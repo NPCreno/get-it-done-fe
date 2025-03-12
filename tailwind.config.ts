@@ -44,6 +44,9 @@ const config: Config = {
         text: "#333",
         border: "#E0E0E0",
       },
+      fontFamily: {
+        lato: ["Lato", "sans-serif"],
+      },
     },
   },
   plugins: [],
