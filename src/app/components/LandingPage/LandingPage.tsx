@@ -2,17 +2,17 @@ import React from "react";
 
 export default function LandingPage() {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold">Welcome to App Tracker</h1>
-        <p className="text-gray-600 mt-2">Manage your projects with ease.</p>
-        <div className="mt-6">
-          <a
-            href="/dashboard"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md"
-          >
-            Get Started
-          </a>
+    <div className="flex flex-row">
+      <div className="min-w-[50vw] min-h-screen bg-gradient-to-t from-primary-default to-white flex flex-col justify-center items-center"></div>
+      <div className="min-w-[50vw] min-h-screen bg-white flex flex-col justify-center items-center">
+        <div className="flex flex-col gap-9 items-center">
+          <h1 className="font-rancho text-8xl text-primary-default text-center">
+            Get it Done!
+          </h1>
+          <span className="font-lato text-2xl text-primary-default text-center">
+            Stay organized, boost productivity, and achieve your goals.
+          </span>
+          <img src="/people-meeting.jpg" className="h-[460px] w-[460px]" />
         </div>
       </div>
     </div>

@@ -46,6 +46,7 @@ const config: Config = {
       },
       fontFamily: {
         lato: ["Lato", "sans-serif"],
+        rancho: ["Rancho", "cursive"],
       },
     },
   },
