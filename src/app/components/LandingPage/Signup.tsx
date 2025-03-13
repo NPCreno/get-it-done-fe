@@ -1,4 +1,16 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
 
 export default function Signup() {
   return (
@@ -13,7 +25,11 @@ export default function Signup() {
         </span>
       </div>
 
-      <div className=""></div>
+      {/* form */}
+      <div className="flex flex-col gap-8">
+        <div className="flex-col"></div>
+        <div className=""></div>
+      </div>
 
       <div className=""></div>
 
