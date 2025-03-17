@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Login from "./Login";
 import Signup from "./Signup";
@@ -7,8 +8,8 @@ export default function LandingPage() {
     <div className="flex flex-row">
       {/* left side */}
       <div className="min-w-[50vw] min-h-screen bg-gradient-to-t from-primary-300 to-white flex flex-col justify-center items-center">
-        <Signup></Signup>
-        {/* <Login></Login> */}
+        {/* <Signup></Signup> */}
+        <Login></Login>
       </div>
       {/* right side */}
       <div className="min-w-[50vw] min-h-screen bg-white flex flex-col justify-center items-center">
