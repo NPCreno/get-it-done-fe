@@ -77,7 +77,7 @@ export default function Login() {
               className="rounded-xl border border-[#E0E0E0] w-full h-10 py-2 px-5 
                         focus:border-primary-default focus:ring-1 focus:ring-primary-default 
                         outline-none transition-all duration-200"
-              placeholder="Enter email or username"
+              placeholder="Enter password"
             />
           </div>
         </div>
