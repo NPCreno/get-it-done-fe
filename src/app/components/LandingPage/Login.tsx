@@ -56,9 +56,9 @@ export default function Login() {
             <input
               type="text"
               id="emailUsername"
-              className="rounded-xl border border-[#E0E0E0] w-full h-10 py-2 px-5 
+              className="rounded-xl border border-[#E0E0E0] w-full h-10 py-2 px-2 
                         focus:border-primary-default focus:ring-1 focus:ring-primary-default 
-                        outline-none transition-all duration-200"
+                        outline-none transition-all duration-200 text-primary-500"
               placeholder="Enter email or username"
             />
           </div>
@@ -74,9 +74,9 @@ export default function Login() {
             <input
               type="password"
               id="password"
-              className="rounded-xl border border-[#E0E0E0] w-full h-10 py-2 px-5 
+              className="rounded-xl border border-[#E0E0E0] w-full h-10 py-2 px-2
                         focus:border-primary-default focus:ring-1 focus:ring-primary-default 
-                        outline-none transition-all duration-200"
+                        outline-none transition-all duration-200 text-primary-500"
               placeholder="Enter password"
             />
           </div>
