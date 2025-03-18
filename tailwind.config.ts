@@ -87,6 +87,9 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        "primary-default": "0px 0px 10px rgba(254, 173, 3, 0.5)",
+      },
     },
   },
   plugins: [],
