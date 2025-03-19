@@ -1,15 +1,21 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Login from "./Login";
 import Signup from "./Signup";
-
+import ForgotPassword from "./ForgotPassword";
 export default function LandingPage() {
+  // UseStates
+  const [activeCard, setActiveCard] = useState<string>("login");
+
+  console.log("activeCard: ", activeCard);
   return (
     <div className="flex flex-row">
       {/* left side */}
       <div className="min-w-[50vw] min-h-screen bg-gradient-to-t from-primary-300 to-white flex flex-col justify-center items-center">
-        {/* <Signup></Signup> */}
-        <Login></Login>
+        {activeCard === "login" && <Login onChangeView={setActiveCard}></Login>}
+        {activeCard === "signup" && <Signup></Signup>}
+        {activeCard === "forgotPassword" && <ForgotPassword></ForgotPassword>}
+        {/* ForgotPassword */}
       </div>
       {/* right side */}
       <div className="min-w-[50vw] min-h-screen bg-white flex flex-col justify-center items-center">

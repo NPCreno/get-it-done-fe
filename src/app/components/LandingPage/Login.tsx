@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { userSchema } from "@/app/schemas/userSchema";
 
-export default function Login() {
+export default function Login({
+  onChangeView,
+}: {
+  onChangeView: (view: "signup" | "forgotPassword") => void;
+}) {
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -44,8 +48,6 @@ export default function Login() {
     }
   };
 
-  console.log("errors: ", errors);
-  // console.log("values: ", values);
   return (
     <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-[695px] pl-16 pr-16 items-center justify-center shadow-2xl">
       {/* Header */}
@@ -59,7 +61,7 @@ export default function Login() {
       </div>
 
       {/* form */}
-      <form className="flex flex-col w-full" id="signupForm" name="signupForm">
+      <form className="flex flex-col w-full" id="loginForm" name="loginForm">
         <div className="flex flex-col justify-center">
           {/* Email */}
           <div className="min-h-[89px]">
@@ -167,12 +169,12 @@ export default function Login() {
           </div>
 
           {/* forgot password */}
-          <a
-            href="/forgotPassword"
+          <button
             className="font-lato text-xs text-primary-default ml-2 font-bold"
+            onClick={() => onChangeView("forgotPassword")}
           >
             Forgot Password?
-          </a>
+          </button>
         </div>
 
         {/* buttons */}
@@ -185,7 +187,10 @@ export default function Login() {
           >
             Login
           </button>
-          <button className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default">
+          <button
+            className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default"
+            onClick={() => onChangeView("signup")}
+          >
             Sign Up
           </button>
         </div>
