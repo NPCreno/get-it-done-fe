@@ -259,7 +259,7 @@ export default function Signup() {
         </div>
 
         {/* buttons */}
-        <div className="w-full flex flex-col gap-5 mt-4">
+        <div className="w-full flex flex-col mt-6">
           <button
             type="button"
             onClick={() => handleSubmitForm(values)}
