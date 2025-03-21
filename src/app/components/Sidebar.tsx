@@ -3,15 +3,29 @@
 import { JSX, useEffect, useState } from "react";
 import { FiMenu, FiX, FiHome, FiGrid, FiBell, FiUser } from "react-icons/fi";
 import Link from "next/link";
+import { useFormState } from "@/app/context/FormProvider";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
+    useFormState();
 
   return (
     <>
       {/* Sidebar for large screens */}
-      <aside className="hidden md:flex flex-col w-[60px] hover:w-[146px] h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300">
+      <aside
+        className="hidden md:flex flex-col h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300"
+        style={{ width: `${sidebarWidth}px` }} // Use global state for width
+        onMouseEnter={() => {
+          setSidebarWidth(146);
+          setIsSidebarOpen(true);
+        }}
+        onMouseLeave={() => {
+          setSidebarWidth(60);
+          setIsSidebarOpen(false);
+        }}
+      >
         <div className="flex flex-row fixed gap-[10px] max-h-[30px] group-hover:ml-0 ml-1">
           <svg
             width="30"
@@ -75,7 +89,10 @@ export default function Sidebar() {
             </defs>
           </svg>
 
-          <h1 className="text-2xl text-primary-default font-rancho opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300">
+          <h1
+            className={`text-2xl text-primary-default font-rancho transition-opacity duration-300 
+            ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
+          >
             Get it Done!
           </h1>
         </div>
@@ -131,7 +148,8 @@ function SidebarLink({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
-
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
+    useFormState();
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCurrentPage(window.location.pathname);
@@ -159,9 +177,10 @@ function SidebarLink({
         className="min-h-[20px] min-w-[20px] ml-2 transition-opacity duration-300"
       />
       <span
-        className={`font-bold font-lato text-[13px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300 ${
-          isActive || isHovered ? "text-white" : "text-primary-default"
-        }`}
+        className={`font-bold font-lato text-[13px] transition-opacity duration-300
+          ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}
+          ${isActive || isHovered ? "text-white" : "text-primary-default"}
+        `}
       >
         {text}
       </span>
