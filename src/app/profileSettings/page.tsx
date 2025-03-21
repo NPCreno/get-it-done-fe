@@ -1,6 +1,6 @@
 import MainLayout from "@/app/components/MainLayout";
 
-export default function DashboardPage() {
+export default function ProfileSettingsPage() {
   return (
     <MainLayout>
       <div className="main flex justify-center ju w-full">
@@ -10,10 +10,10 @@ export default function DashboardPage() {
             {/* Left header */}
             <div className="flex flex-col">
               <h1 className="text-[28px] font-bold text-primary-default">
-                Dashboard
+                Profile Settings
               </h1>
               <p className="font-lato text-[13px] text-text">
-                Track your tasks and monitor your progress
+                Manage Your Profile & Preferences
               </p>
             </div>
 
