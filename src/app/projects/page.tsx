@@ -5,14 +5,14 @@ export default function ProjectsPage() {
     <MainLayout>
       <div className="main flex justify-center ju w-full">
         {/* Main Page */}
-        <div className="inside w-[1440px]">
+        <div className="inside max-w-[1440px] w-full px-4 md:px-8 lg:px-12 mx-auto">
           <div className="flex justify-between">
             {/* Left header */}
             <div className="flex flex-col">
-              <h1 className="text-[28px] font-bold text-primary-default">
+              <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
                 Projects
               </h1>
-              <p className="font-lato text-[13px] text-text">
+              <p className="font-lato text-[13px] text-text fade-in-delay select-none">
                 Organize your tasks into projects
               </p>
             </div>

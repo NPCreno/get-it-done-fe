@@ -13,7 +13,7 @@ export default function MainLayout({
     <div className="flex bg-background">
       <div
         className="hover:w-[166px] w-[80px] p-5 h-screen transition-all duration-300"
-        style={{ width: `${sidebarWidth}px` }} // Use global state for width
+        style={{ width: `${sidebarWidth + 20}px` }} // Use global state for width
         onMouseEnter={() => setSidebarWidth(146)}
         onMouseLeave={() => setSidebarWidth(60)}
       >
