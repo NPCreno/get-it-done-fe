@@ -32,7 +32,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Additional universal states
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar toggle state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [sidebarWidth, setSidebarWidth] = useState(60);
   return (
