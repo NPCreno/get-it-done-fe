@@ -41,7 +41,7 @@ const config: Config = {
         success: "#53D86A",
         warning: "#FEC242",
         info: "#2196F3",
-        background: "#F4F4F4",
+        background: "#EEEEEE",
         text: "#333",
         border: "#E0E0E0",
       },

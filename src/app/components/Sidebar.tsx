@@ -1,18 +1,31 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { FiMenu, FiX, FiHome, FiGrid, FiBell, FiUser } from "react-icons/fi";
 import Link from "next/link";
+import { useFormState } from "@/app/context/FormProvider";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
+    useFormState();
 
   return (
     <>
       {/* Sidebar for large screens */}
-      <aside className="hidden md:flex flex-col w-[60px] hover:w-[146px] h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300">
+      <aside
+        className="hidden md:flex flex-col h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300"
+        style={{ width: `${sidebarWidth}px` }} // Use global state for width
+        onMouseEnter={() => {
+          setSidebarWidth(146);
+          setIsSidebarOpen(true);
+        }}
+        onMouseLeave={() => {
+          setSidebarWidth(60);
+          setIsSidebarOpen(false);
+        }}
+      >
         <div className="flex flex-row fixed gap-[10px] max-h-[30px] group-hover:ml-0 ml-1">
           <svg
             width="30"
@@ -76,7 +89,10 @@ export default function Sidebar() {
             </defs>
           </svg>
 
-          <h1 className="text-2xl text-primary-default font-rancho opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300">
+          <h1
+            className={`text-2xl text-primary-default font-rancho transition-opacity duration-300 
+            ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
+          >
             Get it Done!
           </h1>
         </div>
@@ -84,22 +100,26 @@ export default function Sidebar() {
         <nav className="flex flex-col gap-5 mt-[60px]">
           <SidebarLink
             href="/dashboard"
-            icon={"/dashboard-white.png"}
+            icon="/dashboard-yellow.png"
+            iconHover="/dashboard-white.png"
             text="Dashboard"
           />
           <SidebarLink
             href="/projects"
-            icon={"/projects-white.png"}
+            icon="/projects-yellow.png"
+            iconHover="/projects-white.png"
             text="Projects"
           />
           <SidebarLink
             href="/notifications"
-            icon={"/notifs-white.png"}
+            icon="/notifs-yellow.png"
+            iconHover="/notifs-white.png"
             text="Notifications"
           />
           <SidebarLink
             href="/profileSettings"
-            icon={"/profile-white.png"}
+            icon="/profile-yellow.png"
+            iconHover="/profile-white.png"
             text="Profile"
           />
         </nav>
@@ -111,36 +131,6 @@ export default function Sidebar() {
           {isOpen ? <FiX /> : <FiMenu />}
         </button>
       </div>
-
-      {isOpen && (
-        <aside className="md:hidden fixed inset-0 bg-gray-900 text-white w-64 h-screen p-4 z-50">
-          <button onClick={toggleSidebar} className="text-2xl mb-6">
-            <FiX />
-          </button>
-          <nav className="flex flex-col space-y-4">
-            <SidebarLink
-              href="/dashboard"
-              icon={"/dashboard-white.png"}
-              text="Dashboard"
-            />
-            <SidebarLink
-              href="/projects"
-              icon={"/dashboard-white.png"}
-              text="Projects"
-            />
-            <SidebarLink
-              href="/notifications"
-              icon={"/dashboard-white.png"}
-              text="Notifications"
-            />
-            <SidebarLink
-              href="/settings"
-              icon={"/dashboard-white.png"}
-              text="Settings"
-            />
-          </nav>
-        </aside>
-      )}
     </>
   );
 }
@@ -148,19 +138,50 @@ export default function Sidebar() {
 function SidebarLink({
   href,
   icon,
+  iconHover,
   text,
 }: {
   href: string;
   icon: string;
+  iconHover: string;
   text: string;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [currentPage, setCurrentPage] = useState("");
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
+    useFormState();
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentPage(window.location.pathname);
+    }
+  }, []);
+
+  const isActive = currentPage === href; // Check if this link matches the current page
+
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 bg-primary-default rounded-[10px] h-[35px] w-[35px] justify-start group-hover:w-[126px] transition-all duration-300 hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)]"
+      className={`flex items-center gap-4 rounded-[10px] h-[35px] w-[35px] justify-start 
+      group-hover:w-[126px] transition-all duration-300 linkbtn 
+      ${
+        isActive || isHovered
+          ? "bg-primary-default shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)]"
+          : "hover:bg-primary-default"
+      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <img src={icon} className="min-h-[20] min-w-[20px] ml-2" />
-      <span className=" text-white font-bold font-lato text-[13px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-300">
+      <img
+        src={isActive || isHovered ? iconHover : icon}
+        alt={text}
+        className="min-h-[20px] min-w-[20px] ml-2 transition-opacity duration-300"
+      />
+      <span
+        className={`font-bold font-lato text-[13px] transition-opacity duration-300
+          ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}
+          ${isActive || isHovered ? "text-white" : "text-primary-default"}
+        `}
+      >
         {text}
       </span>
     </Link>
