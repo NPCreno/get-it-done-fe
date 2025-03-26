@@ -2,12 +2,15 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { userSchema } from "@/app/schemas/userSchema";
-
+import { supabase } from "@/app/lib/supabase";
+import { useRouter } from "next/navigation";
 export default function Login({
   onChangeView,
 }: {
   onChangeView: (view: "signup" | "forgotPassword") => void;
 }) {
+  const router = useRouter();
+
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -35,6 +38,7 @@ export default function Login({
   });
 
   const handleSubmitForm = async (values: any) => {
+    login()
     setIsSubmitted(true); // Mark as submitted
     await validateForm(); // Revalidate fields
     if (Object.keys(errors).length === 0) {
@@ -48,6 +52,23 @@ export default function Login({
     }
   };
 
+
+  const login = async ()=> {
+    try {
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email: values.usernameOrEmail,
+        password: values.password,
+      })
+      
+      if(data.session != null){
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  
   return (
     <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-[695px] pl-16 pr-16 items-center justify-center shadow-2xl">
       {/* Header */}

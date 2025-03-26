@@ -1,13 +1,28 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Login from "./Login";
 import Signup from "./Signup";
 import ForgotPassword from "./ForgotPassword";
+import { supabase } from "@/app/lib/supabase";
+import { useRouter } from "next/navigation";
 export default function LandingPage() {
+  const router = useRouter();
   // UseStates
   const [activeCard, setActiveCard] = useState<string>("login");
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-  console.log("activeCard: ", activeCard);
+      if (session) {
+        router.push("/dashboard");
+      }
+    };
+
+    checkSession();
+  }, []);
+
   return (
     <div className="flex flex-row">
       {/* left side */}

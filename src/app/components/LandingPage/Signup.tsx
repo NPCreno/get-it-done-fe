@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { userSchema } from "@/app/schemas/userSchema";
+import { supabase } from "@/app/lib/supabase";
 
 export default function Signup() {
   // UseStates
@@ -37,15 +38,29 @@ export default function Signup() {
       onHandleFormSubmit(values);
     }
   };
+
   const onHandleFormSubmit = async (data: any) => {
     try {
+      signUp();
     } catch (error) {
       // alert("Oops! Something went wrong. Please try again "+ {error});
     }
   };
 
-  console.log("errors: ", errors);
-  console.log("values: ", values);
+    const signUp = async ()=> {
+      try {
+        const data = {
+          email: values.email,
+          password: values.password,
+        }
+        const { error } = await supabase.auth.signUp(data)
+  
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    console.log(values)
   return (
     <div className="flex flex-col rounded-2xl gap-6 bg-white w-[430px] h-auto px-16 py-8 items-center justify-center shadow-2xl">
       {/* Header */}
@@ -220,11 +235,11 @@ export default function Signup() {
 
           {/* Confirm Password */}
           <div className="min-h-[89px]">
-            <div className={` ${errors.password ? "shake" : ""}`}>
+            <div className={` ${errors.confirmPassword ? "shake" : ""}`}>
               <label
                 htmlFor="password"
                 className={`text-base font-normal font-lato ${
-                  errors.password ? "text-error " : "text-primary-default"
+                  errors.confirmPassword ? "text-error " : "text-primary-default"
                 }`}
               >
                 Confirm Password
@@ -236,23 +251,23 @@ export default function Signup() {
                   e.preventDefault();
                 }
               }}
-              value={values.password ?? ""}
+              value={values.confirmPassword ?? ""}
               onChange={handleChange}
               type="password"
-              id="password"
+              id="confirmPassword"
               onBlur={handleBlur}
               className={`rounded-xl border  w-full h-10 py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
-                          errors.password
+                          errors.confirmPassword
                             ? "focus:ring-error border-error"
                             : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
                         }`}
               placeholder="Confirm your password"
             />
-            {errors.password && (
+            {errors.confirmPassword && (
               <span className="text-error font-lato text-xs top-0">
-                {errors.password as string}
+                {errors.confirmPassword as string}
               </span>
             )}
           </div>
