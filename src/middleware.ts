@@ -1,5 +1,4 @@
 import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
-import { Session } from "inspector/promises";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
@@ -14,9 +13,8 @@ export async function middleware(req: NextRequest) {
   console.log("Middleware running");
   console.log("session: ", session);
   if (!session) {
-    return NextResponse.rewrite(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
-
   return res;
 }
 
