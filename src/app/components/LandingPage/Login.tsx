@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { userSchema } from "@/app/schemas/userSchema";
+import { loginSchema } from "@/app/schemas/loginSchema";
 import { supabase } from "@/app/lib/supabase";
 import { useRouter } from "next/navigation";
 export default function Login({
@@ -13,7 +13,7 @@ export default function Login({
 
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const {
     validateForm,
     setFieldValue,
@@ -25,50 +25,72 @@ export default function Login({
     setSubmitting,
     handleBlur,
     isSubmitting,
+    setFieldError,
   } = useFormik({
     initialValues: { rememberMe: false },
     enableReinitialize: true,
-    validationSchema: userSchema,
+    validationSchema: loginSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
     onSubmit: async (values: any) => {
       setSubmitting(false);
-      onHandleFormSubmit(values);
+      handleSubmitForm(values);
     },
   });
 
   const handleSubmitForm = async (values: any) => {
-    login()
     setIsSubmitted(true); // Mark as submitted
-    await validateForm(); // Revalidate fields
-    if (Object.keys(errors).length === 0) {
-      onHandleFormSubmit(values);
-    }
-  };
-  const onHandleFormSubmit = async (data: any) => {
-    try {
-    } catch (error) {
-      // alert("Oops! Something went wrong. Please try again "+ {error});
+    const validationErrors = await validateForm();
+    if (Object.keys(validationErrors).length === 0) {
+      await login();
     }
   };
 
-
-  const login = async ()=> {
+  const login = async () => {
     try {
+      setIsLoading(true);
+      let emailToLogin = values.usernameOrEmail;
+
+      // Check if the input is a username
+      if (!values.usernameOrEmail.includes("@")) {
+        // Query the profiles table to find the email associated with the username
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("username", values.usernameOrEmail)
+          .single();
+
+        if (error) {
+          setIsLoading(false);
+          console.log("Error finding username:", error);
+          return; // Handle error if username doesn't exist
+        }
+
+        if (data) {
+          emailToLogin = data.email; // Use the email associated with the username
+        }
+      }
+
+      // Now use the email (whether it was entered as email or resolved from username)
       const { error, data } = await supabase.auth.signInWithPassword({
-        email: values.usernameOrEmail,
+        email: emailToLogin,
         password: values.password,
-      })
-      
-      if(data.session != null){
+      });
+
+      if (data.session != null) {
+        setIsLoading(false);
         router.push("/dashboard");
+      } else {
+        setFieldError("usernameOrEmail", "Invalid login credentials");
+        setFieldError("password", "Invalid login credentials");
+        setIsLoading(false);
       }
     } catch (error) {
-      console.log(error)
+      setIsLoading(false);
+      console.log("Error during login:", error);
     }
-  }
+  };
 
-  
   return (
     <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-[695px] pl-16 pr-16 items-center justify-center shadow-2xl">
       {/* Header */}
@@ -84,7 +106,7 @@ export default function Login({
       {/* form */}
       <form className="flex flex-col w-full" id="loginForm" name="loginForm">
         <div className="flex flex-col justify-center">
-          {/* Email */}
+          {/* Username or Email */}
           <div className="min-h-[89px]">
             <div className={` ${errors.usernameOrEmail ? "shake" : ""}`}>
               <label
@@ -101,10 +123,10 @@ export default function Login({
             <input
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  e.preventDefault(); // Prevent form submission when "Enter" is pressed
+                  handleSubmit();
                 }
               }}
-              value={values.usernameOrEmail ?? ""}
+              value={values.usernameOrEmail || values.email}
               onChange={handleChange}
               type="text"
               id="usernameOrEmail"
@@ -141,7 +163,7 @@ export default function Login({
             <input
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  e.preventDefault();
+                  handleSubmit();
                 }
               }}
               value={values.password ?? ""}
@@ -204,9 +226,9 @@ export default function Login({
             type="button"
             onClick={() => handleSubmitForm(values)}
             className="rounded-3xl bg-primary-default font-bold font-poppins h-10 text-white 
-             hover:shadow-primary-default transition-shadow duration-300"
+                    hover:shadow-primary-default transition-shadow duration-300 flex justify-center items-center"
           >
-            Login
+            {isLoading ? <div className="loader"></div> : "Login"}
           </button>
           <button
             className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default"
