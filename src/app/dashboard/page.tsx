@@ -1,6 +1,13 @@
 import MainLayout from "@/app/components/MainLayout";
-
+import ChartCard from "./chartCard";
+import StatsCard from "./statsCard";
+import TaskItem from "./taskItem";
 export default function DashboardPage() {
+  const tasks = [
+    { task: "Finish FE-002", tag: "Design", status: "good" },
+    { task: "Review FE-003", tag: "Review", status: "pending" },
+    { task: "Start FE-004", tag: "Development", status: "good" },
+  ];
   return (
     <MainLayout>
       <div className="main flex justify-center w-full gap-5  h-full">
@@ -41,25 +48,25 @@ export default function DashboardPage() {
 
           {/* first row cards */}
           <div className="flex flex-row gap-5 h-[100px] w-full fade-in-delay-2">
-            <FirstRowCard
+            <StatsCard
               icon="/list-outline.png"
               header="All Tasks"
               content="300"
               delay="fade-in-left-delay-1"
             />
-            <FirstRowCard
+            <StatsCard
               icon="/timer-outline.png"
               header="In Progress"
               content="15"
               delay="fade-in-left-delay-2"
             />
-            <FirstRowCard
+            <StatsCard
               icon="/folder-open-outline.png"
               header="All Projects"
               content="3"
               delay="fade-in-left-delay-3"
             />
-            <FirstRowCard
+            <StatsCard
               icon="/checkbox-outline.png"
               header="Completed"
               content="300"
@@ -102,70 +109,18 @@ export default function DashboardPage() {
             {/* Scrollable Task List */}
             <div className="flex flex-col gap-[10px] mt-5 overflow-y-auto flex-grow basis-0">
               {/* Task Item */}
-              <div className="flex flex-row w-full h-[42px] px-5 py-[11px] justify-between rounded-[10px] bg-background cursor-pointer">
-                <div className="flex flex-row gap-5 items-center">
-                  <div className="border-[2px] border-solid rounded-[10px] border-primary-200 w-5 h-5 flex items-center justify-center cursor-pointer">
-                    <input
-                      id="checkTask"
-                      type="checkbox"
-                      className="appearance-none w-full h-full checked:bg-primary-200 checked:border-white checked:border-solid 
-              border-[2px] rounded-[10px] relative cursor-pointer"
-                    />
-                  </div>
-                  <span className="font-lato text-[13px] text-text font-bold">
-                    Finish FE-002
-                  </span>
-                </div>
-                <div className="flex flex-row gap-5 items-center">
-                  <div className="flex bg-[#D4D4D4] font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center">
-                    Design
-                  </div>
-                  <div className="rounded-[10px] w-[10px] h-[10px] bg-green-600"></div>
-                </div>
-              </div>
+              {tasks.map((task, index) => (
+                <TaskItem
+                  key={index}
+                  task={task.task}
+                  tag={task.tag}
+                  status={task.status}
+                />
+              ))}
             </div>
           </div>
         </div>
       </div>
     </MainLayout>
-  );
-}
-
-function FirstRowCard({
-  icon,
-  header,
-  content,
-  delay,
-}: {
-  icon: string;
-  header: string;
-  content: string;
-  delay: string;
-}) {
-  return (
-    <div
-      className={`px-6 flex flex-row justify-start items-center gap-8 bg-white rounded-[10px] w-full h-[100px]
-    hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left ${delay}`}
-    >
-      <img src={icon} alt={header} />
-      <div className="flex flex-col justify-start">
-        <span className="text-[#838383] text-base font-bold font-lato">
-          {header}
-        </span>
-        <span className="text-text text-[28px] font-lato">{content}</span>
-      </div>
-    </div>
-  );
-}
-
-function ChartCard({ header, delay }: { header: string; delay: string }) {
-  return (
-    <div
-      className={`p-5 flex flex-col gap-[10px] justify-start items-start bg-white rounded-[10px] w-full h-[210px]
-    hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left ${delay}`}
-    >
-      <span className="text-text text-[13px] font-lato">{header}</span>
-      <div className="w-full h-full rounded-[10px] bg-background"></div>
-    </div>
   );
 }

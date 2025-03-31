@@ -1,11 +1,49 @@
 import MainLayout from "@/app/components/MainLayout";
+import ProjectCard from "./projectCard";
 
 export default function ProjectsPage() {
+  const projectData = [
+    {
+      projName: "Project 1",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+      due: new Date("2025-01-23"),
+      tasks: 5,
+    },
+    {
+      projName: "Project 2",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+      due: new Date("2025-02-23"),
+      tasks: 3,
+    },
+    {
+      projName: "Project 3",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+      due: new Date("2025-03-23"),
+      tasks: 7,
+    },
+    {
+      projName: "Project 4",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+      due: new Date("2025-04-23"),
+      tasks: 2,
+    },
+    {
+      projName: "Project 5",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+      due: new Date("2025-05-23"),
+      tasks: 4,
+    },
+  ];
   return (
     <MainLayout>
       <div className="main flex justify-center ju w-full">
         {/* Main Page */}
-        <div className="inside max-w-[1440px] w-full px-4 md:px-8 lg:px-12 mx-auto">
+        <div className="inside flex flex-col gap-5 max-w-[1440px] w-full px-4 md:px-8 lg:px-12 mx-auto">
           <div className="flex justify-between">
             {/* Left header */}
             <div className="flex flex-col">
@@ -19,23 +57,25 @@ export default function ProjectsPage() {
 
             <div className="flex flex-row gap-[10px] items-end">
               <button
-                className="text-text text-[13px] px-5 bg-white rounded-[10px] h-[35px] flex flex-row items-center 
-              hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
+        hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
-                Start Pomodoro
-                <img
-                  src="/pomodoro-timer.png"
-                  className="max-h-5 max-w-5 ml-[10px]"
-                />
-              </button>
-
-              <button
-                className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
-              transition-all duration-300 justify-center items-center"
-              >
-                <img src="/search-grey.png" />
+                <img src="/add-outline-white.png" alt="add task" />
+                New Project
               </button>
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-5">
+            {projectData.map((project, index) => (
+              <ProjectCard
+                key={index}
+                projName={project.projName}
+                description={project.description}
+                due={project.due}
+                tasks={project.tasks}
+              />
+            ))}
           </div>
         </div>
       </div>
