@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { userSchema } from "@/app/schemas/userSchema";
+import { loginSchema } from "@/app/schemas/loginSchema";
 import OTPInput from "./OTPinput";
 
 export default function ForgotPassword() {
@@ -24,7 +24,7 @@ export default function ForgotPassword() {
   } = useFormik({
     initialValues: { rememberMe: false },
     enableReinitialize: true,
-    validationSchema: userSchema,
+    validationSchema: loginSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
     onSubmit: async (values: any) => {

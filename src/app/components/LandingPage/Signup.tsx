@@ -1,12 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
-import { userSchema } from "@/app/schemas/userSchema";
+import { signUpSchema } from "@/app/schemas/signUpSchema";
+import { supabase } from "@/app/lib/supabase";
 
-export default function Signup() {
+export default function Signup({
+  onChangeView,
+}: {
+  onChangeView: (view: "signedUp") => void;
+}) {
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+  const [isPasswordMatched, setIsPasswordMatched] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const {
     validateForm,
     setFieldValue,
@@ -21,31 +27,96 @@ export default function Signup() {
   } = useFormik({
     initialValues: {},
     enableReinitialize: true,
-    validationSchema: userSchema,
+    validationSchema: signUpSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
     onSubmit: async (values: any) => {
       setSubmitting(false);
-      onHandleFormSubmit(values);
+      handleSubmitForm(values);
     },
   });
 
   const handleSubmitForm = async (values: any) => {
-    setIsSubmitted(true); // Mark as submitted
-    await validateForm(); // Revalidate fields
-    if (Object.keys(errors).length === 0) {
-      onHandleFormSubmit(values);
+    const validationErrors = await validateForm();
+
+    // Allow submission if there are no errors OR the only error is usernameOrEmail
+    if (
+      Object.keys(validationErrors).length === 0 ||
+      (Object.keys(validationErrors).length === 1 &&
+        validationErrors.usernameOrEmail)
+    ) {
+      await signUp();
     }
+    setSubmitting(false);
   };
-  const onHandleFormSubmit = async (data: any) => {
+
+  useEffect(() => {
+    if (
+      values.password === values.confirmPassword &&
+      (values.password != undefined || values.confirmPassword != undefined)
+    ) {
+      setIsPasswordMatched(true);
+    } else {
+      setIsPasswordMatched(false);
+    }
+  }, [values.password, values.confirmPassword]);
+
+  const signUp = async () => {
     try {
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email || "",
+        password: isPasswordMatched ? values.password : "",
+        options: {
+          data: {
+            username: values.username || "",
+            full_name: values.fullname || "",
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.user) {
+        setIsLoading(false);
+        // Insert user data into the profiles table
+        const { error: profileError } = await supabase.from("profiles").insert([
+          {
+            id: data.user.id,
+            username: values.username,
+            full_name: values.fullname,
+            created_at: new Date().toISOString(),
+            email: values.email,
+          },
+        ]);
+        setIsSubmitted(true);
+
+        if (profileError) throw profileError;
+      }
     } catch (error) {
-      // alert("Oops! Something went wrong. Please try again "+ {error});
+      console.log("Signup Error:", error);
     }
   };
 
-  console.log("errors: ", errors);
-  console.log("values: ", values);
+  useEffect(() => {
+    const autoLogin = async () => {
+      if (isSubmitted) {
+        const { data } = await supabase.auth.signInWithPassword({
+          email: values.email,
+          password: values.password,
+        });
+
+        if (data.session != null) {
+          setIsLoading(false);
+          onChangeView("signedUp");
+        }
+      }
+    };
+
+    autoLogin();
+  }, [isSubmitted]);
+
+  console.log(errors);
   return (
     <div className="flex flex-col rounded-2xl gap-6 bg-white w-[430px] h-auto px-16 py-8 items-center justify-center shadow-2xl">
       {/* Header */}
@@ -220,11 +291,13 @@ export default function Signup() {
 
           {/* Confirm Password */}
           <div className="min-h-[89px]">
-            <div className={` ${errors.password ? "shake" : ""}`}>
+            <div className={` ${errors.confirmPassword ? "shake" : ""}`}>
               <label
                 htmlFor="password"
                 className={`text-base font-normal font-lato ${
-                  errors.password ? "text-error " : "text-primary-default"
+                  errors.confirmPassword
+                    ? "text-error "
+                    : "text-primary-default"
                 }`}
               >
                 Confirm Password
@@ -236,23 +309,23 @@ export default function Signup() {
                   e.preventDefault();
                 }
               }}
-              value={values.password ?? ""}
+              value={values.confirmPassword ?? ""}
               onChange={handleChange}
               type="password"
-              id="password"
+              id="confirmPassword"
               onBlur={handleBlur}
               className={`rounded-xl border  w-full h-10 py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
-                          errors.password
+                          errors.confirmPassword
                             ? "focus:ring-error border-error"
                             : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
                         }`}
               placeholder="Confirm your password"
             />
-            {errors.password && (
+            {errors.confirmPassword && (
               <span className="text-error font-lato text-xs top-0">
-                {errors.password as string}
+                {errors.confirmPassword as string}
               </span>
             )}
           </div>
