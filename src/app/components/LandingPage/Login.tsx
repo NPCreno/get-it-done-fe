@@ -80,11 +80,15 @@ export default function Login({
       if (data.session != null) {
         setIsLoading(false);
         router.push("/dashboard");
-      } else {
+      } 
+      
+      else {
         setFieldError("usernameOrEmail", "Invalid login credentials");
         setFieldError("password", "Invalid login credentials");
         setIsLoading(false);
       }
+
+      router.push("/dashboard");
     } catch (error) {
       setIsLoading(false);
       console.log("Error during login:", error);
