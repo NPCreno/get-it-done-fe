@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
 import { supabase } from "@/app/lib/supabase";
-import { createUser } from "../api/api";
+import { createUser, loginEmail } from "../api/api";
 
 export default function Signup({
   onChangeView,
@@ -69,11 +69,30 @@ export default function Signup({
     }
   }, [values.password, values.confirmPassword]);
 
+  const autoLogin = async () => {
+    const { email, password } = values;
+    const { access_token } = await loginEmail(email, password);
+
+    if (access_token) {
+      localStorage.setItem("access_token", access_token); //store in local storage
+      document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`; // Store in cookie (expires in 1 hour)
+      setIsLoading(false);
+      onChangeView("signedUp");
+    }
+  }
+
   const signUp = async () => {
     try {
       const { confirmPassword, ...payload } = values; // Remove confirmPassword
       setIsLoading(true);
-      await createUser(payload);
+      const response = await createUser(payload);
+      if (response) {
+          if (response.error) {
+            console.error("Error:", response.error);
+          } else {
+            await autoLogin();
+          }
+        }
 
       // const { data, error } = await supabase.auth.signUp({
       //   email: values.email || "",
@@ -109,23 +128,6 @@ export default function Signup({
     }
   };
 
-  useEffect(() => {
-    const autoLogin = async () => {
-      if (isSubmitted) {
-        const { data } = await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password,
-        });
-
-        if (data.session != null) {
-          setIsLoading(false);
-          onChangeView("signedUp");
-        }
-      }
-    };
-
-    autoLogin();
-  }, [isSubmitted]);
 
   console.log(errors);
   return (
