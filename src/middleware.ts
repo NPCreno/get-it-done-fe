@@ -1,30 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  // const res = NextResponse.next();
+  const token = req.cookies.get("access_token")?.value;
 
-  // ✅ Simulate session (hardcoded for development)
-  // const session = {
-  //   user: {
-  //     id: "mock-user-id",
-  //     email: "dev@example.com",
-  //   },
-  //   access_token: "mock-access-token",
-  // };
+  const isProtectedRoute = ["/dashboard", "/projects", "/notifications", "/profileSettings"].some(path =>
+    req.nextUrl.pathname.startsWith(path)
+  );
 
-  // 🚫 If you want to simulate an unauthenticated user, set `session = null`
-  // if (!session) {
-  //   return NextResponse.redirect(new URL("/", req.url));
-  // }
+  const isRootRoute = req.nextUrl.pathname === "/";
 
-  // Optionally attach user info to request headers (if needed by downstream API routes or pages)
-  // res.headers.set("x-user-id", session.user.id);
+  if (token) {
+    try {
+      const [, payload] = token.split(".");
+      const decoded = JSON.parse(atob(payload));
+      const exp = decoded.exp * 1000;
 
-  // return res;
+      // If token expired, delete the cookie and redirect to "/"
+      if (Date.now() > exp) {
+        const response = NextResponse.redirect(new URL("/", req.url));
+        response.cookies.set("access_token", "", { path: "/", maxAge: -1 }); // Remove the cookie
+        return response;
+      }
+
+      // If user is on root and token is valid, redirect to "/dashboard"
+      if (isRootRoute) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
+
+      return NextResponse.next(); // Token is valid, allow access to protected routes
+
+    } catch (err) {
+      console.error("Invalid token:", err);
+      const response = NextResponse.redirect(new URL("/", req.url));
+      response.cookies.set("access_token", "", { path: "/", maxAge: -1 }); // Remove the cookie on invalid token
+      return response;
+    }
+  } else {
+    // If there's no token, deny access to protected routes and redirect to "/"
+    if (isProtectedRoute) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+    return NextResponse.next(); // Allow access if no token and on the root route
+  }
 }
 
 export const config = {
-  matcher: ["/dashboard", "/projects", "/notifications", "/profileSettings"],
+  matcher: ["/", "/dashboard", "/projects", "/notifications", "/profileSettings"],
 };
 
 // import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
