@@ -1,5 +1,5 @@
 import MainLayout from "@/app/components/MainLayout";
-import ProjectCard from "./projectCard";
+import ProjectCard from "../../components/projectCard";
 
 export default function ProjectsPage() {
   const projectData = [

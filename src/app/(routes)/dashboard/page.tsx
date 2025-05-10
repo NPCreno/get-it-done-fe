@@ -1,7 +1,7 @@
 import MainLayout from "@/app/components/MainLayout";
-import ChartCard from "./chartCard";
-import StatsCard from "./statsCard";
-import TaskItem from "./taskItem";
+import ChartCard from "../../components/chartCard";
+import StatsCard from "../../components/statsCard";
+import TaskItem from "../../components/taskItem";
 export default function DashboardPage() {
   const tasks = [
     { task: "Finish FE-002", tag: "Design", status: "good" },

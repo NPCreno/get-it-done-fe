@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
 import { supabase } from "@/app/lib/supabase";
+import { createUser } from "../api/api";
 
 export default function Signup({
   onChangeView,
@@ -25,7 +26,14 @@ export default function Signup({
     handleBlur,
     isSubmitting,
   } = useFormik({
-    initialValues: {},
+    initialValues: {
+      username: "",
+      fullname: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      tier: "Standard"
+    },
     enableReinitialize: true,
     validationSchema: signUpSchema,
     validateOnChange: false, // Disable real-time validation
@@ -63,36 +71,39 @@ export default function Signup({
 
   const signUp = async () => {
     try {
+      const { confirmPassword, ...payload } = values; // Remove confirmPassword
       setIsLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email: values.email || "",
-        password: isPasswordMatched ? values.password : "",
-        options: {
-          data: {
-            username: values.username || "",
-            full_name: values.fullname || "",
-          },
-        },
-      });
+      await createUser(payload);
 
-      if (error) throw error;
+      // const { data, error } = await supabase.auth.signUp({
+      //   email: values.email || "",
+      //   password: isPasswordMatched ? values.password : "",
+      //   options: {
+      //     data: {
+      //       username: values.username || "",
+      //       full_name: values.fullname || "",
+      //     },
+      //   },
+      // });
 
-      if (data?.user) {
-        setIsLoading(false);
-        // Insert user data into the profiles table
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: data.user.id,
-            username: values.username,
-            full_name: values.fullname,
-            created_at: new Date().toISOString(),
-            email: values.email,
-          },
-        ]);
-        setIsSubmitted(true);
+      // if (error) throw error;
 
-        if (profileError) throw profileError;
-      }
+      // if (data?.user) {
+      //   setIsLoading(false);
+      //   // Insert user data into the profiles table
+      //   const { error: profileError } = await supabase.from("profiles").insert([
+      //     {
+      //       id: data.user.id,
+      //       username: values.username,
+      //       full_name: values.fullname,
+      //       created_at: new Date().toISOString(),
+      //       email: values.email,
+      //     },
+      //   ]);
+      //   setIsSubmitted(true);
+
+      //   if (profileError) throw profileError;
+      // }
     } catch (error) {
       console.log("Signup Error:", error);
     }

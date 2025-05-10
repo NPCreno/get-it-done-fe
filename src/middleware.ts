@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+  // const res = NextResponse.next();
 
   // ✅ Simulate session (hardcoded for development)
-  const session = {
-    user: {
-      id: "mock-user-id",
-      email: "dev@example.com",
-    },
-    access_token: "mock-access-token",
-  };
+  // const session = {
+  //   user: {
+  //     id: "mock-user-id",
+  //     email: "dev@example.com",
+  //   },
+  //   access_token: "mock-access-token",
+  // };
 
   // 🚫 If you want to simulate an unauthenticated user, set `session = null`
   // if (!session) {
@@ -18,9 +18,9 @@ export async function middleware(req: NextRequest) {
   // }
 
   // Optionally attach user info to request headers (if needed by downstream API routes or pages)
-  res.headers.set("x-user-id", session.user.id);
+  // res.headers.set("x-user-id", session.user.id);
 
-  return res;
+  // return res;
 }
 
 export const config = {
