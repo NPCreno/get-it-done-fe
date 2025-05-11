@@ -4,7 +4,11 @@ import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
 import OTPInput from "./OTPinput";
 
-export default function ForgotPassword() {
+export default function ForgotPassword({
+  onChangeView,
+}: {
+  onChangeView: (view: "login") => void;
+}) {
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [step, setStep] = useState(1);
@@ -54,7 +58,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex flex-col rounded-2xl gap-10 bg-white w-auto h-auto p-16 items-center justify-center shadow-2xl">
+    <div className="flex flex-col rounded-2xl gap-10 bg-white w-auto h-auto p-10 items-center justify-center shadow-2xl">
       {/* Header */}
       <div className="flex flex-col items-center gap-2">
         <h1 className="font-lato text-[40px] text-primary-default text-center font-bold">
@@ -73,7 +77,7 @@ export default function ForgotPassword() {
       </div>
 
       {/* form */}
-      <form className="flex flex-col w-full" id="signupForm" name="signupForm">
+      <form className="flex flex-col w-full" id="signupForm" name="signupForm" onSubmit={handleSubmit}>
         {/* Email */}
 
         {step === 1 && (
@@ -100,7 +104,7 @@ export default function ForgotPassword() {
                 type="email"
                 id="email"
                 onBlur={handleBlur}
-                className={`rounded-xl border  w-full h-10 py-2 px-2 
+                className={`rounded-xl border w-full h-[46px] py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
                           errors.email
@@ -128,6 +132,15 @@ export default function ForgotPassword() {
         <div className="w-full flex flex-col gap-5 mt-8">
           <button
             type="button"
+            onClick={() => onChangeView("login")}
+            className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default 
+             hover:shadow-primary-default transition-shadow duration-300"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
             className="rounded-3xl bg-primary-default font-bold font-poppins h-10 text-white 
               hover:shadow-primary-default transition-shadow duration-300"
             onClick={() => {
