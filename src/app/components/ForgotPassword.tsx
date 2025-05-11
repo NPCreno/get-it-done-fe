@@ -40,6 +40,7 @@ export default function ForgotPassword() {
       onHandleFormSubmit(values);
     }
   };
+  
   const onHandleFormSubmit = async (data: any) => {
     try {
     } catch (error) {

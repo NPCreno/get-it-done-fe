@@ -2,8 +2,8 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
-import { supabase } from "@/app/lib/supabase";
 import { useRouter } from "next/navigation";
+import { loginEmail, loginUsername } from "../api/api";
 export default function Login({
   onChangeView,
 }: {
@@ -49,45 +49,33 @@ export default function Login({
   const login = async () => {
     try {
       setIsLoading(true);
-      let emailToLogin = values.usernameOrEmail;
+      const { usernameOrEmail, password } = values;
 
-      // Check if the input is a username
-      if (!values.usernameOrEmail.includes("@")) {
-        // Query the profiles table to find the email associated with the username
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("email")
-          .eq("username", values.usernameOrEmail)
-          .single();
+      let access_token: string | undefined;
 
-        if (error) {
-          setIsLoading(false);
-          console.log("Error finding username:", error);
-          return; // Handle error if username doesn't exist
-        }
-
-        if (data) {
-          emailToLogin = data.email; // Use the email associated with the username
-        }
+      if (!usernameOrEmail.includes("@")) {
+        const response = await loginUsername(usernameOrEmail, password); // Login using username
+        access_token = response?.access_token;
+      } 
+      else {
+        const response = await loginEmail(usernameOrEmail, password); // Login using email
+        access_token = response?.access_token;
       }
 
-      // Now use the email (whether it was entered as email or resolved from username)
-      const { error, data } = await supabase.auth.signInWithPassword({
-        email: emailToLogin,
-        password: values.password,
-      });
-
-      if (data.session != null) {
-        setIsLoading(false);
+      if (access_token) {
+        localStorage.setItem("access_token", access_token); // Store token in both localStorage and cookies
+        document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`;
         router.push("/dashboard");
       } else {
-        setFieldError("usernameOrEmail", "Invalid login credentials");
+        setFieldError("usernameOrEmail", "Invalid login credentials"); // Set field errors if login failed
         setFieldError("password", "Invalid login credentials");
-        setIsLoading(false);
       }
     } catch (error) {
+      console.error("Error during login:", error);
+      setFieldError("usernameOrEmail", "Login failed");
+      setFieldError("password", "Login failed");
+    } finally {
       setIsLoading(false);
-      console.log("Error during login:", error);
     }
   };
 
