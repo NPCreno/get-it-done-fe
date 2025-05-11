@@ -80,7 +80,7 @@ export default function Login({
   };
 
   return (
-    <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-[695px] pl-16 pr-16 items-center justify-center shadow-2xl">
+    <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-auto p-10 items-center justify-center shadow-2xl">
       {/* Header */}
       <div className="flex flex-col items-center gap-2">
         <h1 className="font-lato text-[40px] text-primary-default text-center font-bold h-16">
@@ -92,91 +92,91 @@ export default function Login({
       </div>
 
       {/* form */}
-      <form className="flex flex-col w-full" id="loginForm" name="loginForm">
-        <div className="flex flex-col justify-center">
-          {/* Username or Email */}
-          <div className="min-h-[89px]">
-            <div className={` ${errors.usernameOrEmail ? "shake" : ""}`}>
-              <label
-                htmlFor="usernameOrEmail"
-                className={`text-base font-normal font-lato ${
-                  errors.usernameOrEmail
-                    ? "text-error "
-                    : "text-primary-default"
-                }`}
-              >
-                Email or Username
-              </label>
+      <form className="flex flex-col w-full" id="loginForm" name="loginForm" onSubmit={handleSubmit}>
+        <div className="flex flex-col justify-center gap-2">
+          <div className="flex flex-col justify-center">
+            {/* Username or Email */}
+            <div className="min-h-[95px]">
+              <div className={` ${errors.usernameOrEmail ? "shake" : ""}`}>
+                <label
+                  htmlFor="usernameOrEmail"
+                  className={`text-base font-normal font-lato ${
+                    errors.usernameOrEmail
+                      ? "text-error "
+                      : "text-primary-default"
+                  }`}
+                >
+                  Email or Username
+                </label>
+              </div>
+              <input
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSubmit();
+                  }
+                }}
+                value={values.usernameOrEmail || values.email}
+                onChange={handleChange}
+                type="text"
+                id="usernameOrEmail"
+                name="usernameOrEmail"
+                onBlur={handleBlur}
+                className={`rounded-xl border  w-full h-[46px] py-2 px-2 
+                  outline-none transition-all duration-200 
+                  text-primary-default ${
+                    errors.usernameOrEmail
+                      ? "focus:ring-error border-error"
+                      : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
+                  }`}
+                placeholder="Enter email or username"
+              />
+              {errors.usernameOrEmail && (
+                <span className="text-error font-lato text-xs top-0">
+                  {errors.usernameOrEmail as string}
+                </span>
+              )}
             </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                }
-              }}
-              value={values.usernameOrEmail || values.email}
-              onChange={handleChange}
-              type="text"
-              id="usernameOrEmail"
-              name="usernameOrEmail"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
-                outline-none transition-all duration-200 
-                text-primary-default ${
-                  errors.usernameOrEmail
-                    ? "focus:ring-error border-error"
-                    : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                }`}
-              placeholder="Enter email or username"
-            />
-            {errors.usernameOrEmail && (
-              <span className="text-error font-lato text-xs top-0">
-                {errors.usernameOrEmail as string}
-              </span>
-            )}
-          </div>
 
-          {/* Password */}
-          <div className="min-h-[89px]">
-            <div className={` ${errors.password ? "shake" : ""}`}>
-              <label
-                htmlFor="password"
-                className={`text-base font-normal font-lato ${
-                  errors.password ? "text-error " : "text-primary-default"
-                }`}
-              >
-                Password
-              </label>
+            {/* Password */}
+            <div className="min-h-[95px]">
+              <div className={` ${errors.password ? "shake" : ""}`}>
+                <label
+                  htmlFor="password"
+                  className={`text-base font-normal font-lato ${
+                    errors.password ? "text-error " : "text-primary-default"
+                  }`}
+                >
+                  Password
+                </label>
+              </div>
+              <input
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSubmit();
+                  }
+                }}
+                value={values.password ?? ""}
+                onChange={handleChange}
+                type="password"
+                id="password"
+                onBlur={handleBlur}
+                className={`rounded-xl border  w-full h-[46px] py-2 px-2 
+                          outline-none transition-all duration-200 
+                          text-primary-default ${
+                            errors.password
+                              ? "focus:ring-error border-error"
+                              : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
+                          }`}
+                placeholder="Enter password"
+              />
+              {errors.password && (
+                <span className="text-error font-lato text-xs top-0">
+                  {errors.password as string}
+                </span>
+              )}
             </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                }
-              }}
-              value={values.password ?? ""}
-              onChange={handleChange}
-              type="password"
-              id="password"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
-                        outline-none transition-all duration-200 
-                        text-primary-default ${
-                          errors.password
-                            ? "focus:ring-error border-error"
-                            : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                        }`}
-              placeholder="Enter password"
-            />
-            {errors.password && (
-              <span className="text-error font-lato text-xs top-0">
-                {errors.password as string}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-2 flex flex-row justify-between">
+          
+          <div className="mt-2 flex flex-row justify-between">
           {/* remember password */}
           <div className="flex flex-row">
             <div className="border-[2px] border-solid rounded-[5px] border-primary-default w-5 h-5 flex items-center justify-center cursor-pointer">
@@ -206,13 +206,16 @@ export default function Login({
           >
             Forgot Password?
           </button>
+          </div>
         </div>
+        </div>
+
+        
 
         {/* buttons */}
         <div className="w-full flex flex-col gap-5 mt-8">
           <button
-            type="button"
-            onClick={() => handleSubmitForm(values)}
+            type="submit"
             className="rounded-3xl bg-primary-default font-bold font-poppins h-10 text-white 
                     hover:shadow-primary-default transition-shadow duration-300 flex justify-center items-center"
           >

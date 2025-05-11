@@ -8,7 +8,7 @@ import { createUser, loginEmail } from "../api/api";
 export default function Signup({
   onChangeView,
 }: {
-  onChangeView: (view: "signedUp") => void;
+  onChangeView: (view: "signedUp" | "login") => void;
 }) {
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -83,7 +83,7 @@ export default function Signup({
 
   const signUp = async () => {
     try {
-      const { confirmPassword, ...payload } = values; // Remove confirmPassword
+      const { confirmPassword, ...payload } = values; // Remove confirmPassword value in payload
       setIsLoading(true);
       const response = await createUser(payload);
       if (response) {
@@ -93,45 +93,14 @@ export default function Signup({
             await autoLogin();
           }
         }
-
-      // const { data, error } = await supabase.auth.signUp({
-      //   email: values.email || "",
-      //   password: isPasswordMatched ? values.password : "",
-      //   options: {
-      //     data: {
-      //       username: values.username || "",
-      //       full_name: values.fullname || "",
-      //     },
-      //   },
-      // });
-
-      // if (error) throw error;
-
-      // if (data?.user) {
-      //   setIsLoading(false);
-      //   // Insert user data into the profiles table
-      //   const { error: profileError } = await supabase.from("profiles").insert([
-      //     {
-      //       id: data.user.id,
-      //       username: values.username,
-      //       full_name: values.fullname,
-      //       created_at: new Date().toISOString(),
-      //       email: values.email,
-      //     },
-      //   ]);
-      //   setIsSubmitted(true);
-
-      //   if (profileError) throw profileError;
-      // }
     } catch (error) {
       console.log("Signup Error:", error);
     }
   };
 
 
-  console.log(errors);
   return (
-    <div className="flex flex-col rounded-2xl gap-6 bg-white w-[430px] h-auto px-16 py-8 items-center justify-center shadow-2xl">
+    <div className="flex flex-col rounded-2xl gap-6 bg-white w-[430px] h-auto p-10 items-center justify-center shadow-2xl">
       {/* Header */}
       <div className="flex flex-col items-center gap-2 h-auto">
         <h1 className="font-lato text-[40px] text-primary-default text-center font-bold">
@@ -143,10 +112,10 @@ export default function Signup({
       </div>
 
       {/* form */}
-      <form className="flex flex-col w-full" id="signupForm" name="signupForm">
+      <form className="flex flex-col w-full" id="signupForm" name="signupForm" onSubmit={handleSubmit}>
         <div className="flex flex-col justify-center">
           {/* Full name */}
-          <div className="min-h-[89px]">
+          <div className="min-h-[95px]">
             <div className={` ${errors.fullname ? "shake" : ""}`}>
               <label
                 htmlFor="fullname"
@@ -169,7 +138,7 @@ export default function Signup({
               id="fullname"
               name="fullname"
               onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
+              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
                 outline-none transition-all duration-200 
                 text-primary-default ${
                   errors.fullname
@@ -186,7 +155,7 @@ export default function Signup({
           </div>
 
           {/* Username */}
-          <div className="min-h-[89px]">
+          <div className="min-h-[95px]">
             <div className={` ${errors.username ? "shake" : ""}`}>
               <label
                 htmlFor="username"
@@ -208,7 +177,7 @@ export default function Signup({
               type="username"
               id="username"
               onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
+              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
                           errors.username
@@ -225,7 +194,7 @@ export default function Signup({
           </div>
 
           {/* Email */}
-          <div className="min-h-[89px]">
+          <div className="min-h-[95px]">
             <div className={` ${errors.email ? "shake" : ""}`}>
               <label
                 htmlFor="email"
@@ -247,7 +216,7 @@ export default function Signup({
               type="email"
               id="email"
               onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
+              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
                           errors.email
@@ -264,7 +233,7 @@ export default function Signup({
           </div>
 
           {/* Password */}
-          <div className="min-h-[89px]">
+          <div className="min-h-[95px]">
             <div className={` ${errors.password ? "shake" : ""}`}>
               <label
                 htmlFor="password"
@@ -286,7 +255,7 @@ export default function Signup({
               type="password"
               id="password"
               onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
+              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
                           errors.password
@@ -303,7 +272,7 @@ export default function Signup({
           </div>
 
           {/* Confirm Password */}
-          <div className="min-h-[89px]">
+          <div className="min-h-[95px]">
             <div className={` ${errors.confirmPassword ? "shake" : ""}`}>
               <label
                 htmlFor="password"
@@ -327,7 +296,7 @@ export default function Signup({
               type="password"
               id="confirmPassword"
               onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-10 py-2 px-2 
+              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
                         outline-none transition-all duration-200 
                         text-primary-default ${
                           errors.confirmPassword
@@ -345,10 +314,18 @@ export default function Signup({
         </div>
 
         {/* buttons */}
-        <div className="w-full flex flex-col mt-6">
+        <div className="w-full flex flex-col mt-6 gap-4">
           <button
             type="button"
-            onClick={() => handleSubmitForm(values)}
+            onClick={() => onChangeView("login")}
+            className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default 
+             hover:shadow-primary-default transition-shadow duration-300"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
             className="rounded-3xl bg-primary-default font-bold font-poppins h-10 text-white 
              hover:shadow-primary-default transition-shadow duration-300"
           >

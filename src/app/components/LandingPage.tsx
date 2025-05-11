@@ -38,7 +38,7 @@ export default function LandingPage() {
         {activeCard === "signup" && (
           <Signup onChangeView={setActiveCard}></Signup>
         )}
-        {activeCard === "forgotPassword" && <ForgotPassword></ForgotPassword>}
+        {activeCard === "forgotPassword" && <ForgotPassword onChangeView={setActiveCard}></ForgotPassword>}
         {/* ForgotPassword */}
       </div>
       {/* right side */}
