@@ -29,7 +29,7 @@ export default function Sidebar() {
       >
         <div className="flex flex-row fixed gap-[10px] max-h-[30px] group-hover:ml-0 ml-1">
           <Image
-            src="/checkmark.png"
+            src="/svgs/checkmark.svg"
             width={30}
             height={30}
             alt="get it done"

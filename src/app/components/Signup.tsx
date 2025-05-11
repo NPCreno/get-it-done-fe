@@ -120,7 +120,7 @@ export default function Signup({
               <label
                 htmlFor="fullname"
                 className={`text-base font-normal font-lato ${
-                  errors.fullname ? "text-error " : "text-primary-default"
+                  errors.fullname ? "text-error-default " : "text-primary-default"
                 }`}
               >
                 Full Name
@@ -148,7 +148,7 @@ export default function Signup({
               placeholder="Enter your Full Name"
             />
             {errors.fullname && (
-              <span className="text-error font-lato text-xs top-0">
+              <span className="text-error-default font-lato text-xs top-0">
                 {errors.fullname as string}
               </span>
             )}
@@ -160,7 +160,7 @@ export default function Signup({
               <label
                 htmlFor="username"
                 className={`text-base font-normal font-lato ${
-                  errors.username ? "text-error " : "text-primary-default"
+                  errors.username ? "text-error-default " : "text-primary-default"
                 }`}
               >
                 Username
@@ -187,7 +187,7 @@ export default function Signup({
               placeholder="Enter your Username"
             />
             {errors.username && (
-              <span className="text-error font-lato text-xs top-0">
+              <span className="text-error-default font-lato text-xs top-0">
                 {errors.username as string}
               </span>
             )}
@@ -199,7 +199,7 @@ export default function Signup({
               <label
                 htmlFor="email"
                 className={`text-base font-normal font-lato ${
-                  errors.email ? "text-error " : "text-primary-default"
+                  errors.email ? "text-error-default " : "text-primary-default"
                 }`}
               >
                 Email
@@ -226,7 +226,7 @@ export default function Signup({
               placeholder="Enter your email address"
             />
             {errors.email && (
-              <span className="text-error font-lato text-xs top-0">
+              <span className="text-error-default font-lato text-xs top-0">
                 {errors.email as string}
               </span>
             )}
@@ -238,7 +238,7 @@ export default function Signup({
               <label
                 htmlFor="password"
                 className={`text-base font-normal font-lato ${
-                  errors.password ? "text-error " : "text-primary-default"
+                  errors.password ? "text-error-default " : "text-primary-default"
                 }`}
               >
                 Password
@@ -265,7 +265,7 @@ export default function Signup({
               placeholder="Enter your password"
             />
             {errors.password && (
-              <span className="text-error font-lato text-xs top-0">
+              <span className="text-error-default font-lato text-xs top-0">
                 {errors.password as string}
               </span>
             )}
@@ -278,7 +278,7 @@ export default function Signup({
                 htmlFor="password"
                 className={`text-base font-normal font-lato ${
                   errors.confirmPassword
-                    ? "text-error "
+                    ? "text-error-default "
                     : "text-primary-default"
                 }`}
               >
@@ -306,7 +306,7 @@ export default function Signup({
               placeholder="Confirm your password"
             />
             {errors.confirmPassword && (
-              <span className="text-error font-lato text-xs top-0">
+              <span className="text-error-default font-lato text-xs top-0">
                 {errors.confirmPassword as string}
               </span>
             )}

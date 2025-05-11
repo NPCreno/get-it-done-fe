@@ -87,7 +87,7 @@ export default function ForgotPassword({
                 <label
                   htmlFor="email"
                   className={`text-base font-normal font-lato ${
-                    errors.email ? "text-error " : "text-primary-default"
+                    errors.email ? "text-error-default " : "text-primary-default"
                   }`}
                 >
                   Email
@@ -114,7 +114,7 @@ export default function ForgotPassword({
                 placeholder="Enter your email address"
               />
               {errors.email && (
-                <span className="text-error font-lato text-xs top-0">
+                <span className="text-error-default font-lato text-xs top-0">
                   {errors.email as string}
                 </span>
               )}
