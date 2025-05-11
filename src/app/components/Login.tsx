@@ -102,7 +102,7 @@ export default function Login({
                   htmlFor="usernameOrEmail"
                   className={`text-base font-normal font-lato ${
                     errors.usernameOrEmail
-                      ? "text-error "
+                      ? "text-error-default "
                       : "text-primary-default"
                   }`}
                 >
@@ -131,7 +131,7 @@ export default function Login({
                 placeholder="Enter email or username"
               />
               {errors.usernameOrEmail && (
-                <span className="text-error font-lato text-xs top-0">
+                <span className="text-error-default font-lato text-xs top-0">
                   {errors.usernameOrEmail as string}
                 </span>
               )}
@@ -143,7 +143,7 @@ export default function Login({
                 <label
                   htmlFor="password"
                   className={`text-base font-normal font-lato ${
-                    errors.password ? "text-error " : "text-primary-default"
+                    errors.password ? "text-error-default " : "text-primary-default"
                   }`}
                 >
                   Password
@@ -170,7 +170,7 @@ export default function Login({
                 placeholder="Enter password"
               />
               {errors.password && (
-                <span className="text-error font-lato text-xs top-0">
+                <span className="text-error-default font-lato text-xs top-0">
                   {errors.password as string}
                 </span>
               )}

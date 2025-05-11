@@ -43,7 +43,7 @@ export default function ProjectsPage() {
     <MainLayout>
       <div className="main flex justify-center ju w-full">
         {/* Main Page */}
-        <div className="inside flex flex-col gap-5 max-w-[1440px] w-full px-4 md:px-8 lg:px-12 mx-auto">
+        <div className="inside flex flex-col gap-5 max-w-[1440px] w-full mx-auto">
           <div className="flex justify-between">
             {/* Left header */}
             <div className="flex flex-col">

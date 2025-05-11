@@ -12,7 +12,7 @@ export default function DashboardPage() {
     <MainLayout>
       <div className="main flex justify-center w-full gap-5  h-full">
         {/* Main Page */}
-        <div className="inside max-w-[1440px] w-full px-4 md:px-8 lg:px-12 mx-auto gap-5 flex flex-col">
+        <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
           {/* Header */}
           <div className="flex justify-between">
             {/* Left header */}
