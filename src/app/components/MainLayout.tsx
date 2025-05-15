@@ -19,7 +19,13 @@ export default function MainLayout({
       >
         <Sidebar />
       </div>
-      <div className="flex-1 p-6 transition-all duration-300">{children}</div>
+      <div className="flex-1 transition-all duration-300 h-screen overflow-hidden">
+        <div className="h-full flex flex-col overflow-hidden">
+          <div className="p-6 flex-1 overflow-auto">
+            {children}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
