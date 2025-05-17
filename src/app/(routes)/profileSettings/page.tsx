@@ -1,14 +1,17 @@
 "use client"
+import { updateUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
-import { signUpSchema } from "@/app/schemas/signUpSchema";
-import { debug } from "console";
+import { updateUserSchema } from "@/app/schemas/updateUserSchema";
 import { useFormik } from "formik";
 import Image from "next/image";
 import { useState } from "react";
+import { useFormState } from "@/app/context/FormProvider";
 
 export default function ProfileSettingsPage() {
+  const { user } = useFormState();
   const [isEditEnabled, setIsEditEnabled] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
     const {
       validateForm,
       setFieldValue,
@@ -27,10 +30,10 @@ export default function ProfileSettingsPage() {
         password: "",
         theme: "",
         enableNotifications: "",
-        soundEffects: "",
+        soundFx: "",
       },
       enableReinitialize: true,
-      validationSchema: signUpSchema,
+      validationSchema: updateUserSchema,
       validateOnChange: false, // Disable real-time validation
       validateOnBlur: false,
       onSubmit: async (values: any) => {
@@ -38,18 +41,31 @@ export default function ProfileSettingsPage() {
         handleSubmitForm(values);
       },
     });
+    
 
     const handleSubmitForm = async (values: any) => {
-      debugger
       const validationErrors = await validateForm();
 
-      if (
-        Object.keys(validationErrors).length === 0 ||
-        (Object.keys(validationErrors).length === 1 &&
-          validationErrors.usernameOrEmail)
-      ) {
+      if (Object.keys(validationErrors).length === 0) {
+        await update()
       }
       setSubmitting(false);
+    };
+
+    const update = async () => {
+      try {
+        setIsLoading(true);
+        const response = await updateUser(user.user_id, values);
+        if (response.status === "success") {
+              setIsLoading(false);
+        }
+        else{
+            console.error("Error:", response.error);
+            setIsLoading(false);
+        }
+      } catch (error) {
+        console.log("Signup Error:", error);
+      }
     };
   
   return (
@@ -294,8 +310,8 @@ export default function ProfileSettingsPage() {
 
                     <div className="flex flex-row justify-center items-center gap-4">
                       <ToggleSwitch
-                        name="soundEffects"
-                        value={values.soundEffects}
+                        name="soundFx"
+                        value={values.soundFx}
                         onChange={setFieldValue}
                         onLabel="Enabled"
                         offLabel="Disabled"

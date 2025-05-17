@@ -4,13 +4,15 @@ import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
 import { useRouter } from "next/navigation";
 import { loginEmail, loginUsername } from "../api/api";
+import { useFormState } from "../context/FormProvider";
+import { parseJwt } from "../utils/utils";
 export default function Login({
   onChangeView,
 }: {
   onChangeView: (view: "signup" | "forgotPassword") => void;
 }) {
   const router = useRouter();
-
+  const { setUser } = useFormState();
   // UseStates
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +65,8 @@ export default function Login({
       }
 
       if (access_token) {
+        const payload = parseJwt(access_token);
+        setUser(payload.user)
         localStorage.setItem("access_token", access_token); // Store token in both localStorage and cookies
         document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`;
         router.push("/dashboard");

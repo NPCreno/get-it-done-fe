@@ -18,6 +18,8 @@ type UniversalStateType = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarWidth: number;
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
+  user: any;
+  setUser: React.Dispatch<React.SetStateAction<any>>;
 };
 
 // Create the context
@@ -35,6 +37,8 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [sidebarWidth, setSidebarWidth] = useState(60);
+  const [user, setUser] = useState();
+
   return (
     <FormContext.Provider
       value={{
@@ -46,6 +50,8 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading,
         sidebarWidth,
         setSidebarWidth,
+        user,
+        setUser,
       }}
     >
       {children}
