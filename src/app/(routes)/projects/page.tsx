@@ -1,5 +1,6 @@
 import MainLayout from "@/app/components/MainLayout";
 import ProjectCard from "../../components/projectCard";
+import Image from "next/image";
 
 export default function ProjectsPage() {
   const projectData = [
@@ -60,7 +61,13 @@ export default function ProjectsPage() {
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
         hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
-                <img src="/add-outline-white.png" alt="add task" />
+                <Image 
+                src="/add-outline-white.png" 
+                alt="add task" 
+                width={25} 
+                height={25}
+                className="mt-[2px]"
+                />
                 New Project
               </button>
             </div>

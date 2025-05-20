@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useFormState } from "../context/FormProvider";
 import Link from "next/link";
+import Image from "next/image";
 export default function SidebarLink({
   href,
   icon,
@@ -14,7 +15,7 @@ export default function SidebarLink({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
-  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
+  const { isSidebarOpen } =
     useFormState();
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -37,10 +38,12 @@ export default function SidebarLink({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <img
+      <Image
         src={isActive || isHovered ? iconHover : icon}
         alt={text}
-        className="min-h-[20px] min-w-[20px] ml-2 transition-opacity duration-300"
+        width={20}
+        height={20}
+        className="ml-2 transition-opacity duration-300"
       />
       <span
         className={`font-bold font-lato text-[13px] transition-opacity duration-300

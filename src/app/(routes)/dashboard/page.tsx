@@ -2,6 +2,7 @@ import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
 import TaskItem from "../../components/taskItem";
+import Image from "next/image";
 export default function DashboardPage() {
   const tasks = [
     { task: "Finish FE-002", tag: "Design", status: "good" },
@@ -31,9 +32,12 @@ export default function DashboardPage() {
               hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
                 Start Pomodoro
-                <img
+                <Image
                   src="/pomodoro-timer.png"
-                  className="max-h-5 max-w-5 ml-[10px]"
+                  className="ml-[10px]"
+                  alt="pomodoro timer"
+                  width={20}
+                  height={20}
                 />
               </button>
 
@@ -41,7 +45,7 @@ export default function DashboardPage() {
                 className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
               transition-all duration-300 justify-center items-center"
               >
-                <img src="/search-grey.png" />
+                <Image src="/search-grey.png" alt="search" width={15} height={15}/>
               </button>
             </div>
           </div>
@@ -101,7 +105,13 @@ export default function DashboardPage() {
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
         hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
-                <img src="/add-outline-white.png" alt="add task" />
+                <Image 
+                src="/add-outline-white.png" 
+                alt="add task" 
+                width={25} 
+                height={25}
+                className="mt-[2px]"
+                />
                 New Task
               </button>
             </div>

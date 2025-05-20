@@ -58,7 +58,7 @@ export default function NotificationCard({
                 </div>
                 {hasAction && (
                     <button
-                    onClick={()=>{onAcknowledge}}
+                    onClick={()=>{onAcknowledge?.()}}
                     className="flex flex-row gap-[5px] px-[10px] h-[30px] w-[95px] bg-background font-lato text-[10px] text-black items-center rounded-[5px]"
                     >
                     <Image

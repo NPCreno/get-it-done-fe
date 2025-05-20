@@ -124,7 +124,7 @@ export const updateUser = async (userid: string, payload: UpdateUserDto) => {
     const token = getAccessToken();
     // Remove fields with empty string values
     const cleanedPayload = Object.fromEntries(
-      Object.entries(payload).filter(([_, value]) => value !== '')
+      Object.entries(payload).filter(([, value]) => value !== "")
     );
     const response = await fetch(`${apiUrl}/user/update/${userid}`, 
         { 

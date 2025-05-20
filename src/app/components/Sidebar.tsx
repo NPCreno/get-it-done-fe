@@ -1,7 +1,7 @@
 "use client";
 
-import { JSX, useEffect, useState } from "react";
-import { FiMenu, FiX, FiHome, FiGrid, FiBell, FiUser } from "react-icons/fi";
+import { useState } from "react";
+import { FiMenu, FiX} from "react-icons/fi";
 import { useFormState } from "@/app/context/FormProvider";
 import SidebarLink from "./sidebarLink";
 import Image from "next/image";

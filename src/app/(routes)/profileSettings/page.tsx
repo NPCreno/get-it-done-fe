@@ -3,15 +3,23 @@ import { getUser, updateUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
 import { updateUserSchema } from "@/app/schemas/updateUserSchema";
-import { useFormik } from "formik";
+import { useFormik, FormikErrors } from "formik";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 
+interface profileSettingsFormValues {
+  fullname: string;
+  username: string;
+  password: string;
+  theme: string;
+  enableNotifications: boolean;
+  soundFx: boolean;
+}
+
 export default function ProfileSettingsPage() {
   const { user, setUser } = useFormState();
   const [isEditEnabled, setIsEditEnabled] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
     const {
       validateForm,
       setFieldValue,
@@ -19,58 +27,68 @@ export default function ProfileSettingsPage() {
       errors,
       handleSubmit,
       handleChange,
-      isValid,
       setSubmitting,
       handleBlur,
-      isSubmitting,
     } = useFormik({
       initialValues: {
         fullname: user ? user.fullname : "",
         username: user ? user.username : "",
         password: "",
         theme: "",
-        enableNotifications: "",
-        soundFx: "",
+        enableNotifications: false,
+        soundFx: false,
       },
       enableReinitialize: true,
       validationSchema: updateUserSchema,
       validateOnChange: false, // Disable real-time validation
       validateOnBlur: false,
-      onSubmit: async (values: any) => {
+      onSubmit: async (values: profileSettingsFormValues) => {
         setSubmitting(false);
         handleSubmitForm(values);
-      },
+      }
     });
     
 
-    const handleSubmitForm = async (values: any) => {
-      const validationErrors = await validateForm();
+    const handleSubmitForm = async (values: profileSettingsFormValues) => {
+      const validationErrors: FormikErrors<typeof values> = await validateForm();
 
       if (Object.keys(validationErrors).length === 0) {
-        await update()
+        await update(values)
       }
       setSubmitting(false);
     };
 
-    const update = async () => {
-      try {
-        setIsLoading(true);
-        const response = await updateUser(user.user_id, values);
-        if (response.status === "success") {
-              setIsLoading(false);
-        }
-        else{
-            console.error("Error:", response.error);
-            setIsLoading(false);
-        }
-      } catch (error) {
-        console.log("Signup Error:", error);
+  const update = async (values: profileSettingsFormValues) => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
       }
-    };
+
+      const updateData = {
+        ...values,
+        enableNotifications: values.enableNotifications.toString(),
+        soundFx: values.soundFx.toString()
+      };
+
+      const response = await updateUser(user.user_id, updateData);
+      if (response.status === "success") {
+      }
+      else{
+          console.error("Error:", response.error);
+      }
+    } catch (error) {
+      console.log("Signup Error:", error);
+    }
+  };
   
   useEffect(() => {
   const fetchUser = async () => {
     try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
       const response = await getUser(user.user_id);
 
       if (response) {
@@ -80,9 +98,8 @@ export default function ProfileSettingsPage() {
       console.error('Failed to fetch user:', error);
     }
   };
-
   fetchUser();
-  }, [user.user_id]); 
+  }, [user, setUser]); 
 
   return (
     <MainLayout>
@@ -368,8 +385,8 @@ export default function ProfileSettingsPage() {
                   </div>
                     <ToggleSwitch
                       name="theme"
-                      value={values.theme}
-                      onChange={setFieldValue}
+                      value={values.theme === "dark"}
+                      onChange={(name, value) => setFieldValue(name, value ? "dark" : "light")}
                       onLabel="Dark"
                       offLabel="Light"
                       className="fade-in-delay"

@@ -6,6 +6,12 @@ import { useRouter } from "next/navigation";
 import { loginEmail, loginUsername } from "../api/api";
 import { useFormState } from "../context/FormProvider";
 import { parseJwt } from "../utils/utils";
+import Image from "next/image";
+interface LoginFormValues {
+  usernameOrEmail: string;
+  password: string;
+  rememberMe: boolean;
+}
 export default function Login({
   onChangeView,
 }: {
@@ -14,7 +20,6 @@ export default function Login({
   const router = useRouter();
   const { setUser } = useFormState();
   // UseStates
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const {
     validateForm,
@@ -23,32 +28,29 @@ export default function Login({
     errors,
     handleSubmit,
     handleChange,
-    isValid,
     setSubmitting,
     handleBlur,
-    isSubmitting,
     setFieldError,
-  } = useFormik({
-    initialValues: { rememberMe: false },
+  } = useFormik<LoginFormValues>({
+    initialValues: { usernameOrEmail: "", password: "", rememberMe: false },
     enableReinitialize: true,
     validationSchema: loginSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
-    onSubmit: async (values: any) => {
+    onSubmit: async (values: LoginFormValues) => {
       setSubmitting(false);
       handleSubmitForm(values);
     },
   });
 
-  const handleSubmitForm = async (values: any) => {
-    setIsSubmitted(true); // Mark as submitted
+  const handleSubmitForm = async (values: LoginFormValues) => {
     const validationErrors = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      await login();
+      await login(values);
     }
   };
 
-  const login = async () => {
+  const login = async (values: LoginFormValues) => {
     try {
       setIsLoading(true);
       const { usernameOrEmail, password } = values;
@@ -119,7 +121,7 @@ export default function Login({
                     handleSubmit();
                   }
                 }}
-                value={values.usernameOrEmail || values.email}
+                value={values.usernameOrEmail}
                 onChange={handleChange}
                 type="text"
                 id="usernameOrEmail"
@@ -244,13 +246,13 @@ export default function Login({
 
       <div className="flex flex-row gap-6">
         <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
-          <img src="/fb-logo.png" alt="fb-logo" className="h-6 w-6" />
+          <Image src="/fb-logo.png" alt="fb-logo" width={24} height={24} />
         </button>
         <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
-          <img src="/google-logo.png" alt="google-logo" className="h-6 w-6" />
+          <Image src="/google-logo.png" alt="google-logo" width={24} height={24} />
         </button>
         <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
-          <img src="/apple-logo.png" alt="apple-logo" className="h-6 w-6" />
+          <Image src="/apple-logo.png" alt="apple-logo" width={24} height={24} />
         </button>
       </div>
     </div>

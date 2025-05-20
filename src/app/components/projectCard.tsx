@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function ProjectCard({
   projName,
   description,
@@ -23,14 +25,14 @@ export default function ProjectCard({
       {/*header */}
       <div className="flex justify-between w-full items-center">
         <div className="flex flex-row gap-5">
-          <img src="/folder-outline.png" />
+          <Image src="/folder-outline.png" alt="folder-outline" width={30} height={30} />
           <h1 className="text-text text-base font-bold font-lato">
             {projName}
           </h1>
         </div>
 
         <div className="flex flex-row hover:cursor-pointer">
-          <img src="/add-outline-yellow.png" className="w-[15px] h-[15px]" />
+          <Image src="/add-outline-yellow.png" alt="add-outline-yellow" width={15} height={15} />
           <h1 className="text-primary-default text-[11px] font-bold font-lato">
             Add Task
           </h1>

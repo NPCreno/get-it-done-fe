@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
+import { IUser } from "../interface/IUser";
 
 // Define the types for form state and additional universal states
 type FormStateType = {
@@ -18,8 +19,8 @@ type UniversalStateType = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarWidth: number;
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
-  user: any;
-  setUser: React.Dispatch<React.SetStateAction<any>>;
+  user: IUser | null;
+  setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
 };
 
 // Create the context
@@ -37,7 +38,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [sidebarWidth, setSidebarWidth] = useState(60);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<IUser | null>(null);
 
   return (
     <FormContext.Provider
