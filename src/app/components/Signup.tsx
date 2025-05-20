@@ -4,6 +4,8 @@ import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
 import { supabase } from "@/app/lib/supabase";
 import { createUser, loginEmail } from "../api/api";
+import { parseJwt } from "../utils/utils";
+import { useFormState } from "../context/FormProvider";
 
 export default function Signup({
   onChangeView,
@@ -11,6 +13,7 @@ export default function Signup({
   onChangeView: (view: "signedUp" | "login") => void;
 }) {
   // UseStates
+  const { setUser } = useFormState();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isPasswordMatched, setIsPasswordMatched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +77,8 @@ export default function Signup({
     const { access_token } = await loginEmail(email, password);
 
     if (access_token) {
+      const payload = parseJwt(access_token);
+      setUser(payload.user)
       localStorage.setItem("access_token", access_token); //store in local storage
       document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`; // Store in cookie (expires in 1 hour)
       setIsLoading(false);

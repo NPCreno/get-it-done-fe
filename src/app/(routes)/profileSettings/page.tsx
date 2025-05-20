@@ -1,15 +1,15 @@
 "use client"
-import { updateUser } from "@/app/api/api";
+import { getUser, updateUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
 import { updateUserSchema } from "@/app/schemas/updateUserSchema";
 import { useFormik } from "formik";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 
 export default function ProfileSettingsPage() {
-  const { user } = useFormState();
+  const { user, setUser } = useFormState();
   const [isEditEnabled, setIsEditEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
     const {
@@ -25,8 +25,8 @@ export default function ProfileSettingsPage() {
       isSubmitting,
     } = useFormik({
       initialValues: {
-        fullname: "",
-        username: "",
+        fullname: user ? user.fullname : "",
+        username: user ? user.username : "",
         password: "",
         theme: "",
         enableNotifications: "",
@@ -68,6 +68,22 @@ export default function ProfileSettingsPage() {
       }
     };
   
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const response = await getUser(user.user_id);
+
+      if (response) {
+        setUser(response);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+    }
+  };
+
+  fetchUser();
+  }, [user.user_id]); 
+
   return (
     <MainLayout>
       <div className="main flex justify-center w-full">
