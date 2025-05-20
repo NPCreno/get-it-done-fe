@@ -1,13 +1,24 @@
 "use client"
+import { getUser, updateUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
-import { signUpSchema } from "@/app/schemas/signUpSchema";
-import { debug } from "console";
-import { useFormik } from "formik";
+import { updateUserSchema } from "@/app/schemas/updateUserSchema";
+import { useFormik, FormikErrors } from "formik";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFormState } from "@/app/context/FormProvider";
+
+interface profileSettingsFormValues {
+  fullname: string;
+  username: string;
+  password: string;
+  theme: string;
+  enableNotifications: boolean;
+  soundFx: boolean;
+}
 
 export default function ProfileSettingsPage() {
+  const { user, setUser } = useFormState();
   const [isEditEnabled, setIsEditEnabled] = useState(false)
     const {
       validateForm,
@@ -16,42 +27,80 @@ export default function ProfileSettingsPage() {
       errors,
       handleSubmit,
       handleChange,
-      isValid,
       setSubmitting,
       handleBlur,
-      isSubmitting,
     } = useFormik({
       initialValues: {
-        fullname: "",
-        username: "",
+        fullname: user ? user.fullname : "",
+        username: user ? user.username : "",
         password: "",
         theme: "",
-        enableNotifications: "",
-        soundEffects: "",
+        enableNotifications: false,
+        soundFx: false,
       },
       enableReinitialize: true,
-      validationSchema: signUpSchema,
+      validationSchema: updateUserSchema,
       validateOnChange: false, // Disable real-time validation
       validateOnBlur: false,
-      onSubmit: async (values: any) => {
+      onSubmit: async (values: profileSettingsFormValues) => {
         setSubmitting(false);
         handleSubmitForm(values);
-      },
+      }
     });
+    
 
-    const handleSubmitForm = async (values: any) => {
-      debugger
-      const validationErrors = await validateForm();
+    const handleSubmitForm = async (values: profileSettingsFormValues) => {
+      const validationErrors: FormikErrors<typeof values> = await validateForm();
 
-      if (
-        Object.keys(validationErrors).length === 0 ||
-        (Object.keys(validationErrors).length === 1 &&
-          validationErrors.usernameOrEmail)
-      ) {
+      if (Object.keys(validationErrors).length === 0) {
+        await update(values)
       }
       setSubmitting(false);
     };
+
+  const update = async (values: profileSettingsFormValues) => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
+
+      const updateData = {
+        ...values,
+        enableNotifications: values.enableNotifications.toString(),
+        soundFx: values.soundFx.toString()
+      };
+
+      const response = await updateUser(user.user_id, updateData);
+      if (response.status === "success") {
+      }
+      else{
+          console.error("Error:", response.error);
+      }
+    } catch (error) {
+      console.log("Signup Error:", error);
+    }
+  };
   
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
+      const response = await getUser(user.user_id);
+
+      if (response) {
+        setUser(response);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+    }
+  };
+  fetchUser();
+  }, [user, setUser]); 
+
   return (
     <MainLayout>
       <div className="main flex justify-center w-full">
@@ -294,8 +343,8 @@ export default function ProfileSettingsPage() {
 
                     <div className="flex flex-row justify-center items-center gap-4">
                       <ToggleSwitch
-                        name="soundEffects"
-                        value={values.soundEffects}
+                        name="soundFx"
+                        value={values.soundFx}
                         onChange={setFieldValue}
                         onLabel="Enabled"
                         offLabel="Disabled"
@@ -336,8 +385,8 @@ export default function ProfileSettingsPage() {
                   </div>
                     <ToggleSwitch
                       name="theme"
-                      value={values.theme}
-                      onChange={setFieldValue}
+                      value={values.theme === "dark"}
+                      onChange={(name, value) => setFieldValue(name, value ? "dark" : "light")}
                       onLabel="Dark"
                       offLabel="Light"
                       className="fade-in-delay"

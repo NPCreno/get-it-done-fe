@@ -1,8 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import { useFormik } from "formik";
-import { loginSchema } from "@/app/schemas/loginSchema";
-import OTPInput from "./OTPinput";
+import { forgotPasswordSchema } from "@/app/schemas/forgotPasswordSchema";
+import OTPInput from "@/app/components/OTPinput";
+interface forgotPasswordFormValues {
+  email: string;
+}
 
 export default function ForgotPassword({
   onChangeView,
@@ -10,51 +13,39 @@ export default function ForgotPassword({
   onChangeView: (view: "login") => void;
 }) {
   // UseStates
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [step, setStep] = useState(1);
-  const [otpTimer, setOtpTimer] = useState(300);
 
   const {
-    validateForm,
-    setFieldValue,
     values,
     errors,
     handleSubmit,
     handleChange,
-    isValid,
     setSubmitting,
     handleBlur,
-    isSubmitting,
-  } = useFormik({
-    initialValues: { rememberMe: false },
+  } = useFormik<forgotPasswordFormValues>({
+    initialValues: { email: "" },
     enableReinitialize: true,
-    validationSchema: loginSchema,
+    validationSchema: forgotPasswordSchema, 
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
-    onSubmit: async (values: any) => {
+    onSubmit: async (values: forgotPasswordFormValues) => {
       setSubmitting(false);
       onHandleFormSubmit(values);
     },
   });
 
-  const handleSubmitForm = async (values: any) => {
-    setIsSubmitted(true); // Mark as submitted
-    await validateForm(); // Revalidate fields
-    if (Object.keys(errors).length === 0) {
-      onHandleFormSubmit(values);
-    }
-  };
-  
-  const onHandleFormSubmit = async (data: any) => {
+  const onHandleFormSubmit = async (values: forgotPasswordFormValues) => {
     try {
+      // TODO: Add API call to send OTP
+      console.log(values);
+      setStep(2);
     } catch (error) {
-      // alert("Oops! Something went wrong. Please try again "+ {error});
+      console.error("Error:", error);
     }
   };
 
   const handleOTPComplete = (otp: string) => {
-    console.log("Entered OTP:", otp);
-    // Call API or proceed to verification
+    console.log("Entered OTP:", otp); 
   };
 
   return (

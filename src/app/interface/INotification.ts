@@ -11,6 +11,6 @@ export interface INotificationProps {
   title: string;
   message: string;
   time: string;
-  status: string;
+  status: 'read' | 'unread';
   onAcknowledge?: () => void; 
 }

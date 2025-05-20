@@ -1,8 +1,10 @@
-  export interface IUser {
-    firstname: string;
-    lastname: string;
+export interface IUser {
+    user_id: string;
+    fullname: string;
     username: string;
     email: string;
-    password: string;
     tier: string;
-  };
+    enableNotifications?: string;
+    theme?: string;
+    soundFx?: string;
+}

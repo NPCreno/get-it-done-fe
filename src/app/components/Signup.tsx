@@ -2,8 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
-import { supabase } from "@/app/lib/supabase";
 import { createUser, loginEmail } from "../api/api";
+import { parseJwt } from "../utils/utils";
+import { useFormState } from "../context/FormProvider";
+
+interface SignupFormValues {
+  username: string;
+  fullname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  tier: string;
+}
 
 export default function Signup({
   onChangeView,
@@ -11,20 +21,17 @@ export default function Signup({
   onChangeView: (view: "signedUp" | "login") => void;
 }) {
   // UseStates
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isPasswordMatched, setIsPasswordMatched] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { setUser } = useFormState();
+  const [isPasswordMatched, setIsPasswordMatched] = useState(false); 
+  console.log(isPasswordMatched)
   const {
     validateForm,
-    setFieldValue,
     values,
     errors,
     handleSubmit,
     handleChange,
-    isValid,
     setSubmitting,
     handleBlur,
-    isSubmitting,
   } = useFormik({
     initialValues: {
       username: "",
@@ -38,22 +45,22 @@ export default function Signup({
     validationSchema: signUpSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
-    onSubmit: async (values: any) => {
+    onSubmit: async (values: SignupFormValues) => {
       setSubmitting(false);
       handleSubmitForm(values);
     },
   });
 
-  const handleSubmitForm = async (values: any) => {
+  const handleSubmitForm = async (values: SignupFormValues) => {
     const validationErrors = await validateForm();
 
     // Allow submission if there are no errors OR the only error is usernameOrEmail
     if (
       Object.keys(validationErrors).length === 0 ||
       (Object.keys(validationErrors).length === 1 &&
-        validationErrors.usernameOrEmail)
+        validationErrors.username)
     ) {
-      await signUp();
+      await signUp(values);
     }
     setSubmitting(false);
   };
@@ -74,29 +81,29 @@ export default function Signup({
     const { access_token } = await loginEmail(email, password);
 
     if (access_token) {
+      const payload = parseJwt(access_token);
+      setUser(payload.user)
       localStorage.setItem("access_token", access_token); //store in local storage
       document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`; // Store in cookie (expires in 1 hour)
-      setIsLoading(false);
       onChangeView("signedUp");
     }
   }
 
-  const signUp = async () => {
+  const signUp = async (values: SignupFormValues) => {
     try {
       const { confirmPassword, ...payload } = values; // Remove confirmPassword value in payload
-      setIsLoading(true);
+      console.log("confirmPassword:", confirmPassword) //for linting purposes
       const response = await createUser(payload);
-      if (response) {
-          if (response.error) {
-            console.error("Error:", response.error);
+      if (response?.error) {
+        console.error("Error:", response.error);
           } else {
             await autoLogin();
           }
         }
-    } catch (error) {
+    catch (error) {
       console.log("Signup Error:", error);
     }
-  };
+  } 
 
 
   return (

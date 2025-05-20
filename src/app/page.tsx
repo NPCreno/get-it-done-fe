@@ -1,6 +1,5 @@
 "use client"
 import LandingPage from "./components/LandingPage";
-import { supabase } from "./lib/supabase";
 
 export default function Home() {
   // const setNewView = async () => {

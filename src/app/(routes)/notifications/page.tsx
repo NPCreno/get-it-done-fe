@@ -4,13 +4,13 @@ import NotificationCard from "@/app/components/notificationCard";
 import { INotificationProps } from "@/app/interface/INotification";
 
 
-export default function NoticationsPage() {
+export default function NotificationsPage() {
 
-const rawNotifications = [
+const rawNotifications: Omit<INotificationProps, 'status'>[] = [
   {
     type: 'achievement',
     title: '🏆 Achievement Unlocked!',
-    message: 'You’ve completed 50 tasks!',
+    message: "You've completed 50 tasks!",
     time: '2h ago',
     onAcknowledge: () => alert('Achievement acknowledged'),
   },
@@ -24,14 +24,14 @@ const rawNotifications = [
   {
     type: 'streak',
     title: '7-Day Streak! 🔥',
-    message: 'You’ve been productive for 7 days straight!',
+    message: "You've been productive for 7 days straight!",
     time: '3h ago',
     onAcknowledge: () => alert('Streak acknowledged'),
   },
   {
     type: 'levelUp',
     title: 'Level Up!',
-    message: 'You’ve reached Productivity Level 3!',
+    message: "You've reached Productivity Level 3!",
     time: '5h ago',
     onAcknowledge: () => alert('Level up acknowledged'),
   },
@@ -57,30 +57,27 @@ const rawNotifications = [
   {
     type: 'smallReward',
     title: 'Small Reward Unlocked 🎉',
-    message: 'You’ve earned a coffee break token!',
+    message: "You've earned a coffee break token!",
     time: '4h ago',
   },
   {
     type: 'taskCompleted',
     title: 'Task Completed',
-    message: 'Finished reading “Deep Work”.',
+    message: 'Finished reading "Deep Work".',
     time: '2d ago',
   },
   {
     type: 'dueTomorrow',
     title: 'Task Due Tomorrow',
-    message: 'Prepare agenda for Thursday’s standup.',
+    message: "Prepare agenda for Thursday's standup.",
     time: '3h ago',
   },
-] as const;
+]
 
 const notifications: INotificationProps[] = rawNotifications.map((notif) => ({
   ...notif,
   status: Math.random() < 0.5 ? 'read' : 'unread',
 }));
-
-const handleAcknowledged = (any: any) => {
-}
 
   return (
     <MainLayout>

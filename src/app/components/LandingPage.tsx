@@ -5,6 +5,7 @@ import Signup from "./Signup";
 import ForgotPassword from "./ForgotPassword";
 import { supabase } from "@/app/lib/supabase";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 export default function LandingPage() {
   const router = useRouter();
   // UseStates
@@ -22,7 +23,7 @@ export default function LandingPage() {
     };
 
     checkSession();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (activeCard === "signedUp") {
@@ -50,7 +51,12 @@ export default function LandingPage() {
           <span className="font-lato text-2xl text-primary-default text-center">
             Stay organized, boost productivity, and achieve your goals.
           </span>
-          <img src="/people-meeting.jpg" className="h-[460px] w-[460px]" />
+          <Image
+            src="/people-meeting.jpg"
+            width={460}
+            height={460}
+            alt="people-meeting"
+          />
         </div>
       </div>
     </div>
@@ -65,9 +71,12 @@ export default function LandingPage() {
           <span className="font-lato text-3xl text-white text-center mt-[20px] w-[190px]">
             You&apos;re all set to get things done
           </span>
-          <img
+          <Image
             src="/checkmark-circle-outline.png"
-            className="h-[150px] w-[150px] mt-[50px]"
+            className="mt-[50px]"
+            width={150}
+            height={150}
+            alt="checkmark-circle-outline"
           />
           <a
             type="button"
