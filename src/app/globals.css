@@ -157,3 +157,33 @@ body {
   background: #555; 
   cursor: pointer;
 }
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.toast-enter {
+  animation: toastIn 0.1s ease-out;
+}
+
+.toast-exit {
+  animation: toastOut 0.1s ease-in forwards;
+}
