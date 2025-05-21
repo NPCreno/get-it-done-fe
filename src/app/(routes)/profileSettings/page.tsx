@@ -7,6 +7,8 @@ import { useFormik, FormikErrors } from "formik";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
+import { Toast } from "@/app/components/toast";
+import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 
 interface profileSettingsFormValues {
   fullname: string;
@@ -19,44 +21,47 @@ interface profileSettingsFormValues {
 
 export default function ProfileSettingsPage() {
   const { user, setUser } = useFormState();
-  const [isEditEnabled, setIsEditEnabled] = useState(false)
-    const {
-      validateForm,
-      setFieldValue,
-      values,
-      errors,
-      handleSubmit,
-      handleChange,
-      setSubmitting,
-      handleBlur,
-    } = useFormik({
-      initialValues: {
-        fullname: user ? user.fullname : "",
-        username: user ? user.username : "",
-        password: "",
-        theme: "",
-        enableNotifications: false,
-        soundFx: false,
-      },
-      enableReinitialize: true,
-      validationSchema: updateUserSchema,
-      validateOnChange: false, // Disable real-time validation
-      validateOnBlur: false,
-      onSubmit: async (values: profileSettingsFormValues) => {
-        setSubmitting(false);
-        handleSubmitForm(values);
-      }
-    });
-    
-
-    const handleSubmitForm = async (values: profileSettingsFormValues) => {
-      const validationErrors: FormikErrors<typeof values> = await validateForm();
-
-      if (Object.keys(validationErrors).length === 0) {
-        await update(values)
-      }
+  const [isEditEnabled, setIsEditEnabled] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
+  const [isExiting, setIsExiting] = useState(false);
+  const {
+    validateForm,
+    setFieldValue,
+    values,
+    errors,
+    handleSubmit,
+    handleChange,
+    setSubmitting,
+    handleBlur,
+  } = useFormik({
+    initialValues: {
+      fullname: user ? user.fullname : "",
+      username: user ? user.username : "",
+      password: "",
+      theme: "",
+      enableNotifications: false,
+      soundFx: false,
+    },
+    enableReinitialize: true,
+    validationSchema: updateUserSchema,
+    validateOnChange: false, // Disable real-time validation
+    validateOnBlur: false,
+    onSubmit: async (values: profileSettingsFormValues) => {
       setSubmitting(false);
-    };
+      handleSubmitForm(values);
+    }
+  });
+  
+
+  const handleSubmitForm = async (values: profileSettingsFormValues) => {
+    const validationErrors: FormikErrors<typeof values> = await validateForm();
+
+    if (Object.keys(validationErrors).length === 0) {
+      await update(values)
+    }
+    setSubmitting(false);
+  };
 
   const update = async (values: profileSettingsFormValues) => {
     try {
@@ -72,37 +77,97 @@ export default function ProfileSettingsPage() {
       };
 
       const response = await updateUser(user.user_id, updateData);
-      if (response.status === "success") {
-      }
-      else{
-          console.error("Error:", response.error);
+      
+      if (response) {
+        setToastMessage({
+          title: "Profile Settings Saved",
+          description: "Your preferences have been saved",
+          className: "text-green-600",
+        });
+      
+        setShowToast(true);
+        setIsExiting(false);
+      
+        setTimeout(() => {
+          setIsExiting(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
       }
     } catch (error) {
-      console.log("Signup Error:", error);
+      if (error instanceof Error) {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: error.message,
+          className: "text-error-default",
+        });
+      } else {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: "An unknown error occurred",
+          className: "text-error-default",
+        });
+      }
+      setShowToast(true);
+      setIsExiting(false);
+      
+      setTimeout(() => {
+        setIsExiting(true); // Start exit animation
+        setTimeout(() => {
+          setShowToast(false); // Remove after animation completes
+        }, 400); // Must match the toastOut animation duration
+      }, 10000); // Toast display duration
     }
+  };
+        
+  const handleToastClose = () => {
+    setIsExiting(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 400);
   };
   
   useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      if(!user){
-        console.error("No User data found");
-        return
+    const fetchUser = async () => {
+      try {
+        // If no user, try getting one from cookies
+        if (!user) {
+          const token = getAccessTokenFromCookies();
+          if (!token) {
+            console.error("No access_token found in cookies");
+            return;
+          }
+  
+          const parsedUser = parseJwt(token);
+          if (!parsedUser || !parsedUser.user_id) {
+            console.error("Failed to parse user or missing user_id in token");
+            return;
+          }
+  
+          setUser(parsedUser);
+          return;
+        }
+       
+        const response = await getUser(user.user_id);  // If user exists, fetch updated info
+        if (response) {
+          setUser(response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
       }
-      const response = await getUser(user.user_id);
-
-      if (response) {
-        setUser(response);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user:', error);
-    }
-  };
-  fetchUser();
-  }, [user, setUser]); 
+    };
+  
+    fetchUser();
+  }, []);
 
   return (
     <MainLayout>
+      {showToast && (
+        <div className={`fixed bottom-4 right-4 z-50 ${isExiting ? "toast-exit" : "toast-enter"}`}>
+          <Toast {...toastMessage} onClose={handleToastClose} />
+        </div>
+      )}
       <div className="main flex justify-center w-full">
         {/* Main Page */}
         <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
