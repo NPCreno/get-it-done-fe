@@ -33,7 +33,7 @@ export default function DashboardPage() {
               >
                 Start Pomodoro
                 <Image
-                  src="/pomodoro-timer.png"
+                  src="/svgs/timer.svg"
                   className="ml-[10px]"
                   alt="pomodoro timer"
                   width={20}
@@ -45,7 +45,7 @@ export default function DashboardPage() {
                 className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
               transition-all duration-300 justify-center items-center"
               >
-                <Image src="/search-grey.png" alt="search" width={15} height={15}/>
+                <Image src="/svgs/search-grey.svg" alt="search" width={15} height={15}/>
               </button>
             </div>
           </div>
@@ -53,25 +53,25 @@ export default function DashboardPage() {
           {/* first row cards */}
           <div className="flex flex-row gap-5 h-[100px] w-full fade-in-delay-2">
             <StatsCard
-              icon="/list-outline.png"
+              icon="/svgs/list-outline.svg"
               header="All Tasks"
               content="300"
               delay="fade-in-left-delay-1"
             />
             <StatsCard
-              icon="/timer-outline.png"
+              icon="/svgs/timer-outline.svg"
               header="In Progress"
               content="15"
               delay="fade-in-left-delay-2"
             />
             <StatsCard
-              icon="/folder-open-outline.png"
+              icon="/svgs/folder-open-outline.svg"
               header="All Projects"
               content="3"
               delay="fade-in-left-delay-3"
             />
             <StatsCard
-              icon="/checkbox-outline.png"
+              icon="/svgs/checkbox-outline.svg"
               header="Completed"
               content="300"
               delay="fade-in-left-delay-4"
@@ -106,7 +106,7 @@ export default function DashboardPage() {
         hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
                 <Image 
-                src="/add-outline-white.png" 
+                src="/svgs/add-outline-white.svg" 
                 alt="add task" 
                 width={25} 
                 height={25}

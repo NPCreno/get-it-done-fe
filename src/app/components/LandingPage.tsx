@@ -72,7 +72,7 @@ export default function LandingPage() {
             You&apos;re all set to get things done
           </span>
           <Image
-            src="/checkmark-circle-outline.png"
+            src="/svgs/checkmark-circle-outline.svg"
             className="mt-[50px]"
             width={150}
             height={150}

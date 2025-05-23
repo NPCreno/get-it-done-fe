@@ -46,26 +46,26 @@ export default function Sidebar() {
         <nav className="flex flex-col gap-5 mt-[60px]">
           <SidebarLink
             href="/dashboard"
-            icon="/dashboard-yellow.png"
-            iconHover="/dashboard-white.png"
+            icon="/svgs/dashboard-yellow.svg"
+            iconHover="/svgs/dashboard-white.svg"
             text="Dashboard"
           />
           <SidebarLink
             href="/projects"
-            icon="/projects-yellow.png"
-            iconHover="/projects-white.png"
+            icon="/svgs/projects-yellow.svg"
+            iconHover="/svgs/projects-white.svg"
             text="Projects"
           />
           <SidebarLink
             href="/notifications"
-            icon="/notifs-yellow.png"
-            iconHover="/notifs-white.png"
+            icon="/svgs/notifs-yellow.svg"
+            iconHover="/svgs/notifs-white.svg"
             text="Notifications"
           />
           <SidebarLink
             href="/profileSettings"
-            icon="/profile-yellow.png"
-            iconHover="/profile-white.png"
+            icon="/svgs/profile-yellow.svg"
+            iconHover="/svgs/profile-white.svg"
             text="Profile"
           />
         </nav>

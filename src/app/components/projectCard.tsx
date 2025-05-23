@@ -25,14 +25,14 @@ export default function ProjectCard({
       {/*header */}
       <div className="flex justify-between w-full items-center">
         <div className="flex flex-row gap-5">
-          <Image src="/folder-outline.png" alt="folder-outline" width={30} height={30} />
+          <Image src="/svgs/folder-outline.svg" alt="folder-outline" width={30} height={30} />
           <h1 className="text-text text-base font-bold font-lato">
             {projName}
           </h1>
         </div>
 
         <div className="flex flex-row hover:cursor-pointer">
-          <Image src="/add-outline-yellow.png" alt="add-outline-yellow" width={15} height={15} />
+          <Image src="/svgs/add-outline-yellow.svg" alt="add-outline-yellow" width={15} height={15} />
           <h1 className="text-primary-default text-[11px] font-bold font-lato">
             Add Task
           </h1>

@@ -62,7 +62,7 @@ export default function ProjectsPage() {
         hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
                 <Image 
-                src="/add-outline-white.png" 
+                src="/svgs/add-outline-white.svg" 
                 alt="add task" 
                 width={25} 
                 height={25}
