@@ -24,7 +24,7 @@ export default function ProfileSettingsPage() {
   const [isEditEnabled, setIsEditEnabled] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
-  const [isExiting, setIsExiting] = useState(false);
+  const [isExitingToast, setIsExitingToast] = useState(false);
   const {
     validateForm,
     setFieldValue,
@@ -86,10 +86,10 @@ export default function ProfileSettingsPage() {
         });
       
         setShowToast(true);
-        setIsExiting(false);
+        setIsExitingToast(false);
       
         setTimeout(() => {
-          setIsExiting(true); // Start exit animation
+          setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
             setShowToast(false); // Remove after animation completes
           }, 400); // Must match the toastOut animation duration
@@ -110,10 +110,10 @@ export default function ProfileSettingsPage() {
         });
       }
       setShowToast(true);
-      setIsExiting(false);
+      setIsExitingToast(false);
       
       setTimeout(() => {
-        setIsExiting(true); // Start exit animation
+        setIsExitingToast(true); // Start exit animation
         setTimeout(() => {
           setShowToast(false); // Remove after animation completes
         }, 400); // Must match the toastOut animation duration
@@ -122,7 +122,7 @@ export default function ProfileSettingsPage() {
   };
         
   const handleToastClose = () => {
-    setIsExiting(true);
+    setIsExitingToast(true);
     setTimeout(() => {
       setShowToast(false);
     }, 400);
@@ -139,7 +139,7 @@ export default function ProfileSettingsPage() {
             return;
           }
   
-          const parsedUser = parseJwt(token);
+          const parsedUser = parseJwt(token).user;
           if (!parsedUser || !parsedUser.user_id) {
             console.error("Failed to parse user or missing user_id in token");
             return;
@@ -164,7 +164,7 @@ export default function ProfileSettingsPage() {
   return (
     <MainLayout>
       {showToast && (
-        <div className={`fixed bottom-4 right-4 z-50 ${isExiting ? "toast-exit" : "toast-enter"}`}>
+        <div className={`fixed bottom-4 right-4 z-50 ${isExitingToast ? "toast-exit" : "toast-enter"}`}>
           <Toast {...toastMessage} onClose={handleToastClose} />
         </div>
       )}
