@@ -52,7 +52,14 @@ export default function AddProjectModal({ isOpen, onClose, projectTitle, setProj
         />
         
         <div className="flex flex-row gap-5">
-
+            <InputBox 
+                type="date"
+                label="Due Date" 
+                value={dueDate.toISOString()} 
+                onChange={(e) => setDueDate(new Date(e.target.value))} 
+                isLabelVisible={true}
+                placeholder="Select due date"
+            />
         </div>
 
         <div className="flex flex-row justify-end gap-4 w-full">
