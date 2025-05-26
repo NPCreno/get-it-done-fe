@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import InputBox from '../inputBox';
+import { CustomDropdownMenu } from '../dropdown';
 
 interface AddProjectModalProps {
   isOpen: boolean;
@@ -11,9 +12,11 @@ interface AddProjectModalProps {
   setProjectDescription: (projectDescription: string) => void;
   dueDate: Date;
   setDueDate: (dueDate: Date) => void;
+  priority: string;
+  setPriority: (priority: string) => void;
 }
 
-export default function AddProjectModal({ isOpen, onClose, projectTitle, setProjectTitle, projectDescription, setProjectDescription, dueDate, setDueDate }: AddProjectModalProps) {
+export default function AddProjectModal({ isOpen, onClose, projectTitle, setProjectTitle, projectDescription, setProjectDescription, dueDate, setDueDate, priority, setPriority }: AddProjectModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -59,6 +62,15 @@ export default function AddProjectModal({ isOpen, onClose, projectTitle, setProj
                 onChange={(e) => setDueDate(new Date(e.target.value))} 
                 isLabelVisible={true}
                 placeholder="Select due date"
+            />
+            <InputBox 
+                type="dropdown"
+                label="Priority" 
+                value={priority} 
+                onChange={(e) => setPriority(e.target.value)} 
+                isLabelVisible={true}
+                placeholder="Select priority"
+                dropdownptions={[ "Low", "Medium", "High"]}
             />
         </div>
 

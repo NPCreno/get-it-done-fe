@@ -1,16 +1,17 @@
 import React from "react";
 import { DatePicker } from "./datePicker";
-
+import { CustomDropdownMenu } from "./dropdown";
 interface InputBoxProps {
   label: string;
   placeholder: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: "text" | "textarea" | "date";
+  type?: "text" | "textarea" | "date" | "dropdown";
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   isLabelVisible?: boolean;
+  dropdownptions?: string[];
 }
 
 export default function InputBox({
@@ -23,6 +24,7 @@ export default function InputBox({
   disabled,
   onBlur,
   isLabelVisible = true,
+  dropdownptions,
 }: InputBoxProps) {
   return (
     <div className="w-full">
@@ -72,7 +74,7 @@ export default function InputBox({
           placeholder={placeholder}
           disabled={disabled}
         />
-      ) : (
+      ) : type === "date" ? (
         <DatePicker
           date={value ? new Date(value) : undefined}
           setDate={(date: Date) => {
@@ -82,6 +84,10 @@ export default function InputBox({
             onChange(syntheticEvent);
           }}
         />
+      ) : type === "dropdown" ? (
+        <CustomDropdownMenu options={dropdownptions ?? []} selectedOption={value} setSelectedOption={(option: string) => onChange({ target: { value: option } } as React.ChangeEvent<HTMLInputElement>)} />
+      ) : (
+        <></>
       )}
 
       {error && (
