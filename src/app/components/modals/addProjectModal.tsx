@@ -12,11 +12,25 @@ interface AddProjectModalProps {
   setProjectDescription: (projectDescription: string) => void;
   dueDate: Date;
   setDueDate: (dueDate: Date) => void;
-  priority: string;
-  setPriority: (priority: string) => void;
+  color: string;
+  setColor: (color: string) => void;
 }
+  
+const dropdownOptions = [
+  { name: "Lavender", color: "#E6E6FA" },  
+  { name: "Mint", color: "#B5EAD7" },      
+  { name: "Peach", color: "#FFDAB9" },     
+  { name: "Sky", color: "#A0D8EF" },       
+  { name: "Lemon", color: "#FFFACD" },     
+  { name: "Rose", color: "#FADADD" },      
+  { name: "Mauve", color: "#E0B0FF" },     
+  { name: "Baby Blue", color: "#BDE0FE" }, 
+  { name: "Coral", color: "#FFB5A7" },     
+  { name: "Seafoam", color: "#C3FBD8" },   
+];
 
-export default function AddProjectModal({ isOpen, onClose, projectTitle, setProjectTitle, projectDescription, setProjectDescription, dueDate, setDueDate, priority, setPriority }: AddProjectModalProps) {
+
+export default function AddProjectModal({ isOpen, onClose, projectTitle, setProjectTitle, projectDescription, setProjectDescription, dueDate, setDueDate, color, setColor }: AddProjectModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -40,7 +54,7 @@ export default function AddProjectModal({ isOpen, onClose, projectTitle, setProj
             type="text"
             label="Project Title" 
             placeholder="Enter Project title" 
-            value={projectTitle} 
+            value={{name: projectTitle}} 
             onChange={(e) => setProjectTitle(e.target.value)} 
             isLabelVisible={true}
         />
@@ -49,31 +63,30 @@ export default function AddProjectModal({ isOpen, onClose, projectTitle, setProj
             type="textarea"
             label="Description" 
             placeholder="Enter description (optional)" 
-            value={projectDescription} 
+            value={{name: projectDescription}} 
             onChange={(e) => setProjectDescription(e.target.value)} 
             isLabelVisible={true}
         />
         
         <div className="flex flex-row gap-5">
             <InputBox 
+                type="dropdown"
+                label="Color" 
+                value={{name: color}} 
+                onChange={(e) => setColor(e.target.value)} 
+                isLabelVisible={true}
+                placeholder="Select color"
+                dropdownptions={dropdownOptions}
+            />
+            <InputBox 
                 type="date"
                 label="Due Date" 
-                value={dueDate.toISOString()} 
+                value={{name: dueDate.toISOString()}} 
                 onChange={(e) => setDueDate(new Date(e.target.value))} 
                 isLabelVisible={true}
                 placeholder="Select due date"
             />
-            <InputBox 
-                type="dropdown"
-                label="Priority" 
-                value={priority} 
-                onChange={(e) => setPriority(e.target.value)} 
-                isLabelVisible={true}
-                placeholder="Select priority"
-                dropdownptions={[ "Low", "Medium", "High"]}
-            />
         </div>
-
         <div className="flex flex-row justify-end gap-4 w-full">
             <div className="w-full"></div>
             <div className="flex flex-row gap-[10px]">

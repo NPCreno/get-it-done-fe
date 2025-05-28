@@ -20,7 +20,7 @@ interface projectFormValues {
   title: string;
   description: string;
   due_date: Date;
-  priority: string;
+  color: string;
   user_id: string;
 }
 
@@ -36,7 +36,7 @@ export default function ProjectsPage() {
     title: "",
     description: "",
     due_date: new Date(),
-    priority: "",
+    color: "",
     user_id: user?.user_id ?? "",
   }), [user?.user_id]);
 
@@ -209,8 +209,8 @@ export default function ProjectsPage() {
           setProjectDescription={(projectDescription: string) => setFieldValue("description", projectDescription)}
           dueDate={values.due_date}
           setDueDate={(dueDate: Date) => setFieldValue("due_date", dueDate)}
-          priority={values.priority}
-          setPriority={(priority: string) => setFieldValue("priority", priority)}
+          color={values.color}
+          setColor={(color: string) => setFieldValue("color", color)}
         />
       )}
     </MainLayout>

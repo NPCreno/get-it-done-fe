@@ -4,14 +4,20 @@ import { CustomDropdownMenu } from "./dropdown";
 interface InputBoxProps {
   label: string;
   placeholder: string;
-  value: string;
+  value: {
+    name: string;
+    color?: string;
+  };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   type?: "text" | "textarea" | "date" | "dropdown";
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   isLabelVisible?: boolean;
-  dropdownptions?: string[];
+  dropdownptions?: {
+    name: string;
+    color?: string;
+  }[];
 }
 
 export default function InputBox({
@@ -46,12 +52,12 @@ export default function InputBox({
           onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
           }}
-          value={value ?? ""}
+          value={value.name ?? ""}
           onChange={onChange}
           type="text"
           id={label}
           onBlur={onBlur}
-          className={`rounded-[10px] border w-full h-[40px] py-2 px-5
+          className={`rounded-md border w-full h-[40px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
             disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -63,11 +69,11 @@ export default function InputBox({
           onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
           }}
-          value={value ?? ""}
+          value={value.name ?? ""}
           onChange={onChange}
           id={label}
           onBlur={onBlur}
-          className={`resize-y rounded-[10px] border w-full min-h-[70px] max-h-[200px] py-2 px-5
+          className={`resize-y rounded-md border w-full min-h-[70px] max-h-[200px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
             disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -76,7 +82,7 @@ export default function InputBox({
         />
       ) : type === "date" ? (
         <DatePicker
-          date={value ? new Date(value) : undefined}
+          date={value.name ? new Date(value.name) : undefined}
           setDate={(date: Date) => {
             const syntheticEvent = {
               target: { value: date.toISOString() },
@@ -85,7 +91,10 @@ export default function InputBox({
           }}
         />
       ) : type === "dropdown" ? (
-        <CustomDropdownMenu options={dropdownptions ?? []} selectedOption={value} setSelectedOption={(option: string) => onChange({ target: { value: option } } as React.ChangeEvent<HTMLInputElement>)} />
+        <CustomDropdownMenu 
+        options={dropdownptions ?? []} 
+        selectedOption={value} 
+        setSelectedOption={(option: {name: string, color?: string}) => onChange({ target: { value: option.name } } as React.ChangeEvent<HTMLInputElement>)} />
       ) : (
         <></>
       )}
