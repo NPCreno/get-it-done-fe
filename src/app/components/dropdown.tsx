@@ -32,7 +32,6 @@ export function CustomDropdownMenu({
 }: CustomDropdownMenuProps) {
 
   const currentSelectedColor = options.find(option => option.name === selectedOption.name)?.color;
-
   return (
     <div className="w-full relative">
       <DropdownMenu>
@@ -61,11 +60,13 @@ export function CustomDropdownMenu({
         <DropdownMenuRadioGroup
           value={selectedOption.name}
           onValueChange={(value) => {
-            const selectedOption = options.find(option => option.name === value);
-            setSelectedOption({
-              name: value,
-              color: selectedOption?.color
-            });
+            const selected = options.find(option => option.name === value);
+            if (selected) {
+              setSelectedOption({
+                name: selected.name,
+                color: selected.color
+              });
+            }
           }}
         >
           {options.map((option) => (
@@ -84,7 +85,6 @@ export function CustomDropdownMenu({
                     <span className="text-sm font-normal font-lato">Select an option</span>
                   </>
                 )}
-              
               </DropdownMenuRadioItem>
             </>
           ))}

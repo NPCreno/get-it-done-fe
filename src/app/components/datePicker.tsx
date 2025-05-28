@@ -20,6 +20,7 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ date, setDate }: DatePickerProps) {
+  console.log("date: ", date)
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -30,8 +31,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
             !date && "text-muted-foreground"
           )}
         >
-          {date ? format(date, "PPP") : <span className="text-border">Pick a date</span>}
-          {/* <span className="text-[#828282]">Pick a date</span> */}
+          {date ? format(date, "PPP") : <span className="text-border text-text">Pick a date</span>}
           <Image src="/svgs/calendar-outline.svg" alt="calendar" width={20} height={20} />
         </Button>
       </PopoverTrigger>
@@ -41,6 +41,7 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
           selected={date}
           onSelect={(day) => setDate(day as Date)}
           initialFocus
+          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
         />
       </PopoverContent>
     </Popover>

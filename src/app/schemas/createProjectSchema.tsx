@@ -9,4 +9,13 @@ export const createProjectSchema = yup.object().shape({
   description: yup
     .string()
     .min(2, "Description must be at least 2 characters long")
+    .optional(),
+
+  colorLabel: yup
+    .string()
+    .required("Color label is required"),
+
+  color: yup
+    .string()
+    .required("Color is required")
 });

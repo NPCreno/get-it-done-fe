@@ -17,7 +17,7 @@ interface InputBoxProps {
   dropdownptions?: {
     name: string;
     color?: string;
-  }[];
+  }[];  
 }
 
 export default function InputBox({
@@ -94,7 +94,13 @@ export default function InputBox({
         <CustomDropdownMenu 
         options={dropdownptions ?? []} 
         selectedOption={value} 
-        setSelectedOption={(option: {name: string, color?: string}) => onChange({ target: { value: option.name } } as React.ChangeEvent<HTMLInputElement>)} />
+        setSelectedOption={
+          (option: {name: string, color?: string}) => 
+            onChange({ 
+              target: { name: option.name, value: option.color } 
+            } as React.ChangeEvent<HTMLInputElement>)
+          }
+             />
       ) : (
         <></>
       )}

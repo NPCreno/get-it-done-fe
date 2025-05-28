@@ -9,6 +9,7 @@ import { createProject, getProjectsForUser, getUser, updateUser } from "@/app/ap
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
+import { Toast } from "@/app/components/toast";
 interface Project {
   title: string;
   description: string;
@@ -19,7 +20,8 @@ interface Project {
 interface projectFormValues {
   title: string;
   description: string;
-  due_date: Date;
+  due_date?: Date;
+  colorLabel: string;
   color: string;
   user_id: string;
 }
@@ -32,10 +34,18 @@ export default function ProjectsPage() {
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
 
+  const handleToastClose = () => {
+    setIsExitingToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 400);
+  };
+
   const initialValues = useMemo(() => ({
     title: "",
     description: "",
-    due_date: new Date(),
+    due_date: null,
+    colorLabel: "",
     color: "",
     user_id: user?.user_id ?? "",
   }), [user?.user_id]);
@@ -44,6 +54,7 @@ export default function ProjectsPage() {
     validateForm,
     setFieldValue,
     values,
+    setErrors,
     errors,
     handleSubmit,
     handleChange,
@@ -57,7 +68,11 @@ export default function ProjectsPage() {
     validateOnBlur: false,
     onSubmit: async (values) => {
       if (!user) return;
-      const withUser = { ...values, user_id: user.user_id };
+      const withUser = {
+        ...values,
+        user_id: user.user_id,
+        due_date: values.due_date || undefined
+      };
       handleSubmitForm(withUser);
     },
   });
@@ -77,8 +92,9 @@ export default function ProjectsPage() {
         console.error("No User data found");
         return
       }
-      const response = await createProject(values);
-      if (response) {
+      const response: any = await createProject(values);
+      if (response.status === "success") {
+        setIsAddProjectModalOpen(false);
         setToastMessage({
           title: "Project Created",
           description: "Your new project has been created successfully",
@@ -149,10 +165,24 @@ export default function ProjectsPage() {
       }
     };
     fetchUser();
-  }, []);
+  }, [isAddProjectModalOpen]);
+
+  const clearValueAndErrors = () => {
+    setErrors({});
+    setFieldValue("title", "");
+    setFieldValue("description", "");
+    setFieldValue("due_date", null);
+    setFieldValue("colorLabel", "");
+    setFieldValue("color", "");
+  }
 
   return (
     <MainLayout>
+      {showToast && (
+        <div className={`fixed bottom-4 right-4 z-50 ${isExitingToast ? "toast-exit" : "toast-enter"}`}>
+          <Toast {...toastMessage} onClose={handleToastClose} />
+        </div>
+      )}
       <div className="main flex justify-center ju w-full">
         {/* Main Page */}
         <div className="inside flex flex-col gap-5 max-w-[1440px] w-full mx-auto">
@@ -171,7 +201,10 @@ export default function ProjectsPage() {
               <button
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
                            hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-                onClick={() => setIsAddProjectModalOpen(true)}
+                onClick={() => {
+                  setIsAddProjectModalOpen(true);
+                  clearValueAndErrors();
+                }}
               >
                 <Image 
                 src="/svgs/add-outline-white.svg" 
@@ -201,16 +234,26 @@ export default function ProjectsPage() {
 
       {isAddProjectModalOpen && (
         <AddProjectModal
+          errors={errors}
           isOpen={isAddProjectModalOpen}
           onClose={() => setIsAddProjectModalOpen(false)}
           projectTitle={values.title}
           setProjectTitle={(projectTitle: string) => setFieldValue("title", projectTitle)}
           projectDescription={values.description}
           setProjectDescription={(projectDescription: string) => setFieldValue("description", projectDescription)}
-          dueDate={values.due_date}
+          dueDate={values.due_date ?? null}
           setDueDate={(dueDate: Date) => setFieldValue("due_date", dueDate)}
           color={values.color}
           setColor={(color: string) => setFieldValue("color", color)}
+          colorLabel={values.colorLabel}
+          setColorLabel={(colorLabel: string) => setFieldValue("colorLabel", colorLabel)}
+          handleCreateProject={() => {
+            const formValues = {
+              ...values,
+              due_date: values.due_date || undefined
+            };
+            handleSubmitForm(formValues);
+          }}
         />
       )}
     </MainLayout>
