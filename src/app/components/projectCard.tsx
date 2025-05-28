@@ -42,7 +42,7 @@ export default function ProjectCard({
       <div className="flex justify-between w-full items-center">
         <div className="flex flex-row">
           <div className="text-text text-[11px] font-bold font-lato rounded-[5px] bg-background px-[5px] h-5 flex items-center">
-          Due {new Date(due_date).toLocaleDateString()}
+          {due_date ? "Due " + new Date(due_date).toLocaleDateString() : ""}
           </div>
         </div>
 

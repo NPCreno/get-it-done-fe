@@ -157,8 +157,6 @@ export default function ProjectsPage() {
         const response = await getUser(user.user_id);
         if (response) {
           setUser(response);
-          const projects = await getProjectsForUser(user.user_id);
-          setProjectData(projects);
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
@@ -166,6 +164,20 @@ export default function ProjectsPage() {
     };
     fetchUser();
   }, [isAddProjectModalOpen]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchProjects = async () => {
+        const projects = await getProjectsForUser(user.user_id);
+        if (projects?.message && projects.message.includes("No projects found")) {
+          setProjectData([]);
+        }else{
+          setProjectData(projects);
+        }
+      };
+      fetchProjects();
+    }
+  }, [user, isAddProjectModalOpen]);
 
   const clearValueAndErrors = () => {
     setErrors({});
@@ -219,7 +231,7 @@ export default function ProjectsPage() {
           </div>
 
           <div className="flex flex-wrap gap-5">
-            {projectData.map((project, index) => (
+            {projectData.length > 0 ? projectData.map((project, index) => (
               <ProjectCard
                 key={index}
                 title={project.title}
@@ -227,7 +239,11 @@ export default function ProjectsPage() {
                 due_date={project.due_date}
                 tasks={project.tasks ? project.tasks : 0}
               />
-            ))}
+            )) : (
+              <div className="flex justify-center items-center h-full">
+                <p className="text-text text-[13px] font-lato">No projects found</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
