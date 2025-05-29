@@ -5,14 +5,17 @@ export default function ProjectCard({
   description,
   due_date,
   tasks,
+  onClick,
 }: {
   title: string;
   description: string;
   due_date: Date;
   tasks: number;
+  onClick: () => void;
 }) {
   return (
     <div
+      onClick={onClick}
       className={`p-5 flex flex-col gap-5 justify-start items-start bg-white rounded-[10px] max-w-[316px] w-[316px] h-auto
       hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left fade-in-left-delay-1`}
     >

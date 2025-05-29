@@ -10,12 +10,8 @@ import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
 import { Toast } from "@/app/components/toast";
-interface Project {
-  title: string;
-  description: string;
-  due_date: Date;
-  tasks?: number;
-}
+import ViewProjectModal from "@/app/components/modals/viewProject";
+import { IProject } from "@/app/interface/IProject";
 
 interface projectFormValues {
   title: string;
@@ -28,12 +24,14 @@ interface projectFormValues {
 
 export default function ProjectsPage() {
   const { user, setUser } = useFormState();
-  const [projectData, setProjectData] = useState<Project[]>([]);
+  const [projectData, setProjectData] = useState<IProject[]>([]);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
+  const [isViewProjectModalOpen, setIsViewProjectModalOpen] = useState(false);
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
-
+  const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -238,6 +236,10 @@ export default function ProjectsPage() {
                 description={project.description}
                 due_date={project.due_date}
                 tasks={project.tasks ? project.tasks : 0}
+                onClick={() => {
+                  setSelectedProject(project);
+                  setIsViewProjectModalOpen(true);
+                }}
               />
             )) : (
               <div className="flex justify-center items-center h-full">
@@ -269,6 +271,23 @@ export default function ProjectsPage() {
               due_date: values.due_date || undefined
             };
             handleSubmitForm(formValues);
+          }}
+        />
+      )}
+
+      {isViewProjectModalOpen && (
+        <ViewProjectModal
+          isOpen={isViewProjectModalOpen}
+          onClose={() => setIsViewProjectModalOpen(false)}
+          project={selectedProject ?? {
+            title: "",
+            description: "",
+            due_date: new Date(),
+            tasks: 0
+          }}
+          handleCreateTask={() => {
+            setIsViewProjectModalOpen(false)
+            setIsAddTaskModalOpen(true);
           }}
         />
       )}
