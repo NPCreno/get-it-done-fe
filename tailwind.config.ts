@@ -55,7 +55,7 @@ const config: Config = {
   			success: '#53D86A',
   			warning: '#FEC242',
   			info: '#2196F3',
-  			background: 'hsl(var(--background))',
+  			background: '#EEEEEE',
   			text: '#333',
   			border: 'hsl(var(--border))',
   			foreground: 'hsl(var(--foreground))',
