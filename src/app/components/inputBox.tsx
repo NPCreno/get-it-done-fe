@@ -1,6 +1,7 @@
 import React from "react";
 import { DatePicker } from "./datePicker";
 import { CustomDropdownMenu } from "./dropdown";
+import { DatePickerv2 } from "./datePickerv2";
 interface InputBoxProps {
   label: string;
   placeholder: string;
@@ -81,7 +82,7 @@ export default function InputBox({
           disabled={disabled}
         />
       ) : type === "date" ? (
-        <DatePicker
+        <DatePickerv2
           date={value.name ? new Date(value.name) : undefined}
           setDate={(date: Date) => {
             const syntheticEvent = {
