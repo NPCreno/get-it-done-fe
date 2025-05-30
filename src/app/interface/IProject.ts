@@ -1,0 +1,6 @@
+export interface IProject {
+    title: string;
+    description: string;
+    due_date: Date;
+    tasks: number;
+  }
