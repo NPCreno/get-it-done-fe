@@ -5,14 +5,18 @@ import StatsCard from "../../components/statsCard";
 import TaskItem from "../../components/taskItem";
 import Image from "next/image";
 import AddTaskModal from "@/app/components/modals/addTaskModal";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
+import { getProjectsForUser, getUser } from "@/app/api/api";
+import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 
 interface taskFormValues {
   user_id: string;
   project_id: string;
+  project_title: string;
+  project_color: string;
   title: string;
   description: string;
   priority: string;
@@ -27,9 +31,8 @@ interface taskFormValues {
 
 export default function DashboardPage() {
   const { user, setUser } = useFormState();
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [projectOptions, setProjectOptions] = useState([]);
-
+  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const [projectOptions, setProjectOptions] = useState<any[]>([]);
   // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
@@ -43,6 +46,8 @@ export default function DashboardPage() {
     due_date: null,
     user_id: user?.user_id ?? "",
     project_id: "",
+    project_title: "",
+    project_color: "",
     priority: "",
     status: "",
     isRecurring: false,
@@ -80,6 +85,7 @@ export default function DashboardPage() {
   });
 
   const handleSubmitForm = async (values: taskFormValues) => {
+    console.log("values: ", values);
     const validationErrors: FormikErrors<typeof values> = await validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
@@ -144,6 +150,49 @@ export default function DashboardPage() {
     { task: "Review FE-003", tag: "Review", status: "pending" },
     { task: "Start FE-004", tag: "Development", status: "good" },
   ];
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        if (!user) { // If no user, try getting one from cookies
+          const token = getAccessTokenFromCookies();
+          if (!token) {
+            console.error("No access_token found in cookies");
+            return;
+          }
+          const parsedUser = parseJwt(token).user;
+          if (!parsedUser || !parsedUser.user_id) {
+            console.error("Failed to parse user or missing user_id in token");
+            return;
+          }
+          setUser(parsedUser);
+          return;
+        }
+        // Only fetch updated user info if we have a user
+        const response = await getUser(user.user_id);
+        if (response) {
+          setUser(response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+    fetchUser();
+  }, [isAddTaskModalOpen]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchProjects = async () => {
+        const projects = await getProjectsForUser(user.user_id);
+        if (projects?.message && projects.message.includes("No projects found")) {
+          setProjectOptions([]);
+        }else{
+          setProjectOptions(projects);
+        }
+      };
+      fetchProjects();
+    }
+  }, [user, isAddTaskModalOpen]);
 
   return (
     <MainLayout>
@@ -240,7 +289,7 @@ export default function DashboardPage() {
               <button
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
                   hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-                onClick={() => setIsTaskModalOpen(true)}
+                onClick={() => setIsAddTaskModalOpen(true)}
               >
                 <Image 
                 src="/svgs/add-outline-white.svg" 
@@ -270,11 +319,11 @@ export default function DashboardPage() {
       </div>
 
       <AddTaskModal
-        isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        isOpen={isAddTaskModalOpen}
+        onClose={() => setIsAddTaskModalOpen(false)}
         formik={{ values, errors, handleChange, setFieldValue }}
         handleCreateTask={handleSubmitForm}
-        projectOptions={projectOptions}
+        project={projectOptions}
       />
 
     </MainLayout>

@@ -9,6 +9,7 @@ interface InputBoxProps {
   value: {
     name: string;
     color?: string;
+    project_id?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime";
@@ -19,8 +20,20 @@ interface InputBoxProps {
   dropdownptions?: {
     name: string;
     color?: string;
+    title?: string;
+    project_id?: string;
   }[];  
   customClass?: string;
+}
+
+
+interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+  target: HTMLInputElement & {
+    name: string;
+    value: string;
+    project_id: string;
+    color: string;
+  };
 }
 
 export default function InputBox({
@@ -126,11 +139,14 @@ export default function InputBox({
         options={dropdownptions ?? []} 
         selectedOption={value} 
         setSelectedOption={
-          (option: {name: string, color?: string}) => 
-            onChange({ 
-              target: { name: option.name, value: option.color } 
-            } as React.ChangeEvent<HTMLInputElement>)
-          }
+          (option: {name: string, color?: string, project_id?: string}) => 
+            onChange({
+              target: {
+                name: option.name,
+                value: option.color ?? '',
+                project_id: option.project_id ?? '',
+              } as any
+            } as CustomChangeEvent)}
              />
       ) : (
         <></>

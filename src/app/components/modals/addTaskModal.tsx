@@ -7,7 +7,16 @@ interface AddTaskModalProps {
   onClose: () => void;
   formik: any;
   handleCreateTask: (values: any) => void;
-  projectOptions: any;
+  project: any;
+}
+
+interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+  target: HTMLInputElement & {
+    name: string;
+    value: string;
+    project_id: string;
+    color: string;
+  };
 }
 
 export default function AddTaskModal({ 
@@ -15,10 +24,10 @@ export default function AddTaskModal({
   onClose, 
   formik,
   handleCreateTask,
-  projectOptions
+  project
 }: AddTaskModalProps) {
   if (!isOpen) return null;
-  
+
   const handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClose();
@@ -41,6 +50,12 @@ export default function AddTaskModal({
     { name: "Week"},
     { name: "Month"},
   ];
+
+  const projectOptions = project.map((option: any) => ({
+    name: option.title,
+    project_id: option.project_id,
+    color: option.color,
+  }));
 
   const clearAllData = () => {
     formik.setFieldValue("title", "");
@@ -111,10 +126,13 @@ export default function AddTaskModal({
             <InputBox 
                 type="dropdown"
                 label="Project" 
-                value={{name: "Project"}} 
+                value={{name: formik.values.project_title, color: formik.values.project_color, project_id: formik.values.project_id}} 
                 onChange={(e) => {
-                  formik.setFieldValue("project", e.target.name);
-                }} 
+                  const customEvent = e as unknown as CustomChangeEvent;
+                  formik.setFieldValue("project_title", customEvent.target.name);
+                  formik.setFieldValue("project_color", customEvent.target.value);
+                  formik.setFieldValue("project_id", customEvent.target.project_id); 
+                }}
                 isLabelVisible={true}
                 placeholder="Select project"
                 dropdownptions={projectOptions}

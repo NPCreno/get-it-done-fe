@@ -17,12 +17,14 @@ interface CustomDropdownMenuProps {
   options: {
     name: string;
     color?: string;
+    project_id?: string;
   }[]
   selectedOption: {
     name: string;
     color?: string;
+    project_id?: string;
   }
-  setSelectedOption: (option: {name: string, color?: string}) => void
+  setSelectedOption: (option: {name: string, color?: string, project_id?: string}) => void
   placeholder: string;
 }
 
@@ -34,6 +36,7 @@ export function CustomDropdownMenu({
 }: CustomDropdownMenuProps) {
 
   const currentSelectedColor = options.find(option => option.name === selectedOption.name)?.color;
+
   return (
     <div className="w-full relative">
       <DropdownMenu>
@@ -66,7 +69,8 @@ export function CustomDropdownMenu({
             if (selected) {
               setSelectedOption({
                 name: selected.name,
-                color: selected.color
+                color: selected.color,
+                project_id: selected.project_id
               });
             }
           }}
