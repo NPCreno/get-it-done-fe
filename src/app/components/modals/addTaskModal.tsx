@@ -6,9 +6,52 @@ import { IProject } from '@/app/interface/IProject';
 interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  formik: any;
-  handleCreateTask: (values: any) => void;
+  formik: FormikType;
+  handleCreateTask: (values: FormValues) => void;
   project: IProject[];
+}
+
+interface FormValues {
+  title: string;
+  description: string;
+  priority: string;
+  project: string; 
+  project_id: string;
+  project_title: string;
+  project_color: string;
+  status: string;
+  due_date: string | null;
+  isRecurring: boolean;
+  repeat_every: string;
+  repeat_days: string[];
+  start_date: string | null;
+  end_date: string | null;
+  user_id: string;
+}
+
+interface FormErrors {
+  title?: string;
+  description?: string;
+  priority?: string;
+  project?: string;
+  project_id?: string;
+  project_title?: string;
+  project_color?: string;
+  status?: string;
+  due_date?: string;
+  isRecurring?: string;
+  repeat_every?: string;
+  repeat_days?: string[] | string;
+  start_date?: string;
+  end_date?: string;
+  user_id?: string;
+}
+
+interface FormikType {
+  values: FormValues;
+  errors: FormErrors;
+  setFieldValue: (field: keyof FormValues, value: FormValues[keyof FormValues]) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
 interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
@@ -53,7 +96,7 @@ export default function AddTaskModal({
     { name: "Month"},
   ];
 
-  const projectOptions = project.map((option: any) => ({
+  const projectOptions = project.map((option: IProject) => ({
     name: option.title,
     project_id: option.project_id,
     color: option.color,
@@ -67,12 +110,12 @@ export default function AddTaskModal({
     formik.setFieldValue("priority", "");
     formik.setFieldValue("project", "");
     formik.setFieldValue("status", "");
-    formik.setFieldValue("due_date", new Date());
+    formik.setFieldValue("due_date", null);
     formik.setFieldValue("isRecurring", false);
     formik.setFieldValue("repeat_every", "");
     formik.setFieldValue("repeat_days", []);
-    formik.setFieldValue("start_date", new Date());
-    formik.setFieldValue("end_date", new Date());
+    formik.setFieldValue("start_date", null);
+    formik.setFieldValue("end_date", null);
   }
   
   return (
@@ -136,7 +179,7 @@ export default function AddTaskModal({
                   formik.setFieldValue("project_id", customEvent.target.project_id); 
                 }}
                 isLabelVisible={true}
-                placeholder="Select project"
+                placeholder="Select project (optional)"
                 dropdownptions={projectOptions}
                 error={formik.errors.project}
             />
@@ -158,10 +201,10 @@ export default function AddTaskModal({
             <InputBox 
                 type="datewithtime"
                 label="Due Date" 
-                value={{ name: formik.values.due_date ? formik.values.due_date.toISOString() : "" }} 
-                onChange={(e) => formik.setFieldValue("due_date", new Date(e.target.value))} 
+                value={{ name: formik.values.due_date ? formik.values.due_date.toString() : "" }} 
+                onChange={(e) => formik.setFieldValue("due_date", e.target.value ? new Date(e.target.value).toISOString() : null)} 
                 isLabelVisible={true}
-                placeholder="Select due date"
+                placeholder="Select due date (optional)"
                 error={formik.errors.due_date}
                 customClass="translate-x-[150px] translate-y-[-170px]"
             />
@@ -197,7 +240,11 @@ export default function AddTaskModal({
                         onChange={(e) => formik.setFieldValue("repeat_days", e.target.name.split(","))} 
                         isLabelVisible={true}
                         placeholder="Select repeat days"
-                        error={formik.errors.repeat_days}
+                        error={
+                          Array.isArray(formik.errors.repeat_days)
+                            ? formik.errors.repeat_days.join(", ")
+                            : formik.errors.repeat_days
+                        }
                         disabled={formik.values.repeat_every !== "Week"}
                     />
                 </div>
@@ -206,9 +253,9 @@ export default function AddTaskModal({
                 <InputBox 
                     type="date"
                     label="Start Date" 
-                    value={{name: formik.values.start_date ? formik.values.start_date.toISOString() : ""}} 
+                    value={{name: formik.values.start_date ? formik.values.start_date.toString() : ""}} 
                     onChange={(e) => {
-                    formik.setFieldValue("start_date", new Date(e.target.value));
+                    formik.setFieldValue("start_date", e.target.value ? new Date(e.target.value).toISOString() : null);
                     }} 
                     isLabelVisible={true}
                     placeholder="Select start date"
@@ -217,8 +264,8 @@ export default function AddTaskModal({
                 <InputBox 
                     type="date"
                     label="End Date" 
-                    value={{ name: formik.values.end_date ? formik.values.end_date.toISOString() : "" }} 
-                    onChange={(e) => formik.setFieldValue("end_date", new Date(e.target.value))} 
+                    value={{ name: formik.values.end_date ? formik.values.end_date.toString() : "" }} 
+                    onChange={(e) => formik.setFieldValue("end_date", e.target.value ? new Date(e.target.value).toISOString() : null)} 
                     isLabelVisible={true}
                     placeholder="Select end date (optional)"
                     error={formik.errors.end_date}

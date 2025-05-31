@@ -5,9 +5,33 @@ import InputBox from '../inputBox';
 interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  errors: any;
-  formik: any;
-  handleCreateProject: (values: any) => void;
+  errors: FormErrors;
+  formik: FormikType;
+  handleCreateProject: (values: FormValues) => void;
+}
+
+interface FormValues {
+  title: string;
+  description: string;
+  color: string;
+  colorLabel: string;
+  due_date: Date | null;
+  user_id: string;
+}
+
+interface FormErrors {
+  title?: string;
+  description?: string;
+  color?: string;
+  colorLabel?: string;
+  due_date?: string;
+}
+
+interface FormikType {
+  values: FormValues;
+  errors: FormErrors;
+  setFieldValue: (field: keyof FormValues, value: FormValues[keyof FormValues]) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
 export default function AddProjectModal({ 
@@ -98,7 +122,7 @@ export default function AddProjectModal({
                 value={{ name: formik.values.due_date ? formik.values.due_date.toISOString() : "" }} 
                 onChange={(e) => formik.setFieldValue("due_date", new Date(e.target.value))} 
                 isLabelVisible={true}
-                placeholder="Select due date"
+                placeholder="Select due date (optional)"
                 error={errors.due_date}
                 customClass="translate-x-[150px] translate-y-[-228px]"
             />

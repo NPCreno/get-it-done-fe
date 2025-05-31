@@ -3,4 +3,6 @@ export interface IProject {
     description: string;
     due_date: Date;
     tasks: number;
+    project_id?: string;
+    color?: string;
   }

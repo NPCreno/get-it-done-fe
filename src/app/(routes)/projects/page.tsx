@@ -12,8 +12,8 @@ import { createProjectSchema } from "@/app/schemas/createProjectSchema";
 import { Toast } from "@/app/components/toast";
 import ViewProjectModal from "@/app/components/modals/viewProject";
 import { IProject } from "@/app/interface/IProject";
-import { IResponse } from "@/app/interface/IResponse";
 import { CreateProjectDto } from "@/app/interface/dto/create-project-dto";
+import { ICreateProjectResponse } from "@/app/interface/responses/ICreateProjectResponse";
 
 interface projectFormValues {
   title: string;
@@ -94,8 +94,8 @@ export default function ProjectsPage() {
         return
       }
 
-      const response: IResponse = await createProject(values as CreateProjectDto);
-      console.log("response: ", response);
+      const response: ICreateProjectResponse = await createProject(values as CreateProjectDto);
+      console.log("response: ", response)
       if (response.status === "success") {
         setIsAddProjectModalOpen(false);
         setToastMessage({

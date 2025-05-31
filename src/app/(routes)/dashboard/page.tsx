@@ -22,12 +22,30 @@ interface taskFormValues {
   description: string;
   priority: string;
   status: string;
-  due_date?: Date;
+  due_date?: Date | null;
   isRecurring: boolean;
   repeat_every: string;
   repeat_days: string[];
   start_date: Date;
   end_date: Date | null;
+  project: string;
+}
+interface FormErrors {
+  title?: string;
+  description?: string;
+  priority?: string;
+  project?: string;
+  project_id?: string;
+  project_title?: string;
+  project_color?: string;
+  status?: string;
+  due_date?: string;
+  isRecurring?: string;
+  repeat_every?: string;
+  repeat_days?: string[] | string;
+  start_date?: string;
+  end_date?: string;
+  user_id?: string;
 }
 
 export default function DashboardPage() {
@@ -42,7 +60,6 @@ export default function DashboardPage() {
   console.log("showToast: ", showToast);
   console.log("toastMessage: ", toastMessage);
   console.log("isExitingToast: ", isExitingToast);
-
 
   const initialValues = useMemo(() => ({
     title: "",
@@ -59,6 +76,7 @@ export default function DashboardPage() {
     repeat_days: [],
     start_date: new Date(),
     end_date: null,
+    project: "",
   }), [user?.user_id]);
 
   const {
@@ -326,13 +344,23 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <AddTaskModal
-        isOpen={isAddTaskModalOpen}
-        onClose={() => setIsAddTaskModalOpen(false)}
-        formik={{ values, errors, handleChange, setFieldValue }}
-        handleCreateTask={handleSubmit}
-        project={projectOptions}
-      />
+      {isAddTaskModalOpen && (
+        <AddTaskModal
+          isOpen={isAddTaskModalOpen}
+          onClose={() => setIsAddTaskModalOpen(false)}
+          formik={{
+            values: {
+              ...values,
+              start_date: values.start_date ? values.start_date.toISOString() : '',
+            },
+            errors: errors as FormErrors,
+            handleChange,
+            setFieldValue
+          }}
+          handleCreateTask={() => handleSubmit()}
+          project={projectOptions}
+        />
+      )}
 
     </MainLayout>
   );
