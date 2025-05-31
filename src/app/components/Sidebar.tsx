@@ -8,8 +8,7 @@ import SidebarLink from "./sidebarLink";
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } =
-    useFormState();
+  const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } = useFormState();
 
   return (
     <>

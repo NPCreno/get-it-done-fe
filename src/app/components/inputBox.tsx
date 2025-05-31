@@ -24,6 +24,7 @@ interface InputBoxProps {
     project_id?: string;
   }[];  
   customClass?: string;
+  labelCustomClass?: string;
 }
 
 interface CustomDropdownChangeEvent extends React.ChangeEvent<HTMLInputElement>{
@@ -46,10 +47,11 @@ export default function InputBox({
   isLabelVisible = true,
   dropdownptions,
   customClass,
+  labelCustomClass,
 }: InputBoxProps) {
   return (
     <div className="w-full">
-      <div className={`${error ? "shake" : ""}`}>
+      <div className={`${error ? "shake" : ""} ${labelCustomClass}`}>
         {isLabelVisible && (
           <label
             htmlFor={label}
@@ -75,7 +77,7 @@ export default function InputBox({
           className={`rounded-md border w-full h-[40px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
-            disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled:opacity-50 disabled:cursor-not-allowed ${customClass}`}
           placeholder={placeholder}
           disabled={disabled}
         />
@@ -91,7 +93,7 @@ export default function InputBox({
           className={`resize-y rounded-md border w-full min-h-[70px] max-h-[200px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
-            disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled:opacity-50 disabled:cursor-not-allowed ${customClass}`}
           placeholder={placeholder}
           disabled={disabled}
         />

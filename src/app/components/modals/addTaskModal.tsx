@@ -117,15 +117,18 @@ export default function AddTaskModal({
     formik.setFieldValue("end_date", null);
   }
   
+  const height = formik.values.isRecurring ? 755 : 583;
+
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
       onClick={onClose}
     >
       <div
-        className="modal-popup bg-white w-[550px] h-auto rounded-[10px] p-5 shadow-lg flex flex-col gap-5"
-        onClick={(e) => e.stopPropagation()}
-      >
+  className="modal-popup bg-white w-[550px] h-auto rounded-[10px] p-5 shadow-lg flex flex-col gap-5 overflow-hidden transition-all duration-300 ease-in-out"
+  style={{ height }}
+  onClick={(e) => e.stopPropagation()}
+>
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">Add New Task</h1>
@@ -147,6 +150,8 @@ export default function AddTaskModal({
             onChange={(e) => formik.setFieldValue("title", e.target.value)} 
             isLabelVisible={true}
             error={formik.errors.title}
+            customClass='fade-in-delay'
+            labelCustomClass='fade-in-delay'
         />
 
         <InputBox 
@@ -157,9 +162,11 @@ export default function AddTaskModal({
             onChange={(e) => formik.setFieldValue("description", e.target.value)} 
             isLabelVisible={true}
             error={formik.errors.description}
+            customClass='fade-in-delay-2'
+            labelCustomClass='fade-in-delay-2'
         />
         
-        <div className="flex flex-row gap-5">
+        <div className="flex flex-row gap-5 fade-in-delay-2">
             <InputBox 
                 type="dropdown"
                 label="Priority" 
@@ -171,6 +178,7 @@ export default function AddTaskModal({
                 placeholder="Select priority"
                 dropdownptions={priorityOptions}
                 error={formik.errors.priority}
+                labelCustomClass='fade-in-delay-2'
             />
             <InputBox 
                 type="dropdown"
@@ -186,10 +194,11 @@ export default function AddTaskModal({
                 placeholder="Select project (optional)"
                 dropdownptions={projectOptions}
                 error={formik.errors.project}
+                labelCustomClass='fade-in-delay-3'
             />
         </div>
 
-        <div className="flex flex-row gap-5">
+        <div className="flex flex-row gap-5 fade-in-delay-3">
             <InputBox 
                 type="dropdown"
                 label="Status" 
@@ -224,7 +233,8 @@ export default function AddTaskModal({
 
         {formik.values.isRecurring && (
             <>
-                <div className="flex flex-row gap-5">
+            <div className="fade-in">
+                <div className="flex flex-row gap-5 fade-in-delay">
                     <InputBox 
                         type="dropdown"
                         label="Repeat Every" 
@@ -253,28 +263,29 @@ export default function AddTaskModal({
                     />
                 </div>
 
-                <div className="flex flex-row gap-5">
-                <InputBox 
-                    type="date"
-                    label="Start Date" 
-                    value={{name: formik.values.start_date ? formik.values.start_date.toString() : ""}} 
-                    onChange={(e) => {
-                    formik.setFieldValue("start_date", e.target.value ? new Date(e.target.value).toISOString() : null);
-                    }} 
-                    isLabelVisible={true}
-                    placeholder="Select start date"
-                    error={formik.errors.start_date}
-                />
-                <InputBox 
-                    type="date"
-                    label="End Date" 
-                    value={{ name: formik.values.end_date ? formik.values.end_date.toString() : "" }} 
-                    onChange={(e) => formik.setFieldValue("end_date", e.target.value ? new Date(e.target.value).toISOString() : null)} 
-                    isLabelVisible={true}
-                    placeholder="Select end date (optional)"
-                    error={formik.errors.end_date}
-                />
-                </div>
+                <div className="flex flex-row gap-5 fade-in-delay-2">
+                  <InputBox 
+                      type="date"
+                      label="Start Date" 
+                      value={{name: formik.values.start_date ? formik.values.start_date.toString() : ""}} 
+                      onChange={(e) => {
+                      formik.setFieldValue("start_date", e.target.value ? new Date(e.target.value).toISOString() : null);
+                      }} 
+                      isLabelVisible={true}
+                      placeholder="Select start date"
+                      error={formik.errors.start_date}
+                  />
+                  <InputBox 
+                      type="date"
+                      label="End Date" 
+                      value={{ name: formik.values.end_date ? formik.values.end_date.toString() : "" }} 
+                      onChange={(e) => formik.setFieldValue("end_date", e.target.value ? new Date(e.target.value).toISOString() : null)} 
+                      isLabelVisible={true}
+                      placeholder="Select end date (optional)"
+                      error={formik.errors.end_date}
+                  />
+              </div>
+            </div>
             </>
         )}
         
