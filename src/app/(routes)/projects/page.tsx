@@ -5,18 +5,20 @@ import Image from "next/image";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
-import { createProject, getProjectsForUser, getUser, updateUser } from "@/app/api/api";
+import { createProject, getProjectsForUser, getUser } from "@/app/api/api";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
 import { Toast } from "@/app/components/toast";
 import ViewProjectModal from "@/app/components/modals/viewProject";
 import { IProject } from "@/app/interface/IProject";
+import { IResponse } from "@/app/interface/IResponse";
+import { CreateProjectDto } from "@/app/interface/dto/create-project-dto";
 
 interface projectFormValues {
   title: string;
   description: string;
-  due_date?: Date;
+  due_date?: Date | null;
   colorLabel: string;
   color: string;
   user_id: string;
@@ -24,10 +26,12 @@ interface projectFormValues {
 
 export default function ProjectsPage() {
   const { user, setUser } = useFormState();
+  const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [projectData, setProjectData] = useState<IProject[]>([]);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [isViewProjectModalOpen, setIsViewProjectModalOpen] = useState(false);
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  console.log("isAddTaskModalOpen: ", isAddTaskModalOpen);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
@@ -57,7 +61,6 @@ export default function ProjectsPage() {
     handleSubmit,
     handleChange,
     setSubmitting,
-    handleBlur,
   } = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -90,7 +93,9 @@ export default function ProjectsPage() {
         console.error("No User data found");
         return
       }
-      const response: any = await createProject(values);
+
+      const response: IResponse = await createProject(values as CreateProjectDto);
+      console.log("response: ", response);
       if (response.status === "success") {
         setIsAddProjectModalOpen(false);
         setToastMessage({
@@ -136,32 +141,37 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        if (!user) { // If no user, try getting one from cookies
-          const token = getAccessTokenFromCookies();
-          if (!token) {
-            console.error("No access_token found in cookies");
+      if(isDoneFetchingUser) return;
+      else{
+        try {
+          if (!user) { // If no user, try getting one from cookies
+            const token = getAccessTokenFromCookies();
+            if (!token) {
+              console.error("No access_token found in cookies");
+              return;
+            }
+            const parsedUser = parseJwt(token).user;
+            if (!parsedUser || !parsedUser.user_id) {
+              console.error("Failed to parse user or missing user_id in token");
+              return;
+            }
+            setIsDoneFetchingUser(true);
+            setUser(parsedUser);
             return;
           }
-          const parsedUser = parseJwt(token).user;
-          if (!parsedUser || !parsedUser.user_id) {
-            console.error("Failed to parse user or missing user_id in token");
-            return;
+          // Only fetch updated user info if we have a user
+          const response = await getUser(user.user_id);
+          if (response) {
+            setIsDoneFetchingUser(true);
+            setUser(response);
           }
-          setUser(parsedUser);
-          return;
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
         }
-        // Only fetch updated user info if we have a user
-        const response = await getUser(user.user_id);
-        if (response) {
-          setUser(response);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
       }
     };
     fetchUser();
-  }, [isAddProjectModalOpen]);
+  }, [user, setUser, isDoneFetchingUser]);
 
   useEffect(() => {
     if (user) {
@@ -256,7 +266,7 @@ export default function ProjectsPage() {
           isOpen={isAddProjectModalOpen}
           onClose={() => setIsAddProjectModalOpen(false)}
           formik={{ values, errors, handleChange, setFieldValue }}
-          handleCreateProject={handleSubmitForm}
+          handleCreateProject={() => handleSubmit()}
         />
       )}
 

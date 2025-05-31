@@ -6,10 +6,8 @@ import { Button } from "@/app/components/shadcn/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/shadcn/dropdown-menu"
 

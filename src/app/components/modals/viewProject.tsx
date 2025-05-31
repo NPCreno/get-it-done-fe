@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import InputBox from '../inputBox';
-import { CustomDropdownMenu } from '../dropdown';
 import { IProject } from '@/app/interface/IProject';
 import { ITask } from '@/app/interface/ITask';
 

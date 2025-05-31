@@ -26,13 +26,11 @@ interface InputBoxProps {
   customClass?: string;
 }
 
-
-interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
+interface CustomDropdownChangeEvent extends React.ChangeEvent<HTMLInputElement>{
   target: HTMLInputElement & {
     name: string;
     value: string;
     project_id: string;
-    color: string;
   };
 }
 
@@ -135,19 +133,19 @@ export default function InputBox({
         />
       ) : type === "dropdown" ? (
         <CustomDropdownMenu 
-        placeholder={placeholder}
-        options={dropdownptions ?? []} 
-        selectedOption={value} 
-        setSelectedOption={
-          (option: {name: string, color?: string, project_id?: string}) => 
+          placeholder={placeholder}
+          options={dropdownptions ?? []}
+          selectedOption={value}
+          setSelectedOption={(option) =>
             onChange({
               target: {
                 name: option.name,
                 value: option.color ?? '',
                 project_id: option.project_id ?? '',
-              } as any
-            } as CustomChangeEvent)}
-             />
+              },
+            } as CustomDropdownChangeEvent)
+          }
+        />
       ) : (
         <></>
       )}

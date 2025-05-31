@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import InputBox from '../inputBox';
+import { IProject } from '@/app/interface/IProject';
 
 interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   formik: any;
   handleCreateTask: (values: any) => void;
-  project: any;
+  project: IProject[];
 }
 
 interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
@@ -30,6 +31,7 @@ export default function AddTaskModal({
 
   const handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
+      clearAllData();
       onClose();
     }
   };
@@ -57,6 +59,8 @@ export default function AddTaskModal({
     color: option.color,
   }));
 
+  window.addEventListener('keydown', handleEscapeKey);
+
   const clearAllData = () => {
     formik.setFieldValue("title", "");
     formik.setFieldValue("description", "");
@@ -70,8 +74,6 @@ export default function AddTaskModal({
     formik.setFieldValue("start_date", new Date());
     formik.setFieldValue("end_date", new Date());
   }
-
-  window.addEventListener('keydown', handleEscapeKey);
   
   return (
     <div

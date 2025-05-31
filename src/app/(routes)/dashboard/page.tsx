@@ -11,6 +11,7 @@ import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 import { getProjectsForUser, getUser } from "@/app/api/api";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
+import { IProject } from "@/app/interface/IProject";
 
 interface taskFormValues {
   user_id: string;
@@ -32,12 +33,15 @@ interface taskFormValues {
 export default function DashboardPage() {
   const { user, setUser } = useFormState();
   const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-  const [projectOptions, setProjectOptions] = useState<any[]>([]);
+  const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
+  console.log("showToast: ", showToast);
+  console.log("toastMessage: ", toastMessage);
+  console.log("isExitingToast: ", isExitingToast);
 
 
   const initialValues = useMemo(() => ({
@@ -61,12 +65,10 @@ export default function DashboardPage() {
     validateForm,
     setFieldValue,
     values,
-    setErrors,
     errors,
     handleSubmit,
     handleChange,
     setSubmitting,
-    handleBlur,
   } = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -97,6 +99,7 @@ export default function DashboardPage() {
 
   const createTask = async (values: taskFormValues) => {
     try {
+      console.log("values: ", values);
       if(!user){
         console.error("No User data found");
         return
@@ -153,32 +156,37 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        if (!user) { // If no user, try getting one from cookies
-          const token = getAccessTokenFromCookies();
-          if (!token) {
-            console.error("No access_token found in cookies");
+      if(isDoneFetchingUser) return;
+      else{
+        try {
+          if (!user) { // If no user, try getting one from cookies
+            const token = getAccessTokenFromCookies();
+            if (!token) {
+              console.error("No access_token found in cookies");
+              return;
+            }
+            const parsedUser = parseJwt(token).user;
+            if (!parsedUser || !parsedUser.user_id) {
+              console.error("Failed to parse user or missing user_id in token");
+              return;
+            }
+            setIsDoneFetchingUser(true);
+            setUser(parsedUser);
             return;
           }
-          const parsedUser = parseJwt(token).user;
-          if (!parsedUser || !parsedUser.user_id) {
-            console.error("Failed to parse user or missing user_id in token");
-            return;
+          // Only fetch updated user info if we have a user
+          const response = await getUser(user.user_id);
+          if (response) {
+            setIsDoneFetchingUser(true);
+            setUser(response);
           }
-          setUser(parsedUser);
-          return;
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
         }
-        // Only fetch updated user info if we have a user
-        const response = await getUser(user.user_id);
-        if (response) {
-          setUser(response);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
       }
     };
     fetchUser();
-  }, [isAddTaskModalOpen]);
+  }, [user, setUser, isDoneFetchingUser]);
 
   useEffect(() => {
     if (user) {
@@ -322,7 +330,7 @@ export default function DashboardPage() {
         isOpen={isAddTaskModalOpen}
         onClose={() => setIsAddTaskModalOpen(false)}
         formik={{ values, errors, handleChange, setFieldValue }}
-        handleCreateTask={handleSubmitForm}
+        handleCreateTask={handleSubmit}
         project={projectOptions}
       />
 

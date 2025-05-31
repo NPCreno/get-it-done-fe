@@ -25,6 +25,7 @@ export default function ProfileSettingsPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
+  const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const {
     validateForm,
     setFieldValue,
@@ -130,36 +131,37 @@ export default function ProfileSettingsPage() {
   
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        // If no user, try getting one from cookies
-        if (!user) {
-          const token = getAccessTokenFromCookies();
-          if (!token) {
-            console.error("No access_token found in cookies");
+      if(isDoneFetchingUser) return;
+      else{
+        try {
+          if (!user) { // If no user, try getting one from cookies
+            const token = getAccessTokenFromCookies();
+            if (!token) {
+              console.error("No access_token found in cookies");
+              return;
+            }
+            const parsedUser = parseJwt(token).user;
+            if (!parsedUser || !parsedUser.user_id) {
+              console.error("Failed to parse user or missing user_id in token");
+              return;
+            }
+            setIsDoneFetchingUser(true);
+            setUser(parsedUser);
             return;
           }
-  
-          const parsedUser = parseJwt(token).user;
-          if (!parsedUser || !parsedUser.user_id) {
-            console.error("Failed to parse user or missing user_id in token");
-            return;
+          // Only fetch updated user info if we have a user
+          const response = await getUser(user.user_id);
+          if (response) {
+            setIsDoneFetchingUser(true);
+            setUser(response);
           }
-  
-          setUser(parsedUser);
-          return;
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
         }
-       
-        const response = await getUser(user.user_id);  // If user exists, fetch updated info
-        if (response) {
-          setUser(response);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
       }
     };
-  
     fetchUser();
-  }, []);
+  }, [user, setUser, isDoneFetchingUser]);
 
   return (
     <MainLayout>
