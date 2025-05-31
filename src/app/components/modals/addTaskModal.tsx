@@ -5,59 +5,17 @@ import InputBox from '../inputBox';
 interface AddTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  taskTitle: string;
-  setTaskTitle: (taskTitle: string) => void;
-  taskDescription: string;
-  setTaskDescription: (taskDescription: string) => void;
-  priority: string;
-  setPriority: (priority: string) => void;
-  dueDate: Date | null;
-  setDueDate: (dueDate: Date) => void;
-  errors: any;
-  handleCreateTask: () => void;
+  formik: any;
+  handleCreateTask: (values: any) => void;
   projectOptions: any;
-  setProject: (project: string) => void;
-  status: string;
-  setStatus: (status: string) => void;
-  isRecurring: boolean;
-  setIsRecurring: (isRecurring: boolean) => void;
-  repeatEvery: string;
-  setRepeatEvery: (repeatEvery: string) => void;
-  repeatDays: string[];
-  setRepeatDays: (repeatDays: string[]) => void;
-  startDate: Date | null;
-  setStartDate: (startDate: Date) => void;
-  endDate: Date | null;
-  setEndDate: (endDate: Date) => void;
 }
 
 export default function AddTaskModal({ 
   isOpen, 
   onClose, 
-  taskTitle, 
-  setTaskTitle, 
-  taskDescription, 
-  setTaskDescription, 
-  dueDate, 
-  setDueDate, 
-  errors,
+  formik,
   handleCreateTask,
-  priority,
-  setPriority,
-  projectOptions,
-  setProject,
-  status,
-  setStatus,
-  isRecurring,
-  setIsRecurring,
-  repeatEvery,
-  setRepeatEvery,
-  repeatDays,
-  setRepeatDays,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
+  projectOptions
 }: AddTaskModalProps) {
   if (!isOpen) return null;
   
@@ -85,17 +43,17 @@ export default function AddTaskModal({
   ];
 
   const clearAllData = () => {
-    setTaskTitle("");
-    setTaskDescription("");
-    setPriority("");
-    setProject("");
-    setStatus("");
-    setDueDate(new Date()); 
-    setIsRecurring(false);
-    setRepeatEvery("");
-    setRepeatDays([]);
-    setStartDate(new Date());
-    setEndDate(new Date());
+    formik.setFieldValue("title", "");
+    formik.setFieldValue("description", "");
+    formik.setFieldValue("priority", "");
+    formik.setFieldValue("project", "");
+    formik.setFieldValue("status", "");
+    formik.setFieldValue("due_date", new Date());
+    formik.setFieldValue("isRecurring", false);
+    formik.setFieldValue("repeat_every", "");
+    formik.setFieldValue("repeat_days", []);
+    formik.setFieldValue("start_date", new Date());
+    formik.setFieldValue("end_date", new Date());
   }
 
   window.addEventListener('keydown', handleEscapeKey);
@@ -121,46 +79,46 @@ export default function AddTaskModal({
             type="text"
             label="Task Title" 
             placeholder="Enter Task title" 
-            value={{name: taskTitle}} 
-            onChange={(e) => setTaskTitle(e.target.value)} 
+            value={{name: formik.values.title}} 
+            onChange={(e) => formik.setFieldValue("title", e.target.value)} 
             isLabelVisible={true}
-            error={errors.title}
+            error={formik.errors.title}
         />
 
         <InputBox 
             type="textarea"
             label="Description" 
             placeholder="Enter description (optional)" 
-            value={{name: taskDescription}} 
-            onChange={(e) => setTaskDescription(e.target.value)} 
+            value={{name: formik.values.description}} 
+            onChange={(e) => formik.setFieldValue("description", e.target.value)} 
             isLabelVisible={true}
-            error={errors.description}
+            error={formik.errors.description}
         />
         
         <div className="flex flex-row gap-5">
             <InputBox 
                 type="dropdown"
                 label="Priority" 
-                value={{name: priority}} 
+                value={{name: formik.values.priority}} 
                 onChange={(e) => {
-                  setPriority(e.target.name);
+                  formik.setFieldValue("priority", e.target.name);
                 }} 
                 isLabelVisible={true}
                 placeholder="Select priority"
                 dropdownptions={priorityOptions}
-                error={errors.priority}
+                error={formik.errors.priority}
             />
             <InputBox 
                 type="dropdown"
                 label="Project" 
                 value={{name: "Project"}} 
                 onChange={(e) => {
-                  setProject(e.target.name);
+                  formik.setFieldValue("project", e.target.name);
                 }} 
                 isLabelVisible={true}
                 placeholder="Select project"
                 dropdownptions={projectOptions}
-                error={errors.project}
+                error={formik.errors.project}
             />
         </div>
 
@@ -168,59 +126,59 @@ export default function AddTaskModal({
             <InputBox 
                 type="dropdown"
                 label="Status" 
-                value={{name: status}} 
+                value={{name: formik.values.status}} 
                 onChange={(e) => {
-                  setStatus(e.target.name);
+                  formik.setFieldValue("status", e.target.name);
                 }} 
                 isLabelVisible={true}
                 placeholder="Select status"
                 dropdownptions={statusOptions}
-                error={errors.status}
+                error={formik.errors.status}
             />
             <InputBox 
                 type="datewithtime"
                 label="Due Date" 
-                value={{ name: dueDate ? dueDate.toISOString() : "" }} 
-                onChange={(e) => setDueDate(new Date(e.target.value))} 
+                value={{ name: formik.values.due_date ? formik.values.due_date.toISOString() : "" }} 
+                onChange={(e) => formik.setFieldValue("due_date", new Date(e.target.value))} 
                 isLabelVisible={true}
                 placeholder="Select due date"
-                error={errors.due_date}
+                error={formik.errors.due_date}
                 customClass="translate-x-[150px] translate-y-[-170px]"
             />
         </div>
 
         <div className="flex flex-row w-full justify-center">
             <button className={`flex justify-center items-center text-primary-default 
-                font-lato font-bold text-[13px] p-[10px] ${isRecurring ? "bg-primary-default text-white rounded-sm" : ""}`} 
-                onClick={() => setIsRecurring(!isRecurring)}>
+                font-lato font-bold text-[13px] p-[10px] ${formik.values.isRecurring ? "bg-primary-default text-white rounded-sm" : ""}`} 
+                onClick={() => formik.setFieldValue("isRecurring", !formik.values.isRecurring)}>
                 Recurring
             </button>
         </div>
 
-        {isRecurring && (
+        {formik.values.isRecurring && (
             <>
                 <div className="flex flex-row gap-5">
                     <InputBox 
                         type="dropdown"
                         label="Repeat Every" 
-                        value={{name: repeatEvery}} 
+                        value={{name: formik.values.repeat_every}} 
                         onChange={(e) => {
-                        setRepeatEvery(e.target.name);
+                        formik.setFieldValue("repeat_every", e.target.name);
                         }} 
                         isLabelVisible={true}
                         placeholder="Select repeat every"
                         dropdownptions={repeatEveryOptions}
-                        error={errors.repeat_every}
+                        error={formik.errors.repeat_every}
                     />
                     <InputBox 
                         type="weekdayselector"
                         label="Repeat Days" 
-                        value={{ name: repeatDays.join(",") }} 
-                        onChange={(e) => setRepeatDays(e.target.name.split(","))} 
+                        value={{ name: formik.values.repeat_days.join(",") }} 
+                        onChange={(e) => formik.setFieldValue("repeat_days", e.target.name.split(","))} 
                         isLabelVisible={true}
                         placeholder="Select repeat days"
-                        error={errors.repeat_days}
-                        disabled={repeatEvery !== "Week"}
+                        error={formik.errors.repeat_days}
+                        disabled={formik.values.repeat_every !== "Week"}
                     />
                 </div>
 
@@ -228,22 +186,22 @@ export default function AddTaskModal({
                 <InputBox 
                     type="date"
                     label="Start Date" 
-                    value={{name: startDate ? startDate.toISOString() : ""}} 
+                    value={{name: formik.values.start_date ? formik.values.start_date.toISOString() : ""}} 
                     onChange={(e) => {
-                    setStartDate(new Date(e.target.value));
+                    formik.setFieldValue("start_date", new Date(e.target.value));
                     }} 
                     isLabelVisible={true}
                     placeholder="Select start date"
-                    error={errors.start_date}
+                    error={formik.errors.start_date}
                 />
                 <InputBox 
                     type="date"
                     label="End Date" 
-                    value={{ name: endDate ? endDate.toISOString() : "" }} 
-                    onChange={(e) => setEndDate(new Date(e.target.value))} 
+                    value={{ name: formik.values.end_date ? formik.values.end_date.toISOString() : "" }} 
+                    onChange={(e) => formik.setFieldValue("end_date", new Date(e.target.value))} 
                     isLabelVisible={true}
                     placeholder="Select end date (optional)"
-                    error={errors.end_date}
+                    error={formik.errors.end_date}
                 />
                 </div>
             </>
@@ -255,7 +213,7 @@ export default function AddTaskModal({
                 <button className="border border-primary-200 rounded-[5px] flex justify-center items-center text-primary-default 
                 font-lato text-xs p-[10px]" onClick={onClose}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
-                text-xs p-[10px]" onClick={handleCreateTask}>Create</button>
+                text-xs p-[10px]" onClick={() => handleCreateTask(formik.values)}>Create</button>
             </div>
         </div>
       </div>

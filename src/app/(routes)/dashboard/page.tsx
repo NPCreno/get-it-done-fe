@@ -28,17 +28,7 @@ interface taskFormValues {
 export default function DashboardPage() {
   const { user, setUser } = useFormState();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDescription, setTaskDescription] = useState("");
-  const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [priority, setPriority] = useState("");
   const [projectOptions, setProjectOptions] = useState([]);
-  const [project, setProject] = useState("");
-  const [status, setStatus] = useState("");
-  const [repeatEvery, setRepeatEvery] = useState("");
-  const [repeatDays, setRepeatDays] = useState<string[]>([]);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
 
   // Toast
   const [showToast, setShowToast] = useState(false);
@@ -154,10 +144,6 @@ export default function DashboardPage() {
     { task: "Review FE-003", tag: "Review", status: "pending" },
     { task: "Start FE-004", tag: "Development", status: "good" },
   ];
-
-  const handleCreateTask = () => {
-    console.log("Creating task...");
-  };
 
   return (
     <MainLayout>
@@ -286,30 +272,9 @@ export default function DashboardPage() {
       <AddTaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
-        taskTitle={taskTitle}
-        setTaskTitle={setTaskTitle}
-        taskDescription={taskDescription}
-        setTaskDescription={setTaskDescription}
-        dueDate={dueDate}
-        setDueDate={setDueDate}
-        priority={priority}
-        setPriority={setPriority}
-        errors={errors}
-        handleCreateTask={handleCreateTask}
+        formik={{ values, errors, handleChange, setFieldValue }}
+        handleCreateTask={handleSubmitForm}
         projectOptions={projectOptions}
-        setProject={setProject}
-        status={status}
-        setStatus={setStatus}
-        isRecurring={isRecurring}
-        setIsRecurring={setIsRecurring}
-        repeatEvery={repeatEvery}
-        setRepeatEvery={setRepeatEvery}
-        repeatDays={repeatDays}
-        setRepeatDays={setRepeatDays}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
       />
 
     </MainLayout>
