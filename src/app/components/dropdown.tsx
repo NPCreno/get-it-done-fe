@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import { Button } from "@/app/components/shadcn/button"
 import {
   DropdownMenu,
@@ -55,7 +54,10 @@ export function CustomDropdownMenu({
             ) : (
               <span className="text-sm font-normal font-lato text-text">{placeholder}</span>
             )}
-            <Image src="/svgs/dropdown.svg" alt="dropdown" width={20} height={10}/>
+            <svg width="20" height="10" viewBox="0 0 22 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 0.5L10.2683 10.5L21 0.5" stroke="#333333"/>
+            </svg>
+
           </div>
         </Button>
       </DropdownMenuTrigger>

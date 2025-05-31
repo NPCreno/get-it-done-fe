@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import InputBox from '../inputBox';
 
 interface AddProjectModalProps {
@@ -76,7 +75,11 @@ export default function AddProjectModal({
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">Create New Project</h1>
-                <Image src="/svgs/close.svg" alt="close" width={20} height={20} onClick={onClose} className="cursor-pointer"/>
+                <button className="cursor-pointer" onClick={onClose}>
+                  <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
             </div>
             <h2 className="text-[#676767] text-sm font-lato">Add a new project to organize your tasks.</h2>
         </div>

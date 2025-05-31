@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useState } from "react";
 
 interface ToastProps {
@@ -28,14 +27,9 @@ export function Toast({
       <div className="flex flex-row justify-between">
         <span className={`font-lato text-base font-bold ${className}`}>{title}</span>
         {showExit && (
-          <Image
-            src="/svgs/close.svg"
-            alt="close"
-            width={16}
-            height={16}
-            className="cursor-pointer"
-            onClick={() => onClose?.()}
-          />
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         )}
       </div>
       <span className="font-lato text-base font-normal text-text">{description}</span>

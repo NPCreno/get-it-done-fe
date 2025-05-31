@@ -1,7 +1,6 @@
 "use client"
 import MainLayout from "@/app/components/MainLayout";
 import ProjectCard from "../../components/projectCard";
-import Image from "next/image";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
@@ -226,13 +225,10 @@ export default function ProjectsPage() {
                   clearValueAndErrors();
                 }}
               >
-                <Image 
-                src="/svgs/add-outline-white.svg" 
-                alt="add task" 
-                width={25} 
-                height={25}
-                className="mt-[2px]"
-                />
+                <svg width="25" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+
                 New Project
               </button>
             </div>

@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import InputBox from '../inputBox';
 import { IProject } from '@/app/interface/IProject';
 
@@ -130,7 +129,12 @@ export default function AddTaskModal({
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">Add New Task</h1>
-                <Image src="/svgs/close.svg" alt="close" width={20} height={20} onClick={onClose} className="cursor-pointer"/>
+                <button className="cursor-pointer" onClick={onClose}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+
+                </button>
             </div>
             <h2 className="text-[#676767] text-sm font-lato">Create a new task to track your work</h2>
         </div>
@@ -278,9 +282,9 @@ export default function AddTaskModal({
             <div className="w-full"></div>
             <div className="flex flex-row gap-[10px]">
                 <button className="border border-primary-200 rounded-[5px] flex justify-center items-center text-primary-default 
-                font-lato text-xs p-[10px]" onClick={onClose}>Cancel</button>
+                font-lato text-[13px] font-bold p-[10px]" onClick={onClose}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
-                text-xs p-[10px]" onClick={() => handleCreateTask(formik.values)}>Create</button>
+                text-[13px] font-bold p-[10px]" onClick={() => handleCreateTask(formik.values)}>Create</button>
             </div>
         </div>
       </div>

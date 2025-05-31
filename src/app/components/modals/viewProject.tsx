@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 import { IProject } from '@/app/interface/IProject';
 import { ITask } from '@/app/interface/ITask';
 
@@ -134,7 +133,11 @@ export default function ViewProjectModal({
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">{project.title}</h1>
-                <Image src="/svgs/close.svg" alt="close" width={20} height={20} onClick={onClose} className="cursor-pointer"/>
+                <button className="cursor-pointer" onClick={onClose}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
             </div>
             <h2 className="text-[#676767] text-sm font-lato">{project.description ? project.description : "View and manage tasks in this project"}</h2>
         </div>
@@ -148,7 +151,10 @@ export default function ViewProjectModal({
         <div className="flex flex-row justify-between w-full  items-center">
               <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-xs p-[10px]" onClick={handleCreateTask}>
-                  <Image src="/svgs/add-outline-white.svg" alt="add-outline-white" width={20} height={20}/>
+                  <svg width="20" height="20" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+
                   New Task
               </button>
               
@@ -207,7 +213,11 @@ const TaskCard = (task: ITask) => {
           </div>
         ) : (
           <div className="h-full flex items-center cursor-pointer" onClick={() => handleRevertStatus(task.task_id)}>
-            <Image src="/svgs/refresh-circle-outline.svg" alt="refresh-outline" width={20} height={20}/>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 1C5.47917 1 1 5.47917 1 11C1 16.5208 5.47917 21 11 21C16.5208 21 21 16.5208 21 11C21 5.47917 16.5208 1 11 1Z" stroke="#FED580" stroke-width="1.5" stroke-miterlimit="10"/>
+            <path d="M10.9998 5.42706L13.0831 7.5104L10.9998 9.59373" stroke="#FED580" stroke-width="1.3125" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12.6663 7.71771C12.6663 7.71771 13.3007 7.40521 10.9997 7.40521C10.1756 7.40521 9.37001 7.64958 8.6848 8.10742C7.9996 8.56526 7.46554 9.21601 7.15018 9.97737C6.83481 10.7387 6.7523 11.5765 6.91307 12.3848C7.07384 13.193 7.47068 13.9354 8.0534 14.5182C8.63612 15.1009 9.37855 15.4977 10.1868 15.6585C10.9951 15.8193 11.8328 15.7367 12.5942 15.4214C13.3556 15.106 14.0063 14.572 14.4641 13.8868C14.922 13.2016 15.1663 12.396 15.1663 11.5719" stroke="#FED580" stroke-width="1.3125" stroke-miterlimit="10" stroke-linecap="round"/>
+            </svg>
           </div>
         )}
 
