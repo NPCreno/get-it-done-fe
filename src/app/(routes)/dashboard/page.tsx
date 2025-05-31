@@ -81,6 +81,7 @@ export default function DashboardPage() {
   const {
     validateForm,
     setFieldValue,
+    setFieldError,
     values,
     errors,
     handleSubmit,
@@ -349,7 +350,8 @@ export default function DashboardPage() {
             },
             errors: errors as FormErrors,
             handleChange,
-            setFieldValue
+            setFieldValue,
+            setFieldError,
           }}
           handleCreateTask={() => handleSubmit()}
           project={projectOptions}

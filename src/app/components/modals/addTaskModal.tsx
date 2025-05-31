@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import InputBox from '../inputBox';
 import { IProject } from '@/app/interface/IProject';
 
@@ -51,6 +51,7 @@ interface FormikType {
   errors: FormErrors;
   setFieldValue: (field: keyof FormValues, value: FormValues[keyof FormValues]) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  setFieldError: (field: keyof FormErrors, message: string) => void;
 }
 
 interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
@@ -69,6 +70,8 @@ export default function AddTaskModal({
   handleCreateTask,
   project
 }: AddTaskModalProps) {
+  const [height, setHeight] = useState(0);
+  const ref = useRef<HTMLDivElement>(null); 
   if (!isOpen) return null;
 
   const handleEscapeKey = (event: KeyboardEvent) => {
@@ -115,24 +118,47 @@ export default function AddTaskModal({
     formik.setFieldValue("repeat_days", []);
     formik.setFieldValue("start_date", null);
     formik.setFieldValue("end_date", null);
+    formik.setFieldError("title", "");
+    formik.setFieldError("description", "");
+    formik.setFieldError("priority", "");
+    formik.setFieldError("project", "");
+    formik.setFieldError("status", "");
+    formik.setFieldError("due_date", "");
   }
-  
-  const height = formik.values.isRecurring ? 755 : 583;
+  // const height = formik.values.isRecurring ? 755 : 583;
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (ref.current) {
+        setHeight(ref.current.scrollHeight + 40);
+      }
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [formik.values.isRecurring, formik.errors]); 
 
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
-      onClick={onClose}
+      onClick={() => {
+        clearAllData();
+        onClose();
+      }}
     >
       <div
-  className="modal-popup bg-white w-[550px] h-auto rounded-[10px] p-5 shadow-lg flex flex-col gap-5 overflow-hidden transition-all duration-300 ease-in-out"
-  style={{ height }}
-  onClick={(e) => e.stopPropagation()}
->
+          className="modal-popup bg-white w-[550px] rounded-[10px] p-5 shadow-lg overflow-hidden transition-all duration-300 ease-in-out"
+          onClick={(e) => e.stopPropagation()}
+          style={{ height }}
+        >
+        <div ref={ref} className="h-auto flex flex-col gap-5 ">
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">Add New Task</h1>
-                <button className="cursor-pointer" onClick={onClose}>
+                <button className="cursor-pointer" 
+                onClick={() => {
+                  clearAllData();
+                  onClose();
+                }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -293,11 +319,16 @@ export default function AddTaskModal({
             <div className="w-full"></div>
             <div className="flex flex-row gap-[10px]">
                 <button className="border border-primary-200 rounded-[5px] flex justify-center items-center text-primary-default 
-                font-lato text-[13px] font-bold p-[10px]" onClick={onClose}>Cancel</button>
+                font-lato text-[13px] font-bold p-[10px]" 
+                onClick={() => {
+                  clearAllData();
+                  onClose();
+                }}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-[13px] font-bold p-[10px]" onClick={() => handleCreateTask(formik.values)}>Create</button>
             </div>
         </div>
+      </div>
       </div>
     </div>
   );
