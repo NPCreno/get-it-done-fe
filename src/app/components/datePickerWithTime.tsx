@@ -56,7 +56,7 @@ export function DatePickerWithTime({ date, setDate, customClass, placeholder }: 
             !date && "text-muted-foreground"
           )}
         >
-          {date ? format(date, "PPP") : <span className="text-border text-text">{placeholder}</span>}
+          {date ? format(date, "PPP • HH:mm") : <span className="text-border text-text">{placeholder}</span>}
           <Image src="/svgs/calendar-outline.svg" alt="calendar" width={20} height={20} />
         </Button>
       </PopoverTrigger>
