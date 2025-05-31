@@ -109,15 +109,17 @@ export default function AddProjectModal({
                 placeholder="Select color"
                 dropdownptions={dropdownOptions}
                 error={errors.color}
+                customClass="translate-x-[150px] translate-y-[-228px]"
             />
             <InputBox 
-                type="date"
+                type="datewithtime"
                 label="Due Date" 
                 value={{ name: dueDate ? dueDate.toISOString() : "" }} 
                 onChange={(e) => setDueDate(new Date(e.target.value))} 
                 isLabelVisible={true}
                 placeholder="Select due date"
                 error={errors.due_date}
+                customClass="translate-x-[150px] translate-y-[-228px]"
             />
         </div>
         <div className="flex flex-row justify-end gap-4 w-full">

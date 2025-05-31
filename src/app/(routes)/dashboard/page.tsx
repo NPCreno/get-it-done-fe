@@ -1,14 +1,164 @@
+"use client";
 import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
 import TaskItem from "../../components/taskItem";
 import Image from "next/image";
+import AddTaskModal from "@/app/components/modals/addTaskModal";
+import { useMemo, useState } from "react";
+import { useFormState } from "@/app/context/FormProvider";
+import { FormikErrors, useFormik } from "formik";
+import { createTaskSchema } from "@/app/schemas/createTaskSchema";
+
+interface taskFormValues {
+  user_id: string;
+  project_id: string;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  due_date?: Date;
+  isRecurring: boolean;
+  repeat_every: string;
+  repeat_days: string[];
+  start_date: Date;
+  end_date: Date | null;
+}
+
 export default function DashboardPage() {
+  const { user, setUser } = useFormState();
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [priority, setPriority] = useState("");
+  const [projectOptions, setProjectOptions] = useState([]);
+  const [project, setProject] = useState("");
+  const [status, setStatus] = useState("");
+  const [repeatEvery, setRepeatEvery] = useState("");
+  const [repeatDays, setRepeatDays] = useState<string[]>([]);
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  // Toast
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
+  const [isExitingToast, setIsExitingToast] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(false);
+
+
+  const initialValues = useMemo(() => ({
+    title: "",
+    description: "",
+    due_date: null,
+    user_id: user?.user_id ?? "",
+    project_id: "",
+    priority: "",
+    status: "",
+    isRecurring: false,
+    repeat_every: "",
+    repeat_days: [],
+    start_date: new Date(),
+    end_date: null,
+  }), [user?.user_id]);
+
+  const {
+    validateForm,
+    setFieldValue,
+    values,
+    setErrors,
+    errors,
+    handleSubmit,
+    handleChange,
+    setSubmitting,
+    handleBlur,
+  } = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    validationSchema: createTaskSchema,
+    validateOnChange: false, // Disable real-time validation
+    validateOnBlur: false,
+    onSubmit: async (values) => {
+      if (!user) return;
+      const withUser = {
+        ...values,
+        user_id: user.user_id,
+        due_date: values.due_date || undefined
+      };
+      handleSubmitForm(withUser);
+    },
+  });
+
+  const handleSubmitForm = async (values: taskFormValues) => {
+    const validationErrors: FormikErrors<typeof values> = await validateForm();
+
+    if (Object.keys(validationErrors).length === 0) {
+      await createTask(values)
+    }
+    setSubmitting(false);
+  };
+
+
+  const createTask = async (values: taskFormValues) => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
+      // const response: any = await createTaskApi(values);
+      // if (response.status === "success") {
+      //   setIsTaskModalOpen(false);
+      //   setToastMessage({
+      //     title: "Task Created",
+      //     description: "Your new task has been created successfully",
+      //     className: "text-green-600",
+      //   });
+      
+      //   setShowToast(true);
+      //   setIsExitingToast(false);
+      
+      //   setTimeout(() => {
+      //     setIsExitingToast(true); // Start exit animation
+      //     setTimeout(() => {
+      //       setShowToast(false); // Remove after animation completes
+      //     }, 400); // Must match the toastOut animation duration
+      //   }, 10000); // Toast display duration
+      // }
+    } catch (error) {
+      if (error instanceof Error) {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: error.message,
+          className: "text-error-default",
+        });
+      } else {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: "An unknown error occurred",
+          className: "text-error-default",
+        });
+      }
+      setShowToast(true);
+      setIsExitingToast(false);
+      setTimeout(() => {
+        setIsExitingToast(true); // Start exit animation
+        setTimeout(() => {
+          setShowToast(false); // Remove after animation completes
+        }, 400); // Must match the toastOut animation duration
+      }, 10000); // Toast display duration
+    }
+  };
+  
   const tasks = [
     { task: "Finish FE-002", tag: "Design", status: "good" },
     { task: "Review FE-003", tag: "Review", status: "pending" },
     { task: "Start FE-004", tag: "Development", status: "good" },
   ];
+
+  const handleCreateTask = () => {
+    console.log("Creating task...");
+  };
+
   return (
     <MainLayout>
       <div className="main flex justify-center w-full gap-5  h-full">
@@ -103,7 +253,8 @@ export default function DashboardPage() {
               </h1>
               <button
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
-        hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                  hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                onClick={() => setIsTaskModalOpen(true)}
               >
                 <Image 
                 src="/svgs/add-outline-white.svg" 
@@ -131,6 +282,36 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <AddTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        taskTitle={taskTitle}
+        setTaskTitle={setTaskTitle}
+        taskDescription={taskDescription}
+        setTaskDescription={setTaskDescription}
+        dueDate={dueDate}
+        setDueDate={setDueDate}
+        priority={priority}
+        setPriority={setPriority}
+        errors={errors}
+        handleCreateTask={handleCreateTask}
+        projectOptions={projectOptions}
+        setProject={setProject}
+        status={status}
+        setStatus={setStatus}
+        isRecurring={isRecurring}
+        setIsRecurring={setIsRecurring}
+        repeatEvery={repeatEvery}
+        setRepeatEvery={setRepeatEvery}
+        repeatDays={repeatDays}
+        setRepeatDays={setRepeatDays}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+      />
+
     </MainLayout>
   );
 }

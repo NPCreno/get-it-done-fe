@@ -1,7 +1,8 @@
 import React from "react";
 import { DatePicker } from "./datePicker";
 import { CustomDropdownMenu } from "./dropdown";
-import { DatePickerv2 } from "./datePickerv2";
+import { DatePickerWithTime } from "./datePickerWithTime";
+import WeekdaySelector from "./weekdaySelector";
 interface InputBoxProps {
   label: string;
   placeholder: string;
@@ -10,7 +11,7 @@ interface InputBoxProps {
     color?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: "text" | "textarea" | "date" | "dropdown";
+  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime";
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -19,6 +20,7 @@ interface InputBoxProps {
     name: string;
     color?: string;
   }[];  
+  customClass?: string;
 }
 
 export default function InputBox({
@@ -32,6 +34,7 @@ export default function InputBox({
   onBlur,
   isLabelVisible = true,
   dropdownptions,
+  customClass,
 }: InputBoxProps) {
   return (
     <div className="w-full">
@@ -82,7 +85,7 @@ export default function InputBox({
           disabled={disabled}
         />
       ) : type === "date" ? (
-        <DatePickerv2
+        <DatePicker
           date={value.name ? new Date(value.name) : undefined}
           setDate={(date: Date) => {
             const syntheticEvent = {
@@ -90,9 +93,36 @@ export default function InputBox({
             } as React.ChangeEvent<HTMLInputElement>;
             onChange(syntheticEvent);
           }}
+          placeholder={placeholder}
+          customClass={customClass}
+          
+        />
+      ) : type === "datewithtime" ? (
+        <DatePickerWithTime
+          date={value.name ? new Date(value.name) : undefined}
+          setDate={(date: Date) => {
+            const syntheticEvent = {
+              target: { value: date.toISOString() },
+            } as React.ChangeEvent<HTMLInputElement>;
+            onChange(syntheticEvent);
+          }}
+          placeholder={placeholder}
+          customClass={customClass}
+        />
+      ) : type === "weekdayselector" ? (
+        <WeekdaySelector
+          onChange={(days: string[]) => {
+            const syntheticEvent = {
+              target: { name: days.join(","), value: days.join(",") },
+            } as React.ChangeEvent<HTMLInputElement>;
+            onChange(syntheticEvent);
+          }}
+          defaultSelected={value.name ? value.name.split(",") : []}
+          isDisabled={disabled}
         />
       ) : type === "dropdown" ? (
         <CustomDropdownMenu 
+        placeholder={placeholder}
         options={dropdownptions ?? []} 
         selectedOption={value} 
         setSelectedOption={

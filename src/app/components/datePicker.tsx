@@ -17,9 +17,11 @@ import Image from "next/image"
 interface DatePickerProps {
   date?: Date
   setDate: (date: Date) => void
+  customClass?: string
+  placeholder?: string
 }
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({ date, setDate, customClass, placeholder }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
   const handleDateSelect = (day: Date | undefined) => {
@@ -39,11 +41,11 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
             !date && "text-muted-foreground"
           )}
         >
-          {date ? format(date, "PPP") : <span className="text-border text-text">Pick a date</span>}
+          {date ? format(date, "PPP") : <span className="text-border text-text">{placeholder}</span>}
           <Image src="/svgs/calendar-outline.svg" alt="calendar" width={20} height={20} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className={`w-auto p-0 ${customClass}`}>
         <Calendar
           mode="single"
           selected={date}

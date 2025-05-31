@@ -23,12 +23,14 @@ interface CustomDropdownMenuProps {
     color?: string;
   }
   setSelectedOption: (option: {name: string, color?: string}) => void
+  placeholder: string;
 }
 
 export function CustomDropdownMenu({
   options,
   selectedOption,
   setSelectedOption,
+  placeholder,
 }: CustomDropdownMenuProps) {
 
   const currentSelectedColor = options.find(option => option.name === selectedOption.name)?.color;
@@ -50,13 +52,13 @@ export function CustomDropdownMenu({
                 <span className="text-sm font-normal font-lato text-text">{selectedOption.name}</span>
               </div>
             ) : (
-              <span className="text-sm font-normal font-lato text-text">Select color</span>
+              <span className="text-sm font-normal font-lato text-text">{placeholder}</span>
             )}
             <Image src="/svgs/dropdown.svg" alt="dropdown" width={20} height={10}/>
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[220px] max-h-[286px] overflow-y-auto absolute" side="bottom" align="start" sideOffset={4}>
+      <DropdownMenuContent className="min-w-[244px] max-h-[286px] overflow-y-auto absolute" side="bottom" align="start" sideOffset={4}>
         <DropdownMenuRadioGroup
           value={selectedOption.name}
           onValueChange={(value) => {

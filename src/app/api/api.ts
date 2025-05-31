@@ -1,4 +1,5 @@
 import { CreateProjectDto } from "../interface/dto/create-project-dto";
+import { CreateTaskDto } from "../interface/dto/create-task-dto";
 import { CreateUserDto } from "../interface/dto/create-user-dto";
 import { UpdateUserDto } from "../interface/dto/update-user-dto";
 
@@ -152,6 +153,32 @@ export const createProject = async (payload: CreateProjectDto) => {
   try {
     const token = getAccessToken();
     const response = await fetch(`${apiUrl}/projects/create`, 
+        { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error creating user:', err);
+    throw err;
+  }
+};
+
+export const createTaskApi = async (payload: CreateTaskDto) => {
+  try {
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}/tasks/create`, 
         { 
       method: 'POST',
       headers: {
