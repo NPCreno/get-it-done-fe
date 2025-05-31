@@ -255,23 +255,8 @@ export default function ProjectsPage() {
           errors={errors}
           isOpen={isAddProjectModalOpen}
           onClose={() => setIsAddProjectModalOpen(false)}
-          projectTitle={values.title}
-          setProjectTitle={(projectTitle: string) => setFieldValue("title", projectTitle)}
-          projectDescription={values.description}
-          setProjectDescription={(projectDescription: string) => setFieldValue("description", projectDescription)}
-          dueDate={values.due_date ?? null}
-          setDueDate={(dueDate: Date) => setFieldValue("due_date", dueDate)}
-          color={values.color}
-          setColor={(color: string) => setFieldValue("color", color)}
-          colorLabel={values.colorLabel}
-          setColorLabel={(colorLabel: string) => setFieldValue("colorLabel", colorLabel)}
-          handleCreateProject={() => {
-            const formValues = {
-              ...values,
-              due_date: values.due_date || undefined
-            };
-            handleSubmitForm(formValues);
-          }}
+          formik={{ values, errors, handleChange, setFieldValue }}
+          handleCreateProject={handleSubmitForm}
         />
       )}
 

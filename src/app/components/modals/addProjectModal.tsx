@@ -6,33 +6,15 @@ import { CustomDropdownMenu } from '../dropdown';
 interface AddProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
-  projectTitle: string;
-  setProjectTitle: (projectTitle: string) => void;
-  projectDescription: string;
-  setProjectDescription: (projectDescription: string) => void;
-  dueDate: Date | null;
-  setDueDate: (dueDate: Date) => void;
-  color: string;
-  setColor: (color: string) => void;
-  colorLabel: string;
-  setColorLabel: (colorLabel: string) => void;
   errors: any;
-  handleCreateProject: () => void;
+  formik: any;
+  handleCreateProject: (values: any) => void;
 }
 
 export default function AddProjectModal({ 
   isOpen, 
   onClose, 
-  projectTitle, 
-  setProjectTitle, 
-  projectDescription, 
-  setProjectDescription, 
-  dueDate, 
-  setDueDate, 
-  color, 
-  setColor, 
-  colorLabel, 
-  setColorLabel,
+  formik,
   errors,
   handleCreateProject,
 }: AddProjectModalProps) {
@@ -80,8 +62,8 @@ export default function AddProjectModal({
             type="text"
             label="Project Title" 
             placeholder="Enter Project title" 
-            value={{name: projectTitle}} 
-            onChange={(e) => setProjectTitle(e.target.value)} 
+            value={{name: formik.values.title}} 
+            onChange={(e) => formik.setFieldValue("title", e.target.value)} 
             isLabelVisible={true}
             error={errors.title}
         />
@@ -90,8 +72,8 @@ export default function AddProjectModal({
             type="textarea"
             label="Description" 
             placeholder="Enter description (optional)" 
-            value={{name: projectDescription}} 
-            onChange={(e) => setProjectDescription(e.target.value)} 
+            value={{name: formik.values.description}} 
+            onChange={(e) => formik.setFieldValue("description", e.target.value)} 
             isLabelVisible={true}
             error={errors.description}
         />
@@ -100,10 +82,10 @@ export default function AddProjectModal({
             <InputBox 
                 type="dropdown"
                 label="Color" 
-                value={{name: colorLabel, color: color}} 
+                value={{name: formik.values.colorLabel, color: formik.values.color}} 
                 onChange={(e) => {
-                  setColor(e.target.value);
-                  setColorLabel(e.target.name);
+                  formik.setFieldValue("color", e.target.value);
+                  formik.setFieldValue("colorLabel", e.target.name);
                 }} 
                 isLabelVisible={true}
                 placeholder="Select color"
@@ -114,8 +96,8 @@ export default function AddProjectModal({
             <InputBox 
                 type="datewithtime"
                 label="Due Date" 
-                value={{ name: dueDate ? dueDate.toISOString() : "" }} 
-                onChange={(e) => setDueDate(new Date(e.target.value))} 
+                value={{ name: formik.values.due_date ? formik.values.due_date.toISOString() : "" }} 
+                onChange={(e) => formik.setFieldValue("due_date", new Date(e.target.value))} 
                 isLabelVisible={true}
                 placeholder="Select due date"
                 error={errors.due_date}
@@ -128,7 +110,7 @@ export default function AddProjectModal({
                 <button className="border border-primary-200 rounded-[5px] flex justify-center items-center text-primary-default 
                 font-lato text-xs p-[10px]" onClick={onClose}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
-                text-xs p-[10px]" onClick={handleCreateProject}>Create</button>
+                text-xs p-[10px]" onClick={() => handleCreateProject(formik.values)}>Create</button>
             </div>
         </div>
       </div>
