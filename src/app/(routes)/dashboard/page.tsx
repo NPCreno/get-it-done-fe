@@ -17,7 +17,7 @@ import { ITask } from "@/app/interface/ITask";
 
 interface taskFormValues {
   user_id: string;
-  project_id: string;
+  project_id?: string | null;
   project_title: string;
   project_color: string;
   title: string;
@@ -137,7 +137,7 @@ export default function DashboardPage() {
         description: values.description,
         due_date: values.due_date || undefined,
         user_id: user.user_id,
-        project_id: values.project_id,
+        project_id: values.project_id || undefined,
         priority: values.priority || undefined,
         isRecurring: values.isRecurring || false,
         repeat_every: values.repeat_every || undefined,
@@ -253,7 +253,7 @@ export default function DashboardPage() {
       }
       fetchTasks();
     }
-  }, [user]);
+  }, [user, showToast]);
 
   return (
     <MainLayout>
