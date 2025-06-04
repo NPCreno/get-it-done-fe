@@ -3,14 +3,14 @@ export default function ProjectCard({
   title,
   description,
   due_date,
-  tasks,
+  tasksCount,
   onClick,
   onAddTaskClick,
 }: {
   title: string;
   description: string;
   due_date: Date;
-  tasks: number;
+  tasksCount: number;
   onClick: () => void;
   onAddTaskClick: () => void;
 }) {
@@ -61,7 +61,7 @@ export default function ProjectCard({
         </div>
 
         <h1 className="text-text text-[11px] font-bold font-lato">
-          {tasks} tasks
+          {tasksCount} tasks
         </h1>
       </div>
     </div>

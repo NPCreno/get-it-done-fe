@@ -222,15 +222,17 @@ export default function ProjectsPage() {
     if (user) {
       const fetchProjects = async () => {
         const projects = await getProjectsForUser(user.user_id);
-        if (projects?.message && projects.message.includes("No projects found")) {
+        if (projects?.status === "success") {
+          setProjectData(projects.data);
+          return;
+        }
+        else{
           setProjectData([]);
-        }else{
-          setProjectData(projects);
         }
       };
       fetchProjects();
     }
-  }, [user, isAddProjectModalOpen]);
+  }, [user, isAddProjectModalOpen, isAddTaskModalOpen ]);
 
   const clearValueAndErrors = () => {
     setErrors({});
@@ -270,21 +272,7 @@ export default function ProjectsPage() {
   }, [isViewProjectModalOpen, isAddTaskModalOpen])
 
   console.log("selectProj: ", selectedProject)
-
-  useEffect(() => {
-    if (user) {
-      const fetchProjects = async () => {
-        const projects = await getProjectsForUser(user.user_id);
-        if (projects?.message && projects.message.includes("No projects found")) {
-          setProjectOptions([]);
-        }else{
-          setProjectOptions(projects);
-        }
-      };
-      fetchProjects();
-    }
-  }, [user, isAddTaskModalOpen]);
-
+  
   const handleCreateTask = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
@@ -315,6 +303,7 @@ export default function ProjectsPage() {
       }
       const response: any = await createTaskApi(payload);
       if (response.status === "success") {
+        clearValueAndErrors();
         setIsAddTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
@@ -332,6 +321,7 @@ export default function ProjectsPage() {
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
       }else{
+        clearValueAndErrors();
         setIsAddTaskModalOpen(false);
         setToastMessage({
           title: response.message,
@@ -420,7 +410,7 @@ export default function ProjectsPage() {
                 title={project.title}
                 description={project.description}
                 due_date={project.due_date}
-                tasks={project.tasks ? project.tasks : 0}
+                tasksCount={project.task_count ? project.task_count : 0}
                 onClick={() => {
                   setSelectedProject(project);
                   setIsViewProjectModalOpen(true);

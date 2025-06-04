@@ -228,10 +228,12 @@ export default function DashboardPage() {
     if (user) {
       const fetchProjects = async () => {
         const projects = await getProjectsForUser(user.user_id);
-        if (projects?.message && projects.message.includes("No projects found")) {
+        if (projects?.status === "success") {
+          setProjectOptions(projects.data);
+          return;
+        }
+        else{
           setProjectOptions([]);
-        }else{
-          setProjectOptions(projects);
         }
       };
       fetchProjects();

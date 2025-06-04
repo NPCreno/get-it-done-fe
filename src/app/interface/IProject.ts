@@ -5,4 +5,5 @@ export interface IProject {
     tasks: number;
     project_id?: string;
     color?: string;
+    task_count?: number;
   }
