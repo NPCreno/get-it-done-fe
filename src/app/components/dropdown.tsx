@@ -23,6 +23,7 @@ interface CustomDropdownMenuProps {
   }
   setSelectedOption: (option: {name: string, color?: string, project_id?: string}) => void
   placeholder: string;
+  disabled?: boolean;
 }
 
 export function CustomDropdownMenu({
@@ -30,6 +31,7 @@ export function CustomDropdownMenu({
   selectedOption,
   setSelectedOption,
   placeholder,
+  disabled,
 }: CustomDropdownMenuProps) {
 
   const currentSelectedColor = options.find(option => option.name === selectedOption.name)?.color;
@@ -41,6 +43,7 @@ export function CustomDropdownMenu({
           <Button
           variant="outline"
           className="w-full h-[40px] rounded-[10px] justify-between text-text"
+          disabled={disabled}
         >
           <div className="flex flex-row items-center justify-between w-full">
             {selectedOption.name != "" ? (

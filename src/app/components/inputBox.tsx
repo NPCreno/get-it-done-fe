@@ -138,6 +138,7 @@ export default function InputBox({
           placeholder={placeholder}
           options={dropdownptions ?? []}
           selectedOption={value}
+          disabled={disabled}
           setSelectedOption={(option) =>
             onChange({
               target: {

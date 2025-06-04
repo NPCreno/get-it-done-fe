@@ -5,12 +5,14 @@ export default function ProjectCard({
   due_date,
   tasks,
   onClick,
+  onAddTaskClick,
 }: {
   title: string;
   description: string;
   due_date: Date;
   tasks: number;
   onClick: () => void;
+  onAddTaskClick: () => void;
 }) {
   return (
     <div
@@ -30,7 +32,12 @@ export default function ProjectCard({
           </h1>
         </div>
 
-        <div className="flex flex-row hover:cursor-pointer min-w-[60px]">
+        <div className="flex flex-row hover:cursor-pointer min-w-[60px]" 
+           onClick={(e) => {
+            e.stopPropagation(); 
+            onAddTaskClick();
+          }}
+          >
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M11.7188 7.49951H3.28134M7.50009 3.28076V11.7183V3.28076Z" stroke="#FEAD03" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>

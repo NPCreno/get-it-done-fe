@@ -8,6 +8,7 @@ interface AddTaskModalProps {
   formik: FormikType;
   handleCreateTask: (values: FormValues) => void;
   project: IProject[];
+  preselectedProject?: IProject | null;
 }
 
 interface FormValues {
@@ -24,7 +25,7 @@ interface FormValues {
   repeat_every: string;
   repeat_days: string[];
   start_date: Date | null;
-  end_date: string | null;
+  end_date: Date | null;
   user_id: string;
 }
 
@@ -68,7 +69,8 @@ export default function AddTaskModal({
   onClose, 
   formik,
   handleCreateTask,
-  project
+  project,
+  preselectedProject
 }: AddTaskModalProps) {
   const [height, setHeight] = useState(0);
   const ref = useRef<HTMLDivElement>(null); 
@@ -209,7 +211,12 @@ export default function AddTaskModal({
             <InputBox 
                 type="dropdown"
                 label="Project" 
-                value={{name: formik.values.project_title, color: formik.values.project_color, project_id: formik.values.project_id}} 
+                value={{
+                  name: 
+                  preselectedProject ? preselectedProject.title : formik.values.project_title, 
+                  color: preselectedProject ? preselectedProject.color : formik.values.project_color, 
+                  project_id: preselectedProject ? preselectedProject.project_id : formik.values.project_id
+                }} 
                 onChange={(e) => {
                   const customEvent = e as unknown as CustomChangeEvent;
                   formik.setFieldValue("project_title", customEvent.target.name);
@@ -221,6 +228,7 @@ export default function AddTaskModal({
                 dropdownptions={projectOptions}
                 error={formik.errors.project}
                 labelCustomClass='fade-in-delay-3'
+                disabled={preselectedProject ? true : false}
             />
         </div>
 

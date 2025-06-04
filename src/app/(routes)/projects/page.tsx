@@ -4,7 +4,7 @@ import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
-import { createProject, getProjectsForUser, getUser, getTasksByProject } from "@/app/api/api";
+import { createProject, getProjectsForUser, getUser, getTasksByProject, createTaskApi } from "@/app/api/api";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
@@ -15,14 +15,45 @@ import { CreateProjectDto } from "@/app/interface/dto/create-project-dto";
 import { ICreateProjectResponse } from "@/app/interface/responses/ICreateProjectResponse";
 import AddTaskModal from "@/app/components/modals/addTaskModal";
 import { ITask } from "@/app/interface/ITask";
+import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
+import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 
-interface projectFormValues {
+interface projectOrTaskFormValues {
   title: string;
   description: string;
-  due_date?: Date | null;
+  due_date: Date | null;
   colorLabel: string;
   color: string;
   user_id: string;
+  project_id: string;
+  project_title: string;
+  project_color: string;
+  priority: string;
+  status: string;
+  isRecurring: boolean;
+  repeat_every: string;
+  repeat_days: string[];
+  start_date: Date | null;
+  end_date: Date | null;
+  project: string;
+}
+
+interface FormErrors {
+  title?: string;
+  description?: string;
+  priority?: string;
+  project?: string;
+  project_id?: string;
+  project_title?: string;
+  project_color?: string;
+  status?: string;
+  due_date?: string;
+  isRecurring?: string;
+  repeat_every?: string;
+  repeat_days?: string[] | string;
+  start_date?: string;
+  end_date?: string;
+  user_id?: string;
 }
 
 export default function ProjectsPage() {
@@ -38,6 +69,7 @@ export default function ProjectsPage() {
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
   const [tasks, setTasks] = useState<ITask[]>([]);
+  const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -52,6 +84,17 @@ export default function ProjectsPage() {
     colorLabel: "",
     color: "",
     user_id: user?.user_id ?? "",
+    project_id: "",
+    project_title: "",
+    project_color: "",
+    priority: "",
+    status: "",
+    isRecurring: false,
+    repeat_every: "",
+    repeat_days: [],
+    start_date: new Date(),
+    end_date: null,
+    project: "",
   }), [user?.user_id]);
 
   const {
@@ -63,10 +106,11 @@ export default function ProjectsPage() {
     handleSubmit,
     handleChange,
     setSubmitting,
+    setFieldError,
   } = useFormik({
     initialValues,
     enableReinitialize: true,
-    validationSchema: createProjectSchema,
+    validationSchema: selectedProject ? createTaskSchema  : createProjectSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
     onSubmit: async (values) => {
@@ -74,13 +118,13 @@ export default function ProjectsPage() {
       const withUser = {
         ...values,
         user_id: user.user_id,
-        due_date: values.due_date || undefined
+        due_date: values.due_date || null
       };
-      handleSubmitForm(withUser);
+      handleSubmitForm(withUser as projectOrTaskFormValues);
     },
   });
 
-  const handleSubmitForm = async (values: projectFormValues) => {
+  const handleSubmitForm = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
@@ -89,13 +133,12 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const createProj = async (values: projectFormValues) => {
+  const createProj = async (values: projectOrTaskFormValues) => {
     try {
       if(!user){
         console.error("No User data found");
         return
       }
-
       const response: ICreateProjectResponse = await createProject(values as CreateProjectDto);
       console.log("response: ", response)
       if (response.status === "success") {
@@ -199,7 +242,6 @@ export default function ProjectsPage() {
   }
 
   useEffect(()=>{
-    console.log("selectedProject: ", selectedProject)
     const fetchTasksByProj = async () => {
       try {
         const startDate = new Date().toISOString();
@@ -219,6 +261,118 @@ export default function ProjectsPage() {
     }
     fetchTasksByProj();
   },[selectedProject])
+
+
+  useEffect(() =>{
+    if(!isAddTaskModalOpen && !isViewProjectModalOpen){
+      setSelectedProject(null);
+    }
+  }, [isViewProjectModalOpen, isAddTaskModalOpen])
+
+  console.log("selectProj: ", selectedProject)
+
+  useEffect(() => {
+    if (user) {
+      const fetchProjects = async () => {
+        const projects = await getProjectsForUser(user.user_id);
+        if (projects?.message && projects.message.includes("No projects found")) {
+          setProjectOptions([]);
+        }else{
+          setProjectOptions(projects);
+        }
+      };
+      fetchProjects();
+    }
+  }, [user, isAddTaskModalOpen]);
+
+  const handleCreateTask = async (values: projectOrTaskFormValues) => {
+    const validationErrors: FormikErrors<typeof values> = await validateForm();
+    if (Object.keys(validationErrors).length === 0) {
+      await createTask(values)
+    }
+    setSubmitting(false);
+  };
+
+  const createTask = async (values: projectOrTaskFormValues) => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
+      const payload: CreateTaskDto = {
+        title: values.title,
+        description: values.description,
+        due_date: values.due_date || undefined,
+        user_id: user.user_id,
+        project_id: selectedProject ? selectedProject.project_id : values.project_id,
+        priority: values.priority || undefined,
+        isRecurring: values.isRecurring || false,
+        repeat_every: values.repeat_every || undefined,
+        repeat_days: values.repeat_days || undefined,
+        start_date: values.start_date || undefined,
+        end_date: values.end_date || undefined,
+        status: values.status || undefined,
+      }
+      const response: any = await createTaskApi(payload);
+      if (response.status === "success") {
+        setIsAddTaskModalOpen(false);
+        setToastMessage({
+          title: "Task Created",
+          description: response.message || "Your new task has been created successfully",
+          className: "text-green-600",
+        });
+      
+        setShowToast(true);
+        setIsExitingToast(false);
+      
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }else{
+        setIsAddTaskModalOpen(false);
+        setToastMessage({
+          title: response.message,
+          description: response.error,
+          className: "text-error-default",
+        });
+      
+        setShowToast(true);
+        setIsExitingToast(false);
+      
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: error.message,
+          className: "text-error-default",
+        });
+      } else {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: "An unknown error occurred",
+          className: "text-error-default",
+        });
+      }
+      setShowToast(true);
+      setIsExitingToast(false);
+      setTimeout(() => {
+        setIsExitingToast(true); // Start exit animation
+        setTimeout(() => {
+          setShowToast(false); // Remove after animation completes
+        }, 400); // Must match the toastOut animation duration
+      }, 10000); // Toast display duration
+    }
+  };
 
   return (
     <MainLayout>
@@ -271,6 +425,10 @@ export default function ProjectsPage() {
                   setSelectedProject(project);
                   setIsViewProjectModalOpen(true);
                 }}
+                onAddTaskClick={() => {
+                  setSelectedProject(project);
+                  setIsAddTaskModalOpen(true);
+                }}
               />
             )) : (
               <div className="flex justify-center items-center h-full">
@@ -302,29 +460,31 @@ export default function ProjectsPage() {
             tasks: 0
           }}
           handleCreateTask={() => {
-            debugger
             setIsViewProjectModalOpen(false)
             setIsAddTaskModalOpen(true);
           }}
           tasks={tasks ? tasks : []}
+          
         />
       )}
 
-      {/* {isAddTaskModalOpen && (
+      {isAddTaskModalOpen && (
         <AddTaskModal
           isOpen={isAddTaskModalOpen}
           onClose={() => setIsAddTaskModalOpen(false)}
           formik={{
-            values: values,
+            values: values as projectOrTaskFormValues,
             errors: errors as FormErrors,
             handleChange,
             setFieldValue,
             setFieldError,
           }}
-          handleCreateTask={() => handleSubmit()}
+          handleCreateTask={() => handleCreateTask(values as projectOrTaskFormValues)}
           project={projectOptions}
+          preselectedProject={selectedProject}
         />
-      )} */}
+      )}
+
     </MainLayout>
   );
 }
