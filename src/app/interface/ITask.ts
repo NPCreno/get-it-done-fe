@@ -6,4 +6,5 @@ export interface ITask {
     due_date: Date;
     status: 'To Do' | 'Completed';
     priority: string;
+    project_title?: string;
 }

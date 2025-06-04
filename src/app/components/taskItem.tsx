@@ -1,10 +1,10 @@
 export default function TaskItem({
   task,
-  tag,
+  project,
   status,
 }: {
   task: string;
-  tag: string;
+  project: string;
   status: string;
 }) {
   return (
@@ -23,12 +23,12 @@ export default function TaskItem({
         </span>
       </div>
       <div className="flex flex-row gap-5 items-center">
-        <div className="flex bg-[#D4D4D4] font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center">
-          {tag}
+        <div className={`flex ${project !="" ? "bg-[#D4D4D4]" : ""} font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center`}>
+          {project}
         </div>
         <div
           className={`rounded-[10px] w-[10px] h-[10px] ${
-            status === "good" ? "bg-green-600" : "bg-warn"
+            status === "Complete" ? "bg-green-600" : "bg-warn"
           }`}
         ></div>
       </div>

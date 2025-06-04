@@ -19,11 +19,11 @@ interface FormValues {
   project_title: string;
   project_color: string;
   status: string;
-  due_date: string | null;
+  due_date: Date | null;
   isRecurring: boolean;
   repeat_every: string;
   repeat_days: string[];
-  start_date: string | null;
+  start_date: Date | null;
   end_date: string | null;
   user_id: string;
 }
