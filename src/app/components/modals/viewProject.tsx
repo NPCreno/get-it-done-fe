@@ -7,6 +7,7 @@ interface ViewProjectModalProps {
   onClose: () => void;
   project: IProject;
   handleCreateTask: () => void;
+  tasks: ITask[];
 }
 
 export default function ViewProjectModal({ 
@@ -14,102 +15,9 @@ export default function ViewProjectModal({
   onClose, 
   project, 
   handleCreateTask,
+  tasks,
 }: ViewProjectModalProps) {
-  // const [tasks, setTasks] = useState<ITask[]>([]);
-  const tasks: ITask[] = [
-    {
-      project_id: 'proj-001',
-      task_id: 'task-001',
-      title: 'Design Login Page',
-      description: 'Create wireframes and high-fidelity mockups for the login screen.',
-      due_date: new Date('2025-06-05'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-001',
-      task_id: 'task-002',
-      title: 'API Authentication',
-      description: 'Implement JWT-based authentication for the backend.',
-      due_date: new Date('2025-06-10'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-002',
-      task_id: 'task-003',
-      title: 'Database Schema Design',
-      description: 'Design the initial database schema for the application.',
-      due_date: new Date('2025-06-03'),
-      status: 'Completed',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-002',
-      task_id: 'task-004',
-      title: 'Frontend Setup',
-      description: 'Set up Angular project structure and shared components.',
-      due_date: new Date('2025-06-07'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-003',
-      task_id: 'task-005',
-      title: 'User Dashboard',
-      description: 'Develop dashboard components with dynamic data rendering.',
-      due_date: new Date('2025-06-15'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-003',
-      task_id: 'task-006',
-      title: 'Unit Testing',
-      description: 'Write unit tests for core services and components.',
-      due_date: new Date('2025-06-12'),
-      status: 'To Do',
-      priority: 'Low',
-    },
-    {
-      project_id: 'proj-004',
-      task_id: 'task-007',
-      title: 'CI/CD Integration',
-      description: 'Integrate GitHub Actions for automatic deployment.',
-      due_date: new Date('2025-06-20'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-004',
-      task_id: 'task-008',
-      title: 'Bug Fixing',
-      description: 'Resolve reported issues from internal testing.',
-      due_date: new Date('2025-06-08'),
-      status: 'Completed',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-005',
-      task_id: 'task-009',
-      title: 'Performance Optimization',
-      description: 'Profile and optimize page load times.',
-      due_date: new Date('2025-06-18'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-005',
-      task_id: 'task-010',
-      title: 'Documentation',
-      description: 'Write comprehensive documentation for developers.',
-      due_date: new Date('2025-06-25'),
-      status: 'Completed',
-      priority: 'Low',
-    }
-  ];
-
-  
+ 
   if (!isOpen) return null;
   
   const handleEscapeKey = (event: KeyboardEvent) => {
@@ -142,10 +50,14 @@ export default function ViewProjectModal({
             <h2 className="text-[#676767] text-sm font-lato">{project.description ? project.description : "View and manage tasks in this project"}</h2>
         </div>
 
-        <div className="flex flex-col gap-[10px] max-h-[710px] overflow-y-auto scrollbar-hide">
-          {tasks.map((task) => (
+        <div className="flex flex-col gap-[10px] max-h-[710px] min-h-[200px] overflow-y-auto scrollbar-hide">
+          {tasks.length != 0 ? tasks.map((task) => (
             <TaskCard key={task.task_id} {...task} />
-          ))}
+          )) : (
+            <div className="h-full flex items-center justify-center flex-grow">
+              <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-row justify-between w-full  items-center">
@@ -171,8 +83,8 @@ export default function ViewProjectModal({
 const TaskCard = (task: ITask) => {
 
   const priorityColor = task.priority === "High" ? "bg-red-500" : task.priority === "Medium" ? "bg-accent-default" : "bg-secondary-default";
-  const statusColor = task.status === "To Do" ? "bg-accent-200" : "bg-green-200";
-  const statusTextColor = task.status === "To Do" ? "text-accent-600" : "text-green-700";
+  const statusColor = task.status === "Pending" ? "bg-[#219EBC]" : task.status === "Completed" ? "bg-[#53D86A]" : "bg-red-200";
+  const statusTextColor = task.status === "Pending" ? "text-[#0B4250]" : task.status === "Completed" ? "text-[#53D86A]" : "text-red-700";
 
   const handleRevertStatus = (task_id: string) => {
     console.log("Revert Status", task_id);
@@ -186,12 +98,12 @@ const TaskCard = (task: ITask) => {
     <div className="border border-[#E0E0E0] rounded-[10px] py-2 px-5 flex flex-row">
       <div className="flex flex-row justify-between w-full">
         <div className="flex flex-row gap-[10px] items-center">
-          <div className={`w-[10px] h-[10px] rounded-full mr-4 ${task.status == "Completed" ? "bg-green-400" : priorityColor}`} 
+          <div className={`w-[15px] h-[15px]  rounded-full mr-4 ${task.status == "Completed" ? "bg-green-400" : priorityColor}`} 
           ></div>
           <div className="flex flex-col gap-[10px]">
             <div className="flex flex-row gap-[10px]">
               <h1 className={`text-sm font-bold font-lato ${task.status == "Completed" ? "line-through text-[#828282]" : "text-text"}`}>{task.title}</h1>
-              <div className={`${statusColor} h-[18px] rounded-full px-1 ${statusTextColor} text-[11px] font-lato font-bold ${task.status == "Completed" ? "line-through" : ""}`}>
+              <div className={`${statusColor} px-[6px] h-[18px] rounded-full ${statusTextColor} text-[11px] font-lato font-bold ${task.status == "Completed" ? "line-through" : ""}`}>
                 {task.status}
               </div>
             </div>

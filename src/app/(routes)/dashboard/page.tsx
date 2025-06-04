@@ -242,7 +242,7 @@ export default function DashboardPage() {
     if (user) {
       const fetchTasks = async () => {
         const startDate = new Date().toISOString();
-        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString();
+        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
         const tasks = await getTasksByUser(user.user_id, startDate, endDate);
         if(tasks){
           setTasks(tasks);

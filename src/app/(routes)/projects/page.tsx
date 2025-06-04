@@ -4,7 +4,7 @@ import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
-import { createProject, getProjectsForUser, getUser } from "@/app/api/api";
+import { createProject, getProjectsForUser, getUser, getTasksByProject } from "@/app/api/api";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
@@ -13,6 +13,8 @@ import ViewProjectModal from "@/app/components/modals/viewProject";
 import { IProject } from "@/app/interface/IProject";
 import { CreateProjectDto } from "@/app/interface/dto/create-project-dto";
 import { ICreateProjectResponse } from "@/app/interface/responses/ICreateProjectResponse";
+import AddTaskModal from "@/app/components/modals/addTaskModal";
+import { ITask } from "@/app/interface/ITask";
 
 interface projectFormValues {
   title: string;
@@ -35,6 +37,7 @@ export default function ProjectsPage() {
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
+  const [tasks, setTasks] = useState<ITask[]>([]);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -195,6 +198,28 @@ export default function ProjectsPage() {
     setFieldValue("color", "");
   }
 
+  useEffect(()=>{
+    console.log("selectedProject: ", selectedProject)
+    const fetchTasksByProj = async () => {
+      try {
+        const startDate = new Date().toISOString();
+        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
+        const tasks = await getTasksByProject(selectedProject?.project_id ?? "", startDate, endDate);
+        console.log("tasks: ", tasks)
+        if(tasks){
+          setTasks(tasks);
+        }
+        else{
+          setTasks([]);
+        }
+      } catch (error) {
+        setTasks([]);
+        console.error("Failed to fetch tasks by project:", error);
+      }
+    }
+    fetchTasksByProj();
+  },[selectedProject])
+
   return (
     <MainLayout>
       {showToast && (
@@ -277,11 +302,29 @@ export default function ProjectsPage() {
             tasks: 0
           }}
           handleCreateTask={() => {
+            debugger
             setIsViewProjectModalOpen(false)
             setIsAddTaskModalOpen(true);
           }}
+          tasks={tasks ? tasks : []}
         />
       )}
+
+      {/* {isAddTaskModalOpen && (
+        <AddTaskModal
+          isOpen={isAddTaskModalOpen}
+          onClose={() => setIsAddTaskModalOpen(false)}
+          formik={{
+            values: values,
+            errors: errors as FormErrors,
+            handleChange,
+            setFieldValue,
+            setFieldError,
+          }}
+          handleCreateTask={() => handleSubmit()}
+          project={projectOptions}
+        />
+      )} */}
     </MainLayout>
   );
 }

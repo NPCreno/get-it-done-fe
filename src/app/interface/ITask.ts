@@ -4,7 +4,7 @@ export interface ITask {
     title: string;
     description: string;
     due_date: Date;
-    status: 'To Do' | 'Completed';
+    status: 'Pending' | 'Completed' | 'Overdue';
     priority: string;
     project_title?: string;
 }
