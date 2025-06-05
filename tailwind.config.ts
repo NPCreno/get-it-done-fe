@@ -52,7 +52,15 @@ const config: Config = {
   				'700': '#3F0F0E',
   				default: '#FD3D39'
   			},
-  			success: '#53D86A',
+  			success: {
+				'100': '#D4F5D9',
+				'200': '#A8EBB4',
+				'300': '#7EE28F',
+				'500': '#3EA24F',
+				'600': '#296C35',
+				'700': '#15361A',
+				default: '#53D86A'
+			},
   			warning: '#FEC242',
   			info: '#2196F3',
   			background: '#EEEEEE',

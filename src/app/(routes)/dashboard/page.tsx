@@ -3,17 +3,18 @@ import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
 import TaskItem from "../../components/taskItem";
-import AddTaskModal from "@/app/components/modals/addTaskModal";
+import AddTaskModal from "@/app/components/modals/taskModal";
 import { useEffect, useMemo, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
-import { createTaskApi, getProjectsForUser, getUser, getTasksByUser } from "@/app/api/api";
+import { createTaskApi, getProjectsForUser, getUser, getTasksByUser, updateTaskApi } from "@/app/api/api";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
 import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { Toast } from "@/app/components/toast";
 import { ITask } from "@/app/interface/ITask";
+import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 
 interface taskFormValues {
   user_id: string;
@@ -51,8 +52,12 @@ interface FormErrors {
 }
 
 export default function DashboardPage() {
-  const { user, setUser } = useFormState();
-  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
+  const { 
+    user, 
+    setUser,
+    selectedTaskData   
+  } = useFormState();
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   // Toast
   const [showToast, setShowToast] = useState(false);
@@ -60,6 +65,7 @@ export default function DashboardPage() {
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [tasks, setTasks] = useState<ITask[]>([]);
+  const [isUpdateTask, setIsUpdateTask] = useState(false);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -98,6 +104,7 @@ export default function DashboardPage() {
     handleSubmit,
     handleChange,
     setSubmitting,
+    setErrors,
   } = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -148,7 +155,7 @@ export default function DashboardPage() {
       }
       const response: any = await createTaskApi(payload);
       if (response.status === "success") {
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
           description: response.message || "Your new task has been created successfully",
@@ -238,7 +245,7 @@ export default function DashboardPage() {
       };
       fetchProjects();
     }
-  }, [user, isAddTaskModalOpen]);
+  }, [user, isTaskModalOpen]);
 
   useEffect(() => {
     if (user) {
@@ -256,6 +263,103 @@ export default function DashboardPage() {
       fetchTasks();
     }
   }, [user, showToast]);
+
+    const handleUpdateTask = async (values: taskFormValues) => {
+      try {
+        if(!user){
+          console.error("No User data found");
+          return
+        }
+        const payload: UpdateTaskDto = {
+          title: values.title,
+          description: values.description,
+          due_date: values.due_date || undefined,
+          user_id: user.user_id,
+          project_id: selectedTaskData ? selectedTaskData.project_id : values.project_id || undefined,
+          priority: values.priority || "",
+          task_id: selectedTaskData ? selectedTaskData.task_id : "",
+        }
+        debugger
+        const response: any = await updateTaskApi(payload);
+        if (response.status === "success") {
+          clearValueAndErrors();
+          setIsTaskModalOpen(false);
+          setToastMessage({
+            title: "Task Updated",
+            description: response.message || "Your task has been updated successfully",
+            className: "text-green-600",
+          });
+        
+          setShowToast(true);
+          setIsExitingToast(false);
+        
+          setTimeout(() => {
+            setIsExitingToast(true); // Start exit animation
+            setTimeout(() => {
+              setShowToast(false); // Remove after animation completes
+            }, 400); // Must match the toastOut animation duration
+          }, 10000); // Toast display duration
+        }else{
+          clearValueAndErrors();
+          setIsTaskModalOpen(false);
+          setToastMessage({
+            title: response.message,
+            description: response.error,
+            className: "text-error-default",
+          });
+        
+          setShowToast(true);
+          setIsExitingToast(false);
+        
+          setTimeout(() => {
+            setIsExitingToast(true); // Start exit animation
+            setTimeout(() => {
+              setShowToast(false); // Remove after animation completes
+            }, 400); // Must match the toastOut animation duration
+          }, 10000); // Toast display duration
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          setToastMessage({
+            title: "Something Went Wrong",
+            description: error.message,
+            className: "text-error-default",
+          });
+        } else {
+          setToastMessage({
+            title: "Something Went Wrong",
+            description: "An unknown error occurred",
+            className: "text-error-default",
+          });
+        }
+        setShowToast(true);
+        setIsExitingToast(false);
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }
+    };
+
+    const clearValueAndErrors = () => {
+      setErrors({});
+      setFieldValue("title", "");
+      setFieldValue("description", "");
+      setFieldValue("status", "");
+      setFieldValue("priority", "");
+      setFieldValue("due_date", "");
+    }
+    
+    useEffect(() => {
+      setFieldValue("title", selectedTaskData?.title || "");
+      setFieldValue("description", selectedTaskData?.description || "");
+      setFieldValue("priority", selectedTaskData?.priority || "");
+      setFieldValue("status", selectedTaskData?.status || "");
+      setFieldValue("due_date", selectedTaskData?.due_date || null);
+      setFieldValue("isRecurring", false);
+    }, [selectedTaskData]);
 
   return (
     <MainLayout>
@@ -324,7 +428,7 @@ export default function DashboardPage() {
             />
             <StatsCard
               icon="/svgs/checkbox-outline.svg"
-              header="Completed"
+              header="Complete"
               content="300"
               delay="fade-in-left-delay-4"
             />
@@ -356,7 +460,10 @@ export default function DashboardPage() {
               <button
                 className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
                   hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-                onClick={() => setIsAddTaskModalOpen(true)}
+                onClick={() => {
+                  setIsTaskModalOpen(true);
+                  setIsUpdateTask(false);
+                }}
               >
                 <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -371,20 +478,22 @@ export default function DashboardPage() {
               {tasks.map((task, index) => (
                 <TaskItem
                   key={index}
-                  task={task.title}
-                  project={task.project_title ? task.project_title : ""}
-                  status={task.status}
-                />
+                  task={task}
+                  handleUpdateTask={() => {
+                    setIsTaskModalOpen(true);
+                    setIsUpdateTask(true);
+                  }}
+                  />
               ))}
             </div>
           </div>
         </div>
       </div>
 
-      {isAddTaskModalOpen && (
+      {isTaskModalOpen && (
         <AddTaskModal
-          isOpen={isAddTaskModalOpen}
-          onClose={() => setIsAddTaskModalOpen(false)}
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,
             errors: errors as FormErrors,
@@ -394,6 +503,8 @@ export default function DashboardPage() {
           }}
           handleCreateTask={() => handleSubmit()}
           project={projectOptions}
+          isUpdate={isUpdateTask}
+          handleUpdateTask={() => handleUpdateTask(values as taskFormValues)}
         />
       )}
 
