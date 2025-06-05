@@ -264,76 +264,59 @@ export default function DashboardPage() {
     }
   }, [user, showToast]);
 
-    const handleUpdateTask = async (values: taskFormValues) => {
-      try {
-        if(!user){
-          console.error("No User data found");
-          return
-        }
-        const payload: UpdateTaskDto = {
-          title: values.title,
-          description: values.description,
-          due_date: values.due_date || undefined,
-          user_id: user.user_id,
-          project_id: selectedTaskData ? selectedTaskData.project_id : values.project_id || undefined,
-          priority: values.priority || "",
-          task_id: selectedTaskData ? selectedTaskData.task_id : "",
-        }
-        debugger
-        const response: any = await updateTaskApi(payload);
-        if (response.status === "success") {
-          clearValueAndErrors();
-          setIsTaskModalOpen(false);
-          setToastMessage({
-            title: "Task Updated",
-            description: response.message || "Your task has been updated successfully",
-            className: "text-green-600",
-          });
-        
-          setShowToast(true);
-          setIsExitingToast(false);
-        
-          setTimeout(() => {
-            setIsExitingToast(true); // Start exit animation
-            setTimeout(() => {
-              setShowToast(false); // Remove after animation completes
-            }, 400); // Must match the toastOut animation duration
-          }, 10000); // Toast display duration
-        }else{
-          clearValueAndErrors();
-          setIsTaskModalOpen(false);
-          setToastMessage({
-            title: response.message,
-            description: response.error,
-            className: "text-error-default",
-          });
-        
-          setShowToast(true);
-          setIsExitingToast(false);
-        
-          setTimeout(() => {
-            setIsExitingToast(true); // Start exit animation
-            setTimeout(() => {
-              setShowToast(false); // Remove after animation completes
-            }, 400); // Must match the toastOut animation duration
-          }, 10000); // Toast display duration
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          setToastMessage({
-            title: "Something Went Wrong",
-            description: error.message,
-            className: "text-error-default",
-          });
-        } else {
-          setToastMessage({
-            title: "Something Went Wrong",
-            description: "An unknown error occurred",
-            className: "text-error-default",
-          });
-        }
+  const handleUpdateTask = async (values: taskFormValues) => {
+    const validationErrors: FormikErrors<typeof values> = await validateForm();
+    if (Object.keys(validationErrors).length === 0) {
+      await updateTask(values)
+    }
+    setSubmitting(false);
+  };
+
+  const updateTask = async (values: taskFormValues) => {
+    try {
+      if(!user){
+        console.error("No User data found");
+        return
+      }
+      const payload: UpdateTaskDto = {
+        title: values.title,
+        description: values.description,
+        due_date: values.due_date || undefined,
+        priority: values.priority || undefined,
+        status: values.status || undefined,
+        task_id: selectedTaskData?.task_id,
+      }
+      const response: any = await updateTaskApi(payload);
+      if (response.status === "success") {
+        clearValueAndErrors();
+        setIsTaskModalOpen(false);
+        setToastMessage({
+          title: "Task Updated",
+          description: response.message || "Your task has been updated successfully",
+          className: "text-green-600",
+        });
+      
         setShowToast(true);
         setIsExitingToast(false);
+      
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }else{
+        clearValueAndErrors();
+        setIsTaskModalOpen(false);
+        setToastMessage({
+          title: response.message,
+          description: response.error,
+          className: "text-error-default",
+        });
+      
+        setShowToast(true);
+        setIsExitingToast(false);
+      
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -341,25 +324,48 @@ export default function DashboardPage() {
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
       }
-    };
-
-    const clearValueAndErrors = () => {
-      setErrors({});
-      setFieldValue("title", "");
-      setFieldValue("description", "");
-      setFieldValue("status", "");
-      setFieldValue("priority", "");
-      setFieldValue("due_date", "");
+    } catch (error) {
+      if (error instanceof Error) {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: error.message,
+          className: "text-error-default",
+        });
+      } else {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: "An unknown error occurred",
+          className: "text-error-default",
+        });
+      }
+      setShowToast(true);
+      setIsExitingToast(false);
+      setTimeout(() => {
+        setIsExitingToast(true); // Start exit animation
+        setTimeout(() => {
+          setShowToast(false); // Remove after animation completes
+        }, 400); // Must match the toastOut animation duration
+      }, 10000); // Toast display duration
     }
-    
-    useEffect(() => {
-      setFieldValue("title", selectedTaskData?.title || "");
-      setFieldValue("description", selectedTaskData?.description || "");
-      setFieldValue("priority", selectedTaskData?.priority || "");
-      setFieldValue("status", selectedTaskData?.status || "");
-      setFieldValue("due_date", selectedTaskData?.due_date || null);
-      setFieldValue("isRecurring", false);
-    }, [selectedTaskData]);
+  };
+
+  const clearValueAndErrors = () => {
+    setErrors({});
+    setFieldValue("title", "");
+    setFieldValue("description", "");
+    setFieldValue("status", "");
+    setFieldValue("priority", "");
+    setFieldValue("due_date", "");
+  }
+  
+  useEffect(() => {
+    setFieldValue("title", selectedTaskData?.title || "");
+    setFieldValue("description", selectedTaskData?.description || "");
+    setFieldValue("priority", selectedTaskData?.priority || "");
+    setFieldValue("status", selectedTaskData?.status || "");
+    setFieldValue("due_date", selectedTaskData?.due_date || null);
+    setFieldValue("isRecurring", false);
+  }, [selectedTaskData]);
 
   return (
     <MainLayout>
