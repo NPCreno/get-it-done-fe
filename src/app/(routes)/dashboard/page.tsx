@@ -2,7 +2,6 @@
 import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
-import TaskItem from "../../components/taskItem";
 import AddTaskModal from "@/app/components/modals/taskModal";
 import { useEffect, useMemo, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
@@ -15,6 +14,7 @@ import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { Toast } from "@/app/components/toast";
 import { ITask } from "@/app/interface/ITask";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
+import Image from "next/image";
 
 interface taskFormValues {
   user_id: string;
@@ -32,6 +32,7 @@ interface taskFormValues {
   start_date: Date | null;
   end_date: Date | null;
   project: string;
+  task_id?: string;
 }
 interface FormErrors {
   title?: string;
@@ -66,6 +67,7 @@ export default function DashboardPage() {
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isUpdateTask, setIsUpdateTask] = useState(false);
+  const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -155,6 +157,7 @@ export default function DashboardPage() {
       }
       const response: any = await createTaskApi(payload);
       if (response.status === "success") {
+        setUpdateTaskDashboard(!updateTaskDashboard);
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
@@ -254,6 +257,7 @@ export default function DashboardPage() {
         const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
         const tasks = await getTasksByUser(user.user_id, startDate, endDate);
         if(tasks){
+          setTasks([]);
           setTasks(tasks);
         }
         else{
@@ -262,7 +266,7 @@ export default function DashboardPage() {
       }
       fetchTasks();
     }
-  }, [user, showToast]);
+  }, [user, showToast, updateTaskDashboard]);
 
   const handleUpdateTask = async (values: taskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
@@ -284,10 +288,11 @@ export default function DashboardPage() {
         due_date: values.due_date || undefined,
         priority: values.priority || undefined,
         status: values.status || undefined,
-        task_id: selectedTaskData?.task_id,
+        task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
       }
       const response: any = await updateTaskApi(payload);
       if (response.status === "success") {
+        setUpdateTaskDashboard(!updateTaskDashboard);
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
@@ -367,6 +372,21 @@ export default function DashboardPage() {
     setFieldValue("isRecurring", false);
   }, [selectedTaskData]);
 
+  const handleTaskStatus = async (task: ITask) => {
+    await updateTask({
+      ...task,
+      user_id: user?.user_id || "", 
+      project_color: "",
+      isRecurring: false,
+      repeat_every: "",
+      repeat_days: [],
+      start_date: null,
+      end_date: null,
+      project: task.project_id,
+      project_title: task.project_title || "",
+    });
+  };
+
   return (
     <MainLayout>
       {showToast && (
@@ -441,7 +461,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Chart cards */}
-          <div className="flex flex-row gap-5 h-[210px] w-full fade-in-delay-2">
+          <div className="flex flex-row gap-5 h-[260px] w-full fade-in-delay-2">
             <ChartCard
               header="Task Completion Trend"
               delay="fade-in-left-delay-1"
@@ -489,6 +509,7 @@ export default function DashboardPage() {
                     setIsTaskModalOpen(true);
                     setIsUpdateTask(true);
                   }}
+                  handleTaskStatus={(task: ITask) => handleTaskStatus(task)}
                   />
               ))}
             </div>
@@ -515,5 +536,82 @@ export default function DashboardPage() {
       )}
 
     </MainLayout>
+  );
+}
+
+
+function TaskItem({
+  task,
+  handleUpdateTask,
+  handleTaskStatus,
+}: {
+  task: ITask;
+  handleUpdateTask: () => void;
+  handleTaskStatus: (task: ITask) => void;
+}) {
+  const { setSelectedTaskData } = useFormState();
+
+  const handleCheckToggle = () => {
+    const updatedTask = {
+      ...task,
+      status: task.status === "Complete" ? "Pending" : "Complete",
+    };
+    handleTaskStatus(updatedTask);
+  };
+
+  return (
+    <div className="flex flex-row w-full h-[42px] py-[11px] justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
+      <div className="flex flex-row gap-5 items-center">
+        <div className="group w-5 h-5 relative">
+          <input
+            id="checkTask"
+            type="checkbox"
+            checked={task.status === "Complete"}
+            readOnly
+            onClick={handleCheckToggle}
+            className="peer appearance-none w-full h-full cursor-pointer"
+          />
+          <div
+            className="absolute inset-0 rounded-[10px] border-[2px] border-solid border-primary-200 
+                      peer-checked:border-0 group-hover:border-0 pointer-events-none"
+          ></div>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 
+                          group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none">
+            <Image src="/svgs/checkmark-circle-yellow.svg" alt="Check" width={20} height={20} />
+          </div>
+        </div>
+      </div>
+      <div
+        className="flex flex-row gap-5 items-center flex-grow w-full justify-end"
+        onClick={() => {
+          setSelectedTaskData(task);
+          handleUpdateTask();
+        }}
+      >
+        <div className="flex flex-row justify-between w-full">
+          <span
+            className={`font-lato text-4 text-text ${
+              task.status === "Complete" ? "line-through" : ""
+            }`}
+          >
+            {task.title}
+          </span>
+          <div className="flex flex-row gap-2 items-center">
+            <div
+              className={`flex ${
+                task.project_title != null ? "bg-[#D4D4D4]" : "bg-[#ffffff]"
+              } font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center`}
+            >
+              {task.project_title}
+            </div>
+            <div
+              className={`rounded-[10px] w-[10px] h-[10px] ${
+                task.status === "Complete" ? "bg-green-600" : "bg-[#FFC107]"
+              }`}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
