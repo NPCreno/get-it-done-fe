@@ -4,7 +4,7 @@ import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
-import { createProject, getProjectsForUser, getUser, getTasksByProject, createTaskApi, updateTaskApi } from "@/app/api/api";
+import { createProject, getProjectsForUser, getUser, getTasksByProject, createTaskApi, updateTaskApi, deleteTaskApi } from "@/app/api/api";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
@@ -37,6 +37,7 @@ interface projectOrTaskFormValues {
   start_date: Date | null;
   end_date: Date | null;
   project: string;
+  task_id?: string;
 }
 
 interface FormErrors {
@@ -77,6 +78,7 @@ export default function ProjectsPage() {
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   const [isUpdateTask, setIsUpdateTask] = useState(false);
+  const [updateTasksData, setUpdateTasksData] = useState(false);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -256,7 +258,6 @@ export default function ProjectsPage() {
         const startDate = new Date().toISOString();
         const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
         const tasks = await getTasksByProject(selectedProject?.project_id ?? "", startDate, endDate);
-        console.log("tasks: ", tasks)
         if(tasks){
           setTasks(tasks);
         }
@@ -269,7 +270,7 @@ export default function ProjectsPage() {
       }
     }
     fetchTasksByProj();
-  },[selectedProject])
+  },[selectedProject, updateTasksData])
 
 
   useEffect(() =>{
@@ -319,6 +320,7 @@ export default function ProjectsPage() {
       const response: any = await createTaskApi(payload);
       if (response.status === "success") {
         clearValueAndErrors();
+        setUpdateTasksData(!updateTasksData);
         setIsAddTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
@@ -391,11 +393,12 @@ export default function ProjectsPage() {
         due_date: values.due_date || undefined,
         priority: values.priority || undefined,
         status: values.status || undefined,
-        task_id: selectedTaskData?.task_id,
+        task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
       }
       const response: any = await updateTaskApi(payload);
       if (response.status === "success") {
         clearValueAndErrors();
+        setUpdateTasksData(!updateTasksData);
         setIsAddTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
@@ -456,7 +459,71 @@ export default function ProjectsPage() {
     }
   };
 
-
+  const deleteTask = async (taskId: string) => {
+    try {
+      const response: any = await deleteTaskApi(taskId);
+      if (response.status === "success") {
+        clearValueAndErrors();
+        setUpdateTasksData(!updateTasksData);
+        setIsAddTaskModalOpen(false);
+        setToastMessage({
+          title: "Task Deleted",
+          description: response.message || "Your task has been deleted successfully",
+          className: "text-green-600",
+        });
+      
+        setShowToast(true);
+        setIsExitingToast(false);
+      
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }else{
+        clearValueAndErrors();
+        setIsAddTaskModalOpen(false);
+        setToastMessage({
+          title: response.message,
+          description: response.error,
+          className: "text-error-default",
+        });
+      
+        setShowToast(true);
+        setIsExitingToast(false);
+      
+        setTimeout(() => {
+          setIsExitingToast(true); // Start exit animation
+          setTimeout(() => {
+            setShowToast(false); // Remove after animation completes
+          }, 400); // Must match the toastOut animation duration
+        }, 10000); // Toast display duration
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: error.message,
+          className: "text-error-default",
+        });
+      } else {
+        setToastMessage({
+          title: "Something Went Wrong",
+          description: "An unknown error occurred",
+          className: "text-error-default",
+        });
+      }
+      setShowToast(true);
+      setIsExitingToast(false);
+      setTimeout(() => {
+        setIsExitingToast(true); // Start exit animation
+        setTimeout(() => {
+          setShowToast(false); // Remove after animation completes
+        }, 400); // Must match the toastOut animation duration
+      }, 10000); // Toast display duration
+    }
+  };
   useEffect(() => {
     setFieldValue("title", selectedTaskData?.title || "");
     setFieldValue("description", selectedTaskData?.description || "");
@@ -465,6 +532,36 @@ export default function ProjectsPage() {
     setFieldValue("due_date", selectedTaskData?.due_date || null);
     setFieldValue("isRecurring", false);
   }, [selectedTaskData]);
+
+
+  const handleTaskStatus = async (task: ITask) => {
+      const mappedTask: projectOrTaskFormValues = {
+        title: task.title,
+        description: task.description,
+        due_date: task.due_date ?? null,
+        colorLabel: "", 
+        color: "",      
+        user_id: user?.user_id ?? "", 
+        project_id: task.project_id,
+        project_title: task.project_title ?? "",
+        project_color: "", 
+        priority: task.priority,
+        status: task.status,
+        isRecurring: false,
+        repeat_every: "",
+        repeat_days: [],
+        start_date: null,
+        end_date: null,
+        project: "",  
+        task_id: task.task_id,
+      };
+    
+      await updateTask(mappedTask);
+    };
+
+    const handleDeleteTask = async (taskId: string) => {
+      await deleteTask(taskId);
+    };
 
   return (
     <MainLayout>
@@ -509,10 +606,7 @@ export default function ProjectsPage() {
             {projectData.length > 0 ? projectData.map((project, index) => (
               <ProjectCard
                 key={index}
-                title={project.title}
-                description={project.description}
-                due_date={project.due_date}
-                tasksCount={project.task_count ? project.task_count : 0}
+                project={project}
                 onClick={() => {
                   setSelectedProject(project);
                   setIsViewProjectModalOpen(true);
@@ -562,6 +656,8 @@ export default function ProjectsPage() {
             setIsAddTaskModalOpen(true);
             setIsUpdateTask(true);
           }}
+          handleTaskStatus={(task: ITask) => handleTaskStatus(task)}
+          handleDeleteTask={(taskId: string) => handleDeleteTask(taskId)}
         />
       )}
 

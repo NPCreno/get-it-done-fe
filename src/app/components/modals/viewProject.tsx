@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IProject } from '@/app/interface/IProject';
 import { ITask } from '@/app/interface/ITask';
 import { useFormState } from '@/app/context/FormProvider';
@@ -10,6 +10,8 @@ interface ViewProjectModalProps {
   handleCreateTask: () => void;
   tasks: ITask[];
   handleUpdateTask: () => void;
+  handleTaskStatus: (task: ITask) => void;
+  handleDeleteTask: (taskId: string) => void;
 }
 
 export default function ViewProjectModal({ 
@@ -19,6 +21,8 @@ export default function ViewProjectModal({
   handleCreateTask,
   tasks,
   handleUpdateTask,
+  handleTaskStatus,
+  handleDeleteTask,
 }: ViewProjectModalProps) {
  
   if (!isOpen) return null;
@@ -31,6 +35,9 @@ export default function ViewProjectModal({
 
   window.addEventListener('keydown', handleEscapeKey);
   
+  useEffect(() => {
+    // refresh tasks lists
+  }, [tasks]);
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
@@ -54,7 +61,7 @@ export default function ViewProjectModal({
 
         <div className="flex flex-col gap-[10px] max-h-[710px] min-h-[200px] overflow-y-auto scrollbar-hide">
           {tasks.length != 0 ? tasks.map((task) => (
-            <TaskCard task={task} handleUpdateTask={handleUpdateTask} />
+            <TaskCard task={task} handleUpdateTask={handleUpdateTask} handleTaskStatus={handleTaskStatus} handleDeleteTask={handleDeleteTask}/>
           )) : (
             <div className="h-full flex items-center justify-center flex-grow">
               <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
@@ -83,63 +90,76 @@ export default function ViewProjectModal({
 interface TaskCardProps {
   task: ITask;
   handleUpdateTask: () => void;
+  handleTaskStatus: (task: ITask) => void;
+  handleDeleteTask: (taskId: string) => void;
 }
 
-const TaskCard = ({ task, handleUpdateTask }: TaskCardProps) => {
+const TaskCard = ({ task, handleUpdateTask, handleTaskStatus, handleDeleteTask }: TaskCardProps) => {
   const {
     setSelectedTaskData,
   } = useFormState();
-  const priorityColor = task.priority === "High" ? "bg-red-500" : task.priority === "Medium" ? "bg-accent-default" : "bg-secondary-default";
-  const statusColor = task.status === "Pending" ? "bg-[#219EBC]" : task.status === "Complete" ? "bg-[#53D86A]" : "bg-red-200";
-  const statusTextColor = task.status === "Pending" ? "text-[#0B4250]" : task.status === "Complete" ? "text-success-600" : "text-red-700";
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const priorityColor = task.priority === "Low" ? "bg-secondary-200" : task.priority === "Medium" ? "bg-accent-200" : "bg-error-200";
+  const priorityTextColor = task.priority === "Low" ? "text-secondary-500" : task.priority === "Medium" ? "text-accent-500" : "text-error-500";
 
-  const handleRevertStatus = (task_id: string) => {
-    console.log("Revert Status", task_id);
-  }
-
-  const handleCompleteTask = (task_id: string) => {
-    console.log("Complete Task", task_id);
-  }
+  const handleCheckToggle = () => {
+    const updatedTask = {
+      ...task,
+      status: task.status === "Complete" ? "Pending" : "Complete",
+    };
+    handleTaskStatus(updatedTask);
+  };
 
   return (
-    <div className="border border-[#E0E0E0] rounded-[10px] py-2 px-5 flex flex-row cursor-pointer" 
-    onClick={() => {
-      setSelectedTaskData(task)
-      handleUpdateTask()
-    }}>
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-row gap-[10px] items-center">
-          <div className={`w-[15px] h-[15px] rounded-full mr-4 ${task.status == "Complete" ? "bg-green-400" : priorityColor}`} 
+    <div className="border border-[#E0E0E0] rounded-[10px] py-2 px-5 flex flex-row">
+      <div className="flex flex-row justify-between w-full" 
+      onMouseEnter={() => setShowDeleteModal(true)} 
+        onMouseLeave={() => setShowDeleteModal(false)}>
+        <div className="flex flex-row gap-[10px] items-center w-full" 
+        onClick={() => {
+          setSelectedTaskData(task)
+          handleUpdateTask()
+        }}
+        >
+          <div className={`w-[15px] h-[15px] rounded-full mr-4 ${task.status == "Complete" ? "bg-success-500" : "bg-[#FFC107]"}`} 
           ></div>
           <div className="flex flex-col gap-[10px] justify-center items-center">
             <div className="flex flex-row gap-[10px]">
               <h1 className={`text-sm font-bold font-lato ${task.status == "Complete" ? "line-through text-[#828282]" : "text-text"}`}>{task.title}</h1>
-              <div className={`${statusColor} flex items-center px-[6px] h-[20px] rounded-full ${statusTextColor} text-[11px] font-lato font-bold ${task.status == "Complete" ? "line-through" : ""}`}>
-                {task.status}
+              <div className={`${priorityColor} flex items-center px-[6px] h-[20px] rounded-full ${priorityTextColor} text-[11px] font-lato font-bold ${task.status == "Complete" ? "line-through" : ""}`}>
+                {task.priority} Priority
               </div>
             </div>
-            <h1 className="text-[#828282] text-xs font-bold font-lato">{task.description}</h1>
+            <h1 className="text-[#828282] text-xs font-bold font-lato w-full text-start">{task.description}</h1>
           </div>
         </div>
 
-        {task.status != "Complete" ?(
-          <div className="h-full flex items-center">
-            <div className="border-[2px] border-solid rounded-[10px] border-primary-200 w-5 h-5 flex items-center justify-center cursor-pointer">
-              <input
-                id="checkTask"
-                type="checkbox"
-                className="appearance-none w-full h-full checked:bg-primary-200 checked:border-white checked:border-solid 
-                        border-[2px] rounded-[10px] relative cursor-pointer"
-                onClick={() => handleCompleteTask(task.task_id)}
-              />
+        
+          <div className="h-full flex items-center w-[60px] gap-[10px] justify-end">
+          {showDeleteModal && (
+            <div className="cursor-pointer" onClick={() => handleDeleteTask(task.task_id)}>
+              <Image src="/svgs/trash-outline.svg" alt="Delete" width={20} height={20} />
             </div>
+          )}
+            <div className="group min-w-5 h-5 relative">
+                <input
+                  id="checkTask"
+                  type="checkbox"
+                  checked={task.status === "Complete"}
+                  readOnly
+                  onClick={handleCheckToggle}
+                  className="peer appearance-none min-w-5 h-full cursor-pointer"
+                />
+                <div
+                  className="absolute inset-0 rounded-[10px] border-[2px] border-solid border-primary-200 
+                            peer-checked:border-0 group-hover:border-0 pointer-events-none"
+                ></div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 
+                                group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none">
+                  <Image src="/svgs/checkmark-circle-yellow.svg" alt="Check" width={20} height={20} />
+                </div>
+              </div>
           </div>
-        ) : (
-          <div className="h-full flex items-center cursor-pointer" onClick={() => handleRevertStatus(task.task_id)}>
-           <Image src="/svgs/refresh-circle-outline.svg" alt="Revert" width={20} height={20} />
-          </div>
-        )}
-
       </div>
     </div>
   )

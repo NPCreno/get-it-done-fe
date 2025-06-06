@@ -1,16 +1,11 @@
+import { IProject } from "../interface/IProject";
 
 export default function ProjectCard({
-  title,
-  description,
-  due_date,
-  tasksCount,
+  project,
   onClick,
   onAddTaskClick,
 }: {
-  title: string;
-  description: string;
-  due_date: Date;
-  tasksCount: number;
+  project: IProject;
   onClick: () => void;
   onAddTaskClick: () => void;
 }) {
@@ -28,7 +23,7 @@ export default function ProjectCard({
           </svg>
 
           <h1 className="text-text text-base font-bold font-lato">
-            {title}
+            {project.title}
           </h1>
         </div>
 
@@ -49,19 +44,19 @@ export default function ProjectCard({
 
       {/* Description */}
       <span className="text-text text-[11px] font-lato w-full">
-        {description}
+        {project.description ? project.description : "This project has no description"}
       </span>
 
       {/* Due and tasks */}
       <div className="flex justify-between w-full items-center">
         <div className="flex flex-row">
-          <div className={`text-text text-[11px] font-bold font-lato rounded-[5px] ${due_date ? "bg-background" : ""} px-[5px] h-5 flex items-center`}>
-          {due_date ? "Due " + new Date(due_date).toLocaleDateString() : ""}
+          <div className={`text-text text-[11px] font-bold font-lato rounded-[5px] ${project.due_date ? "bg-background" : ""} px-[5px] h-5 flex items-center`}>
+          {project.due_date ? "Due " + new Date(project.due_date).toLocaleDateString() : ""}
           </div>
         </div>
 
         <h1 className="text-text text-[11px] font-bold font-lato">
-          {tasksCount} tasks
+          {project.task_count} tasks
         </h1>
       </div>
     </div>

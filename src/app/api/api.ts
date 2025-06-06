@@ -228,6 +228,31 @@ export const updateTaskApi = async (payload: UpdateTaskDto) => {
   }
 };
 
+export const deleteTaskApi = async (taskId: string) => {
+  try {
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}/tasks/${taskId}`, 
+        { 
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to create user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error creating user:', err);
+    throw err;
+  }
+};
+
 export const getProjectsForUser = async (userId: string) => {
   try {
     const token = getAccessToken();
