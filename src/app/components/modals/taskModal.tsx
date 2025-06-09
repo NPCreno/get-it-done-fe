@@ -3,7 +3,6 @@ import InputBox from '../inputBox';
 import { IProject } from '@/app/interface/IProject';
 
 interface taskModalProps {
-  isOpen: boolean;
   onClose: () => void;
   formik: FormikType;
   handleCreateTask: (values: FormValues) => void;
@@ -67,7 +66,6 @@ interface CustomChangeEvent extends React.ChangeEvent<HTMLInputElement> {
 }
 
 export default function TaskModal({ 
-  isOpen, 
   onClose, 
   formik,
   handleCreateTask,
@@ -78,7 +76,6 @@ export default function TaskModal({
 }: taskModalProps) {
   const [height, setHeight] = useState(0);
   const ref = useRef<HTMLDivElement>(null); 
-  if (!isOpen) return null;
 
   const handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
@@ -342,7 +339,7 @@ export default function TaskModal({
                 }}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-[13px] font-bold p-[10px]" 
-                onClick={() => {isUpdate ? handleUpdateTask(formik.values) : handleCreateTask(formik.values)}}>
+                onClick={() => isUpdate ? handleUpdateTask(formik.values) : handleCreateTask(formik.values)}>
                   {isUpdate ? "Update" : "Create"}
                 </button>
             </div>
