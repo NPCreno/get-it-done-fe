@@ -15,6 +15,7 @@ import { Toast } from "@/app/components/toast";
 import { ITask } from "@/app/interface/ITask";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import Image from "next/image";
+import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 
 interface taskFormValues {
   user_id: string;
@@ -75,10 +76,6 @@ export default function DashboardPage() {
     }, 400);
   };
 
-  console.log("showToast: ", showToast);
-  console.log("toastMessage: ", toastMessage);
-  console.log("isExitingToast: ", isExitingToast);
-
   const initialValues = useMemo(() => ({
     title: "",
     description: "",
@@ -125,7 +122,6 @@ export default function DashboardPage() {
   });
 
   const handleSubmitForm = async (values: taskFormValues) => {
-    console.log("values: ", values);
     const validationErrors: FormikErrors<typeof values> = await validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
@@ -155,7 +151,7 @@ export default function DashboardPage() {
         end_date: values.end_date || undefined,
         status: values.status || undefined,
       }
-      const response: any = await createTaskApi(payload);
+      const response: ITaskResponse = await createTaskApi(payload);
       if (response.status === "success") {
         setUpdateTaskDashboard(!updateTaskDashboard);
         setIsTaskModalOpen(false);
@@ -290,7 +286,7 @@ export default function DashboardPage() {
         status: values.status || undefined,
         task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
       }
-      const response: any = await updateTaskApi(payload);
+      const response: ITaskResponse = await updateTaskApi(payload);
       if (response.status === "success") {
         setUpdateTaskDashboard(!updateTaskDashboard);
         clearValueAndErrors();
@@ -315,7 +311,7 @@ export default function DashboardPage() {
         setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
-          description: response.error,
+          description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
       
@@ -364,13 +360,18 @@ export default function DashboardPage() {
   }
   
   useEffect(() => {
+    if(selectedTaskData){
     setFieldValue("title", selectedTaskData?.title || "");
     setFieldValue("description", selectedTaskData?.description || "");
     setFieldValue("priority", selectedTaskData?.priority || "");
     setFieldValue("status", selectedTaskData?.status || "");
     setFieldValue("due_date", selectedTaskData?.due_date || null);
     setFieldValue("isRecurring", false);
-  }, [selectedTaskData]);
+    }
+    else{
+      return
+    }
+  }, [selectedTaskData, setFieldValue]);
 
   const handleTaskStatus = async (task: ITask) => {
     await updateTask({
@@ -519,7 +520,6 @@ export default function DashboardPage() {
 
       {isTaskModalOpen && (
         <AddTaskModal
-          isOpen={isTaskModalOpen}
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,

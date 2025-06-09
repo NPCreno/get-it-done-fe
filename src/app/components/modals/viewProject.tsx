@@ -4,7 +4,6 @@ import { ITask } from '@/app/interface/ITask';
 import { useFormState } from '@/app/context/FormProvider';
 import Image from 'next/image';
 interface ViewProjectModalProps {
-  isOpen: boolean;
   onClose: () => void;
   project: IProject;
   handleCreateTask: () => void;
@@ -15,7 +14,6 @@ interface ViewProjectModalProps {
 }
 
 export default function ViewProjectModal({ 
-  isOpen, 
   onClose, 
   project, 
   handleCreateTask,
@@ -25,8 +23,6 @@ export default function ViewProjectModal({
   handleDeleteTask,
 }: ViewProjectModalProps) {
  
-  if (!isOpen) return null;
-  
   const handleEscapeKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClose();
@@ -60,8 +56,8 @@ export default function ViewProjectModal({
         </div>
 
         <div className="flex flex-col gap-[10px] max-h-[710px] min-h-[200px] overflow-y-auto scrollbar-hide">
-          {tasks.length != 0 ? tasks.map((task) => (
-            <TaskCard task={task} handleUpdateTask={handleUpdateTask} handleTaskStatus={handleTaskStatus} handleDeleteTask={handleDeleteTask}/>
+          {tasks.length != 0 ? tasks.map((task, index) => (
+            <TaskCard key={index} task={task} handleUpdateTask={handleUpdateTask} handleTaskStatus={handleTaskStatus} handleDeleteTask={handleDeleteTask}/>
           )) : (
             <div className="h-full flex items-center justify-center flex-grow">
               <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
