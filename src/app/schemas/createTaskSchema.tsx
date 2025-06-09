@@ -46,6 +46,6 @@ export const createTaskSchema = yup.object().shape({
     .when("isRecurring", {
       is: true,
       then: (schema) => schema.required("Start date is required"),
-      otherwise: (schema) => schema.required("Start date is required"),
+      otherwise: (schema) => schema.optional(),
     }),
 });

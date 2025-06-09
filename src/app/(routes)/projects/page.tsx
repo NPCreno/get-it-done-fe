@@ -70,7 +70,6 @@ export default function ProjectsPage() {
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [isViewProjectModalOpen, setIsViewProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  console.log("isTaskModalOpen: ", isTaskModalOpen);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
@@ -149,7 +148,6 @@ export default function ProjectsPage() {
         return
       }
       const response: ICreateProjectResponse = await createProject(values as CreateProjectDto);
-      console.log("response: ", response)
       if (response.status === "success") {
         setIsAddProjectModalOpen(false);
         setToastMessage({
@@ -279,8 +277,6 @@ export default function ProjectsPage() {
     }
   }, [isViewProjectModalOpen, isTaskModalOpen])
 
-  console.log("selectProj: ", selectedProject)
-  
   const handleCreateTask = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
@@ -657,7 +653,6 @@ export default function ProjectsPage() {
 
       {isViewProjectModalOpen && (
         <ViewProjectModal
-          isOpen={isViewProjectModalOpen}
           onClose={() => setIsViewProjectModalOpen(false)}
           project={selectedProject ?? {
             title: "",
@@ -683,7 +678,6 @@ export default function ProjectsPage() {
 
       {isTaskModalOpen && (
         <TaskModal
-          isOpen={isTaskModalOpen}
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values as projectOrTaskFormValues,

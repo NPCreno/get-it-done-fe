@@ -76,10 +76,6 @@ export default function DashboardPage() {
     }, 400);
   };
 
-  console.log("showToast: ", showToast);
-  console.log("toastMessage: ", toastMessage);
-  console.log("isExitingToast: ", isExitingToast);
-
   const initialValues = useMemo(() => ({
     title: "",
     description: "",
@@ -126,7 +122,6 @@ export default function DashboardPage() {
   });
 
   const handleSubmitForm = async (values: taskFormValues) => {
-    console.log("values: ", values);
     const validationErrors: FormikErrors<typeof values> = await validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
@@ -525,7 +520,6 @@ export default function DashboardPage() {
 
       {isTaskModalOpen && (
         <AddTaskModal
-          isOpen={isTaskModalOpen}
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,
