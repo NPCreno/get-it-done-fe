@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import InputBox from '../inputBox';
 import { IProject } from '@/app/interface/IProject';
 
@@ -78,14 +78,20 @@ export default function TaskModal({
 }: taskModalProps) {
   const [height, setHeight] = useState(0);
   const ref = useRef<HTMLDivElement>(null); 
-  if (!isOpen) return null;
+  
 
-  const handleEscapeKey = (event: KeyboardEvent) => {
+  const handleEscapeKey = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
-      clearAllData();
       onClose();
     }
-  };
+  }, [onClose]);
+  
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [handleEscapeKey]);
 
   const priorityOptions = [
     { name: "Low", color: "#219EBC" },
@@ -133,6 +139,7 @@ export default function TaskModal({
   }
 
   useEffect(() => {
+    if (!formik.values.isRecurring) return;
     const frame = requestAnimationFrame(() => {
       if (ref.current) {
         setHeight(ref.current.scrollHeight + 40);
@@ -141,6 +148,8 @@ export default function TaskModal({
 
     return () => cancelAnimationFrame(frame);
   }, [formik.values.isRecurring, formik.errors]); 
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -342,7 +351,7 @@ export default function TaskModal({
                 }}>Cancel</button>
                 <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-[13px] font-bold p-[10px]" 
-                onClick={() => {isUpdate ? handleUpdateTask(formik.values) : handleCreateTask(formik.values)}}>
+                onClick={() => isUpdate ? handleUpdateTask(formik.values) : handleCreateTask(formik.values)}>
                   {isUpdate ? "Update" : "Create"}
                 </button>
             </div>

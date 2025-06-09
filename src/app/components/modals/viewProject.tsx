@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { IProject } from '@/app/interface/IProject';
 import { ITask } from '@/app/interface/ITask';
 import { useFormState } from '@/app/context/FormProvider';
@@ -25,19 +25,25 @@ export default function ViewProjectModal({
   handleDeleteTask,
 }: ViewProjectModalProps) {
  
-  if (!isOpen) return null;
   
-  const handleEscapeKey = (event: KeyboardEvent) => {
+  const handleEscapeKey = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClose();
     }
-  };
-
-  window.addEventListener('keydown', handleEscapeKey);
+  }, [onClose]);
   
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [handleEscapeKey]);
+
   useEffect(() => {
     // refresh tasks lists
   }, [tasks]);
+
+  if (!isOpen) return null;
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
@@ -60,13 +66,21 @@ export default function ViewProjectModal({
         </div>
 
         <div className="flex flex-col gap-[10px] max-h-[710px] min-h-[200px] overflow-y-auto scrollbar-hide">
-          {tasks.length != 0 ? tasks.map((task) => (
-            <TaskCard task={task} handleUpdateTask={handleUpdateTask} handleTaskStatus={handleTaskStatus} handleDeleteTask={handleDeleteTask}/>
-          )) : (
-            <div className="h-full flex items-center justify-center flex-grow">
-              <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
-            </div>
-          )}
+        {tasks.length !== 0 ? (
+          tasks.map((task) => (
+            <TaskCard
+              key={task.task_id}
+              task={task}
+              handleUpdateTask={handleUpdateTask}
+              handleTaskStatus={handleTaskStatus}
+              handleDeleteTask={handleDeleteTask}
+            />
+          ))
+        ) : (
+          <div className="h-full flex items-center justify-center flex-grow">
+            <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
+          </div>
+        )}
         </div>
 
         <div className="flex flex-row justify-between w-full  items-center">
