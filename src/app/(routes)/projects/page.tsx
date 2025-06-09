@@ -18,6 +18,7 @@ import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 import TaskModal from "@/app/components/modals/taskModal";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
+import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 
 interface projectOrTaskFormValues {
   title: string;
@@ -63,14 +64,13 @@ export default function ProjectsPage() {
     user, 
     setUser,
     selectedTaskData,
-    setSelectedTaskData, 
   } = useFormState();
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [projectData, setProjectData] = useState<IProject[]>([]);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [isViewProjectModalOpen, setIsViewProjectModalOpen] = useState(false);
-  const [isAddTaskModalOpen, setIsAddTaskModalOpen] = useState(false);
-  console.log("isAddTaskModalOpen: ", isAddTaskModalOpen);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  console.log("isTaskModalOpen: ", isTaskModalOpen);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
   const [isExitingToast, setIsExitingToast] = useState(false);
@@ -241,7 +241,7 @@ export default function ProjectsPage() {
       };
       fetchProjects();
     }
-  }, [user, isAddProjectModalOpen, isAddTaskModalOpen ]);
+  }, [user, isAddProjectModalOpen, isTaskModalOpen ]);
 
   const clearValueAndErrors = () => {
     setErrors({});
@@ -274,10 +274,10 @@ export default function ProjectsPage() {
 
 
   useEffect(() =>{
-    if(!isAddTaskModalOpen && !isViewProjectModalOpen){
+    if(!isTaskModalOpen && !isViewProjectModalOpen){
       setSelectedProject(null);
     }
-  }, [isViewProjectModalOpen, isAddTaskModalOpen])
+  }, [isViewProjectModalOpen, isTaskModalOpen])
 
   console.log("selectProj: ", selectedProject)
   
@@ -317,11 +317,11 @@ export default function ProjectsPage() {
         end_date: values.end_date || undefined,
         status: values.status || "Pending",
       }
-      const response: any = await createTaskApi(payload);
+      const response: ITaskResponse = await createTaskApi(payload);
       if (response.status === "success") {
         clearValueAndErrors();
         setUpdateTasksData(!updateTasksData);
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
           description: response.message || "Your new task has been created successfully",
@@ -339,10 +339,10 @@ export default function ProjectsPage() {
         }, 10000); // Toast display duration
       }else{
         clearValueAndErrors();
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
-          description: response.error,
+          description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
       
@@ -395,11 +395,11 @@ export default function ProjectsPage() {
         status: values.status || undefined,
         task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
       }
-      const response: any = await updateTaskApi(payload);
+      const response: ITaskResponse = await updateTaskApi(payload);
       if (response.status === "success") {
         clearValueAndErrors();
         setUpdateTasksData(!updateTasksData);
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
           description: response.message || "Your new task has been created successfully",
@@ -417,10 +417,10 @@ export default function ProjectsPage() {
         }, 10000); // Toast display duration
       }else{
         clearValueAndErrors();
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
-          description: response.error,
+          description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
       
@@ -461,11 +461,11 @@ export default function ProjectsPage() {
 
   const deleteTask = async (taskId: string) => {
     try {
-      const response: any = await deleteTaskApi(taskId);
+      const response: ITaskResponse = await deleteTaskApi(taskId);
       if (response.status === "success") {
         clearValueAndErrors();
         setUpdateTasksData(!updateTasksData);
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Deleted",
           description: response.message || "Your task has been deleted successfully",
@@ -483,10 +483,10 @@ export default function ProjectsPage() {
         }, 10000); // Toast display duration
       }else{
         clearValueAndErrors();
-        setIsAddTaskModalOpen(false);
+        setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
-          description: response.error,
+          description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
       
@@ -525,13 +525,18 @@ export default function ProjectsPage() {
     }
   };
   useEffect(() => {
+    if(selectedTaskData){
     setFieldValue("title", selectedTaskData?.title || "");
     setFieldValue("description", selectedTaskData?.description || "");
     setFieldValue("priority", selectedTaskData?.priority || "");
     setFieldValue("status", selectedTaskData?.status || "");
     setFieldValue("due_date", selectedTaskData?.due_date || null);
     setFieldValue("isRecurring", false);
-  }, [selectedTaskData]);
+    }
+    else{
+      return
+    }
+  }, [selectedTaskData, setFieldValue]);
 
 
   const handleTaskStatus = async (task: ITask) => {
@@ -563,6 +568,21 @@ export default function ProjectsPage() {
       await deleteTask(taskId);
     };
 
+    useEffect(() => {
+      if (user) {
+        const fetchProjects = async () => {
+          const projects = await getProjectsForUser(user.user_id);
+          if (projects?.status === "success") {
+            setProjectOptions(projects.data);
+            return;
+          }
+          else{
+            setProjectOptions([]);
+          }
+        };
+        fetchProjects();
+      }
+    }, [user, isTaskModalOpen]);
   return (
     <MainLayout>
       {showToast && (
@@ -613,7 +633,7 @@ export default function ProjectsPage() {
                 }}
                 onAddTaskClick={() => {
                   setSelectedProject(project);
-                  setIsAddTaskModalOpen(true);
+                  setIsTaskModalOpen(true);
                 }}
               />
             )) : (
@@ -647,13 +667,13 @@ export default function ProjectsPage() {
           }}
           handleCreateTask={() => {
             setIsViewProjectModalOpen(false)
-            setIsAddTaskModalOpen(true);
+            setIsTaskModalOpen(true);
             setIsUpdateTask(false);
           }}
           tasks={tasks ? tasks : []}
           handleUpdateTask={() => {
             setIsViewProjectModalOpen(false)
-            setIsAddTaskModalOpen(true);
+            setIsTaskModalOpen(true);
             setIsUpdateTask(true);
           }}
           handleTaskStatus={(task: ITask) => handleTaskStatus(task)}
@@ -661,10 +681,10 @@ export default function ProjectsPage() {
         />
       )}
 
-      {isAddTaskModalOpen && (
+      {isTaskModalOpen && (
         <TaskModal
-          isOpen={isAddTaskModalOpen}
-          onClose={() => setIsAddTaskModalOpen(false)}
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values as projectOrTaskFormValues,
             errors: errors as FormErrors,
