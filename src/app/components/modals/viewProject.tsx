@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import InputBox from '../inputBox';
-import { CustomDropdownMenu } from '../dropdown';
 import { IProject } from '@/app/interface/IProject';
 import { ITask } from '@/app/interface/ITask';
-
+import { useFormState } from '@/app/context/FormProvider';
+import Image from 'next/image';
 interface ViewProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   project: IProject;
   handleCreateTask: () => void;
+  tasks: ITask[];
+  handleUpdateTask: () => void;
+  handleTaskStatus: (task: ITask) => void;
+  handleDeleteTask: (taskId: string) => void;
 }
 
 export default function ViewProjectModal({ 
@@ -17,102 +19,12 @@ export default function ViewProjectModal({
   onClose, 
   project, 
   handleCreateTask,
+  tasks,
+  handleUpdateTask,
+  handleTaskStatus,
+  handleDeleteTask,
 }: ViewProjectModalProps) {
-  // const [tasks, setTasks] = useState<ITask[]>([]);
-  const tasks: ITask[] = [
-    {
-      project_id: 'proj-001',
-      task_id: 'task-001',
-      title: 'Design Login Page',
-      description: 'Create wireframes and high-fidelity mockups for the login screen.',
-      due_date: new Date('2025-06-05'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-001',
-      task_id: 'task-002',
-      title: 'API Authentication',
-      description: 'Implement JWT-based authentication for the backend.',
-      due_date: new Date('2025-06-10'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-002',
-      task_id: 'task-003',
-      title: 'Database Schema Design',
-      description: 'Design the initial database schema for the application.',
-      due_date: new Date('2025-06-03'),
-      status: 'Completed',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-002',
-      task_id: 'task-004',
-      title: 'Frontend Setup',
-      description: 'Set up Angular project structure and shared components.',
-      due_date: new Date('2025-06-07'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-003',
-      task_id: 'task-005',
-      title: 'User Dashboard',
-      description: 'Develop dashboard components with dynamic data rendering.',
-      due_date: new Date('2025-06-15'),
-      status: 'To Do',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-003',
-      task_id: 'task-006',
-      title: 'Unit Testing',
-      description: 'Write unit tests for core services and components.',
-      due_date: new Date('2025-06-12'),
-      status: 'To Do',
-      priority: 'Low',
-    },
-    {
-      project_id: 'proj-004',
-      task_id: 'task-007',
-      title: 'CI/CD Integration',
-      description: 'Integrate GitHub Actions for automatic deployment.',
-      due_date: new Date('2025-06-20'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-004',
-      task_id: 'task-008',
-      title: 'Bug Fixing',
-      description: 'Resolve reported issues from internal testing.',
-      due_date: new Date('2025-06-08'),
-      status: 'Completed',
-      priority: 'High',
-    },
-    {
-      project_id: 'proj-005',
-      task_id: 'task-009',
-      title: 'Performance Optimization',
-      description: 'Profile and optimize page load times.',
-      due_date: new Date('2025-06-18'),
-      status: 'To Do',
-      priority: 'Medium',
-    },
-    {
-      project_id: 'proj-005',
-      task_id: 'task-010',
-      title: 'Documentation',
-      description: 'Write comprehensive documentation for developers.',
-      due_date: new Date('2025-06-25'),
-      status: 'Completed',
-      priority: 'Low',
-    }
-  ];
-
-  
+ 
   if (!isOpen) return null;
   
   const handleEscapeKey = (event: KeyboardEvent) => {
@@ -122,8 +34,10 @@ export default function ViewProjectModal({
   };
 
   window.addEventListener('keydown', handleEscapeKey);
-
   
+  useEffect(() => {
+    // refresh tasks lists
+  }, [tasks]);
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
@@ -136,21 +50,31 @@ export default function ViewProjectModal({
         <div className="flex flex-col">
             <div className="flex flex-row justify-between items-center">
                 <h1 className="text-text text-[20px] font-bold font-lato">{project.title}</h1>
-                <Image src="/svgs/close.svg" alt="close" width={20} height={20} onClick={onClose} className="cursor-pointer"/>
+                <button className="cursor-pointer" onClick={onClose}>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.5 4.50098L4.5 11.501M11.5 11.501L4.5 4.50098L11.5 11.501Z" stroke="#666666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
             </div>
             <h2 className="text-[#676767] text-sm font-lato">{project.description ? project.description : "View and manage tasks in this project"}</h2>
         </div>
 
-        <div className="flex flex-col gap-[10px] max-h-[710px] overflow-y-auto scrollbar-hide">
-          {tasks.map((task) => (
-            <TaskCard key={task.task_id} {...task} />
-          ))}
+        <div className="flex flex-col gap-[10px] max-h-[710px] min-h-[200px] overflow-y-auto scrollbar-hide">
+          {tasks.length != 0 ? tasks.map((task) => (
+            <TaskCard task={task} handleUpdateTask={handleUpdateTask} handleTaskStatus={handleTaskStatus} handleDeleteTask={handleDeleteTask}/>
+          )) : (
+            <div className="h-full flex items-center justify-center flex-grow">
+              <h1 className="text-text text-[20px] font-bold font-lato text-center">No tasks found</h1>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-row justify-between w-full  items-center">
               <button className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-xs p-[10px]" onClick={handleCreateTask}>
-                  <Image src="/svgs/add-outline-white.svg" alt="add-outline-white" width={20} height={20}/>
+                  <svg width="20" height="20" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                   New Task
               </button>
               
@@ -163,56 +87,79 @@ export default function ViewProjectModal({
   );
 }
 
+interface TaskCardProps {
+  task: ITask;
+  handleUpdateTask: () => void;
+  handleTaskStatus: (task: ITask) => void;
+  handleDeleteTask: (taskId: string) => void;
+}
 
-const TaskCard = (task: ITask) => {
+const TaskCard = ({ task, handleUpdateTask, handleTaskStatus, handleDeleteTask }: TaskCardProps) => {
+  const {
+    setSelectedTaskData,
+  } = useFormState();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const priorityColor = task.priority === "Low" ? "bg-secondary-200" : task.priority === "Medium" ? "bg-accent-200" : "bg-error-200";
+  const priorityTextColor = task.priority === "Low" ? "text-secondary-500" : task.priority === "Medium" ? "text-accent-500" : "text-error-500";
 
-  const priorityColor = task.priority === "High" ? "bg-red-500" : task.priority === "Medium" ? "bg-accent-default" : "bg-secondary-default";
-  const statusColor = task.status === "To Do" ? "bg-accent-200" : "bg-green-200";
-  const statusTextColor = task.status === "To Do" ? "text-accent-600" : "text-green-700";
-
-  const handleRevertStatus = (task_id: string) => {
-    console.log("Revert Status", task_id);
-  }
-
-  const handleCompleteTask = (task_id: string) => {
-    console.log("Complete Task", task_id);
-  }
+  const handleCheckToggle = () => {
+    const updatedTask = {
+      ...task,
+      status: task.status === "Complete" ? "Pending" : "Complete",
+    };
+    handleTaskStatus(updatedTask);
+  };
 
   return (
     <div className="border border-[#E0E0E0] rounded-[10px] py-2 px-5 flex flex-row">
-      <div className="flex flex-row justify-between w-full">
-        <div className="flex flex-row gap-[10px] items-center">
-          <div className={`w-[10px] h-[10px] rounded-full mr-4 ${task.status == "Completed" ? "bg-green-400" : priorityColor}`} 
+      <div className="flex flex-row justify-between w-full" 
+      onMouseEnter={() => setShowDeleteModal(true)} 
+        onMouseLeave={() => setShowDeleteModal(false)}>
+        <div className="flex flex-row gap-[10px] items-center w-full" 
+        onClick={() => {
+          setSelectedTaskData(task)
+          handleUpdateTask()
+        }}
+        >
+          <div className={`w-[15px] h-[15px] rounded-full mr-4 ${task.status == "Complete" ? "bg-success-500" : "bg-[#FFC107]"}`} 
           ></div>
-          <div className="flex flex-col gap-[10px]">
+          <div className="flex flex-col gap-[10px] justify-center items-center">
             <div className="flex flex-row gap-[10px]">
-              <h1 className={`text-sm font-bold font-lato ${task.status == "Completed" ? "line-through text-[#828282]" : "text-text"}`}>{task.title}</h1>
-              <div className={`${statusColor} h-[18px] rounded-full px-1 ${statusTextColor} text-[11px] font-lato font-bold ${task.status == "Completed" ? "line-through" : ""}`}>
-                {task.status}
+              <h1 className={`text-sm font-bold font-lato ${task.status == "Complete" ? "line-through text-[#828282]" : "text-text"}`}>{task.title}</h1>
+              <div className={`${priorityColor} flex items-center px-[6px] h-[20px] rounded-full ${priorityTextColor} text-[11px] font-lato font-bold ${task.status == "Complete" ? "line-through" : ""}`}>
+                {task.priority} Priority
               </div>
             </div>
-            <h1 className="text-[#828282] text-xs font-bold font-lato">{task.description}</h1>
+            <h1 className="text-[#828282] text-xs font-bold font-lato w-full text-start">{task.description}</h1>
           </div>
         </div>
 
-        {task.status != "Completed" ?(
-          <div className="h-full flex items-center">
-            <div className="border-[2px] border-solid rounded-[10px] border-primary-200 w-5 h-5 flex items-center justify-center cursor-pointer">
-              <input
-                id="checkTask"
-                type="checkbox"
-                className="appearance-none w-full h-full checked:bg-primary-200 checked:border-white checked:border-solid 
-                        border-[2px] rounded-[10px] relative cursor-pointer"
-                onClick={() => handleCompleteTask(task.task_id)}
-              />
+        
+          <div className="h-full flex items-center w-[60px] gap-[10px] justify-end">
+          {showDeleteModal && (
+            <div className="cursor-pointer" onClick={() => handleDeleteTask(task.task_id)}>
+              <Image src="/svgs/trash-outline.svg" alt="Delete" width={20} height={20} />
             </div>
+          )}
+            <div className="group min-w-5 h-5 relative">
+                <input
+                  id="checkTask"
+                  type="checkbox"
+                  checked={task.status === "Complete"}
+                  readOnly
+                  onClick={handleCheckToggle}
+                  className="peer appearance-none min-w-5 h-full cursor-pointer"
+                />
+                <div
+                  className="absolute inset-0 rounded-[10px] border-[2px] border-solid border-primary-200 
+                            peer-checked:border-0 group-hover:border-0 pointer-events-none"
+                ></div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 
+                                group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none">
+                  <Image src="/svgs/checkmark-circle-yellow.svg" alt="Check" width={20} height={20} />
+                </div>
+              </div>
           </div>
-        ) : (
-          <div className="h-full flex items-center cursor-pointer" onClick={() => handleRevertStatus(task.task_id)}>
-            <Image src="/svgs/refresh-circle-outline.svg" alt="refresh-outline" width={20} height={20}/>
-          </div>
-        )}
-
       </div>
     </div>
   )

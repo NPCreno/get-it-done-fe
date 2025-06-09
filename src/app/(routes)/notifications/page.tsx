@@ -1,10 +1,17 @@
 "use client"
+import { getUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import NotificationCard from "@/app/components/notificationCard";
+import { useFormState } from "@/app/context/FormProvider";
 import { INotificationProps } from "@/app/interface/INotification";
+import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
+import { useEffect, useState } from "react";
+
 
 
 export default function NotificationsPage() {
+  const { user, setUser } = useFormState();
+  const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
 
 const rawNotifications: Omit<INotificationProps, 'status'>[] = [
   {
@@ -78,6 +85,41 @@ const notifications: INotificationProps[] = rawNotifications.map((notif) => ({
   ...notif,
   status: Math.random() < 0.5 ? 'read' : 'unread',
 }));
+
+
+useEffect(() => {
+  const fetchUser = async () => {
+    if(isDoneFetchingUser) return;
+    else{
+      try {
+        if (!user) { // If no user, try getting one from cookies
+          const token = getAccessTokenFromCookies();
+          if (!token) {
+            console.error("No access_token found in cookies");
+            return;
+          }
+          const parsedUser = parseJwt(token).user;
+          if (!parsedUser || !parsedUser.user_id) {
+            console.error("Failed to parse user or missing user_id in token");
+            return;
+          }
+          setIsDoneFetchingUser(true);
+          setUser(parsedUser);
+          return;
+        }
+        // Only fetch updated user info if we have a user
+        const response = await getUser(user.user_id);
+        if (response) {
+          setIsDoneFetchingUser(true);
+          setUser(response);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    }
+  };
+  fetchUser();
+}, [user, setUser, isDoneFetchingUser]);
 
   return (
     <MainLayout>

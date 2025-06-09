@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Check, ChevronRight, Circle, Import } from "lucide-react"
+import { Check, ChevronRight} from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import Image from "next/image"
 const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
@@ -131,7 +130,10 @@ const DropdownMenuRadioItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
-        <Image src="/svgs/check.svg" alt="check" width={17} height={17} />
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2.83228 9.25L6.61068 12.25L14.1675 4.75" stroke="black"/>
+        </svg>
+
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

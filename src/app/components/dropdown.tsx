@@ -1,15 +1,12 @@
 "use client"
 
 import * as React from "react"
-import Image from "next/image"
 import { Button } from "@/app/components/shadcn/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/components/shadcn/dropdown-menu"
 
@@ -17,21 +14,28 @@ interface CustomDropdownMenuProps {
   options: {
     name: string;
     color?: string;
+    project_id?: string;
   }[]
   selectedOption: {
     name: string;
     color?: string;
+    project_id?: string;
   }
-  setSelectedOption: (option: {name: string, color?: string}) => void
+  setSelectedOption: (option: {name: string, color?: string, project_id?: string}) => void
+  placeholder: string;
+  disabled?: boolean;
 }
 
 export function CustomDropdownMenu({
   options,
   selectedOption,
   setSelectedOption,
+  placeholder,
+  disabled,
 }: CustomDropdownMenuProps) {
 
   const currentSelectedColor = options.find(option => option.name === selectedOption.name)?.color;
+
   return (
     <div className="w-full relative">
       <DropdownMenu>
@@ -39,6 +43,7 @@ export function CustomDropdownMenu({
           <Button
           variant="outline"
           className="w-full h-[40px] rounded-[10px] justify-between text-text"
+          disabled={disabled}
         >
           <div className="flex flex-row items-center justify-between w-full">
             {selectedOption.name != "" ? (
@@ -50,13 +55,16 @@ export function CustomDropdownMenu({
                 <span className="text-sm font-normal font-lato text-text">{selectedOption.name}</span>
               </div>
             ) : (
-              <span className="text-sm font-normal font-lato text-text">Select color</span>
+              <span className="text-sm font-normal font-lato text-text">{placeholder}</span>
             )}
-            <Image src="/svgs/dropdown.svg" alt="dropdown" width={20} height={10}/>
+            <svg width="20" height="10" viewBox="0 0 22 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 0.5L10.2683 10.5L21 0.5" stroke="#333333"/>
+            </svg>
+
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[220px] max-h-[286px] overflow-y-auto absolute" side="bottom" align="start" sideOffset={4}>
+      <DropdownMenuContent className="min-w-[244px] max-h-[286px] overflow-y-auto absolute" side="bottom" align="start" sideOffset={4}>
         <DropdownMenuRadioGroup
           value={selectedOption.name}
           onValueChange={(value) => {
@@ -64,7 +72,8 @@ export function CustomDropdownMenu({
             if (selected) {
               setSelectedOption({
                 name: selected.name,
-                color: selected.color
+                color: selected.color,
+                project_id: selected.project_id
               });
             }
           }}

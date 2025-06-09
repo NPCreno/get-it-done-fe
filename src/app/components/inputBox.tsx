@@ -1,16 +1,18 @@
 import React from "react";
 import { DatePicker } from "./datePicker";
 import { CustomDropdownMenu } from "./dropdown";
-import { DatePickerv2 } from "./datePickerv2";
+import { DatePickerWithTime } from "./datePickerWithTime";
+import WeekdaySelector from "./weekdaySelector";
 interface InputBoxProps {
   label: string;
   placeholder: string;
   value: {
     name: string;
     color?: string;
+    project_id?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: "text" | "textarea" | "date" | "dropdown";
+  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime";
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -18,7 +20,19 @@ interface InputBoxProps {
   dropdownptions?: {
     name: string;
     color?: string;
+    title?: string;
+    project_id?: string;
   }[];  
+  customClass?: string;
+  labelCustomClass?: string;
+}
+
+interface CustomDropdownChangeEvent extends React.ChangeEvent<HTMLInputElement>{
+  target: HTMLInputElement & {
+    name: string;
+    value: string;
+    project_id: string;
+  };
 }
 
 export default function InputBox({
@@ -32,10 +46,12 @@ export default function InputBox({
   onBlur,
   isLabelVisible = true,
   dropdownptions,
+  customClass,
+  labelCustomClass,
 }: InputBoxProps) {
   return (
     <div className="w-full">
-      <div className={`${error ? "shake" : ""}`}>
+      <div className={`${error ? "shake" : ""} ${labelCustomClass}`}>
         {isLabelVisible && (
           <label
             htmlFor={label}
@@ -61,7 +77,7 @@ export default function InputBox({
           className={`rounded-md border w-full h-[40px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
-            disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled:opacity-50 disabled:cursor-not-allowed ${customClass}`}
           placeholder={placeholder}
           disabled={disabled}
         />
@@ -77,12 +93,12 @@ export default function InputBox({
           className={`resize-y rounded-md border w-full min-h-[70px] max-h-[200px] py-2 px-2
             outline-none transition-all duration-200 text-text
             ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
-            disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled:opacity-50 disabled:cursor-not-allowed ${customClass}`}
           placeholder={placeholder}
           disabled={disabled}
         />
       ) : type === "date" ? (
-        <DatePickerv2
+        <DatePicker
           date={value.name ? new Date(value.name) : undefined}
           setDate={(date: Date) => {
             const syntheticEvent = {
@@ -90,18 +106,49 @@ export default function InputBox({
             } as React.ChangeEvent<HTMLInputElement>;
             onChange(syntheticEvent);
           }}
+          placeholder={placeholder}
+          customClass={customClass}
+          
+        />
+      ) : type === "datewithtime" ? (
+        <DatePickerWithTime
+          date={value.name ? new Date(value.name) : undefined}
+          setDate={(date: Date) => {
+            const syntheticEvent = {
+              target: { value: date.toISOString() },
+            } as React.ChangeEvent<HTMLInputElement>;
+            onChange(syntheticEvent);
+          }}
+          placeholder={placeholder}
+          customClass={customClass}
+        />
+      ) : type === "weekdayselector" ? (
+        <WeekdaySelector
+          onChange={(days: string[]) => {
+            const syntheticEvent = {
+              target: { name: days.join(","), value: days.join(",") },
+            } as React.ChangeEvent<HTMLInputElement>;
+            onChange(syntheticEvent);
+          }}
+          defaultSelected={value.name ? value.name.split(",") : []}
+          isDisabled={disabled}
         />
       ) : type === "dropdown" ? (
         <CustomDropdownMenu 
-        options={dropdownptions ?? []} 
-        selectedOption={value} 
-        setSelectedOption={
-          (option: {name: string, color?: string}) => 
-            onChange({ 
-              target: { name: option.name, value: option.color } 
-            } as React.ChangeEvent<HTMLInputElement>)
+          placeholder={placeholder}
+          options={dropdownptions ?? []}
+          selectedOption={value}
+          disabled={disabled}
+          setSelectedOption={(option) =>
+            onChange({
+              target: {
+                name: option.name,
+                value: option.color ?? '',
+                project_id: option.project_id ?? '',
+              },
+            } as CustomDropdownChangeEvent)
           }
-             />
+        />
       ) : (
         <></>
       )}

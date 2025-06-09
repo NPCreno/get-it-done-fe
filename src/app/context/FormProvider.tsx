@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { IUser } from "../interface/IUser";
+import { ITask } from "../interface/ITask";
 
 // Define the types for form state and additional universal states
 type FormStateType = {
@@ -21,6 +22,8 @@ type UniversalStateType = {
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
   user: IUser | null;
   setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
+  selectedTaskData: ITask | null;
+  setSelectedTaskData: React.Dispatch<React.SetStateAction<ITask | null>>;
 };
 
 // Create the context
@@ -39,6 +42,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [sidebarWidth, setSidebarWidth] = useState(60);
   const [user, setUser] = useState<IUser | null>(null);
+  const [selectedTaskData, setSelectedTaskData] = useState<ITask | null>(null);
 
   return (
     <FormContext.Provider
@@ -53,6 +57,8 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setSidebarWidth,
         user,
         setUser,
+        selectedTaskData,
+        setSelectedTaskData,
       }}
     >
       {children}
