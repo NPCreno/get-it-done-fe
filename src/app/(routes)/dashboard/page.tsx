@@ -22,6 +22,7 @@ import { ITask } from "@/app/interface/ITask";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import Image from "next/image";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
+import { IUser } from "@/app/interface/IUser";
 
 interface taskFormValues {
   user_id: string;
@@ -60,7 +61,8 @@ interface FormErrors {
 }
 
 export default function DashboardPage() {
-  const { user, setUser, selectedTaskData } = useFormState();
+  const { selectedTaskData } = useFormState();
+  const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   // Toast

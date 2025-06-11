@@ -27,6 +27,7 @@ import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 import TaskModal from "@/app/components/modals/taskModal";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
+import { IUser } from "@/app/interface/IUser";
 
 interface projectOrTaskFormValues {
   title: string;
@@ -68,7 +69,8 @@ interface FormErrors {
 }
 
 export default function ProjectsPage() {
-  const { user, setUser, selectedTaskData } = useFormState();
+  const [user, setUser] = useState<IUser | null>(null);
+  const { selectedTaskData } = useFormState();
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [projectData, setProjectData] = useState<IProject[]>([]);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);

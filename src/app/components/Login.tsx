@@ -18,7 +18,6 @@ export default function Login({
   onChangeView: (view: "signup" | "forgotPassword") => void;
 }) {
   const router = useRouter();
-  const { setUser } = useFormState();
   // UseStates
   const [isLoading, setIsLoading] = useState(false);
   const {
@@ -60,15 +59,12 @@ export default function Login({
       if (!usernameOrEmail.includes("@")) {
         const response = await loginUsername(usernameOrEmail, password); // Login using username
         access_token = response?.access_token;
-      } 
-      else {
+      } else {
         const response = await loginEmail(usernameOrEmail, password); // Login using email
         access_token = response?.access_token;
       }
 
       if (access_token) {
-        const payload = parseJwt(access_token);
-        setUser(payload.user)
         localStorage.setItem("access_token", access_token); // Store token in both localStorage and cookies
         document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`;
         router.push("/dashboard");
@@ -98,7 +94,12 @@ export default function Login({
       </div>
 
       {/* form */}
-      <form className="flex flex-col w-full" id="loginForm" name="loginForm" onSubmit={handleSubmit}>
+      <form
+        className="flex flex-col w-full"
+        id="loginForm"
+        name="loginForm"
+        onSubmit={handleSubmit}
+      >
         <div className="flex flex-col justify-center gap-2">
           <div className="flex flex-col justify-center">
             {/* Username or Email */}
@@ -149,7 +150,9 @@ export default function Login({
                 <label
                   htmlFor="password"
                   className={`text-base font-normal font-lato ${
-                    errors.password ? "text-error-default " : "text-primary-default"
+                    errors.password
+                      ? "text-error-default "
+                      : "text-primary-default"
                   }`}
                 >
                   Password
@@ -181,43 +184,43 @@ export default function Login({
                 </span>
               )}
             </div>
-          
-          <div className="mt-2 flex flex-row justify-between">
-          {/* remember password */}
-          <div className="flex flex-row">
-            <div className="border-[2px] border-solid rounded-[5px] border-primary-default w-5 h-5 flex items-center justify-center cursor-pointer">
-              <input
-                id="rememberMe"
-                type="checkbox"
-                onChange={(e) => setFieldValue("rememberMe", e.target.checked)} // ✅ Manually update Formik state
-                onBlur={handleBlur}
-                checked={values.rememberMe} // ✅ Ensure it's properly controlled
-                className="appearance-none w-full h-full checked:bg-primary-default checked:border-white checked:border-solid 
+
+            <div className="mt-2 flex flex-row justify-between">
+              {/* remember password */}
+              <div className="flex flex-row">
+                <div className="border-[2px] border-solid rounded-[5px] border-primary-default w-5 h-5 flex items-center justify-center cursor-pointer">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    onChange={(e) =>
+                      setFieldValue("rememberMe", e.target.checked)
+                    } // ✅ Manually update Formik state
+                    onBlur={handleBlur}
+                    checked={values.rememberMe} // ✅ Ensure it's properly controlled
+                    className="appearance-none w-full h-full checked:bg-primary-default checked:border-white checked:border-solid 
               border-[1px] rounded-[3px] relative cursor-pointer"
-              />
+                  />
+                </div>
+
+                <label
+                  htmlFor="rememberMe"
+                  className="font-lato text-xs text-primary-default ml-2 font-bold"
+                >
+                  Remember me
+                </label>
+              </div>
+
+              {/* forgot password */}
+              <button
+                type="button"
+                className="font-lato text-xs text-primary-default ml-2 font-bold"
+                onClick={() => onChangeView("forgotPassword")}
+              >
+                Forgot Password?
+              </button>
             </div>
-
-            <label
-              htmlFor="rememberMe"
-              className="font-lato text-xs text-primary-default ml-2 font-bold"
-            >
-              Remember me
-            </label>
-          </div>
-
-          {/* forgot password */}
-          <button
-            type="button"
-            className="font-lato text-xs text-primary-default ml-2 font-bold"
-            onClick={() => onChangeView("forgotPassword")}
-          >
-            Forgot Password?
-          </button>
           </div>
         </div>
-        </div>
-
-        
 
         {/* buttons */}
         <div className="w-full flex flex-col gap-5 mt-8">
@@ -251,10 +254,20 @@ export default function Login({
           <Image src="/fb-logo.png" alt="fb-logo" width={24} height={24} />
         </button>
         <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
-          <Image src="/google-logo.png" alt="google-logo" width={24} height={24} />
+          <Image
+            src="/google-logo.png"
+            alt="google-logo"
+            width={24}
+            height={24}
+          />
         </button>
         <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
-          <Image src="/apple-logo.png" alt="apple-logo" width={24} height={24} />
+          <Image
+            src="/apple-logo.png"
+            alt="apple-logo"
+            width={24}
+            height={24}
+          />
         </button>
       </div>
     </div>
