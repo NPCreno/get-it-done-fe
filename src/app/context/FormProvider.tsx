@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { IUser } from "../interface/IUser";
 import { ITask } from "../interface/ITask";
 
 // Define the types for form state and additional universal states

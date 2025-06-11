@@ -4,8 +4,6 @@ import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
 import { useRouter } from "next/navigation";
 import { loginEmail, loginUsername } from "../api/api";
-import { useFormState } from "../context/FormProvider";
-import { parseJwt } from "../utils/utils";
 import Image from "next/image";
 interface LoginFormValues {
   usernameOrEmail: string;

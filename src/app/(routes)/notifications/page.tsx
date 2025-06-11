@@ -2,15 +2,15 @@
 import { getUser } from "@/app/api/api";
 import MainLayout from "@/app/components/MainLayout";
 import NotificationCard from "@/app/components/notificationCard";
-import { useFormState } from "@/app/context/FormProvider";
 import { INotificationProps } from "@/app/interface/INotification";
+import { IUser } from "@/app/interface/IUser";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useEffect, useState } from "react";
 
 
 
 export default function NotificationsPage() {
-  const { user, setUser } = useFormState();
+  const [user, setUser] = useState<IUser | null>(null);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
 
 const rawNotifications: Omit<INotificationProps, 'status'>[] = [

@@ -5,7 +5,6 @@ import ToggleSwitch from "@/app/components/toggleSwitch";
 import { updateUserSchema } from "@/app/schemas/updateUserSchema";
 import { useFormik, FormikErrors } from "formik";
 import { useEffect, useState } from "react";
-import { useFormState } from "@/app/context/FormProvider";
 import { Toast } from "@/app/components/toast";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IUser } from "@/app/interface/IUser";
