@@ -2,12 +2,18 @@
 import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
-import AddTaskModal from "@/app/components/modals/taskModal";
+import TaskModal from "@/app/components/modals/taskModal";
 import { useEffect, useMemo, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
-import { createTaskApi, getProjectsForUser, getUser, getTasksByUser, updateTaskApi } from "@/app/api/api";
+import {
+  createTaskApi,
+  getProjectsForUser,
+  getUser,
+  getTasksByUser,
+  updateTaskApi,
+} from "@/app/api/api";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
 import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
@@ -54,21 +60,22 @@ interface FormErrors {
 }
 
 export default function DashboardPage() {
-  const { 
-    user, 
-    setUser,
-    selectedTaskData   
-  } = useFormState();
+  const { user, setUser, selectedTaskData } = useFormState();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   // Toast
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
+  const [toastMessage, setToastMessage] = useState({
+    title: "",
+    description: "",
+    className: "",
+  });
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [isUpdateTask, setIsUpdateTask] = useState(false);
   const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -76,23 +83,26 @@ export default function DashboardPage() {
     }, 400);
   };
 
-  const initialValues = useMemo(() => ({
-    title: "",
-    description: "",
-    due_date: null,
-    user_id: user?.user_id ?? "",
-    project_id: "",
-    project_title: "",
-    project_color: "",
-    priority: "",
-    status: "",
-    isRecurring: false,
-    repeat_every: "",
-    repeat_days: [],
-    start_date: new Date(),
-    end_date: null,
-    project: "",
-  }), [user?.user_id]);
+  const initialValues = useMemo(
+    () => ({
+      title: "",
+      description: "",
+      due_date: null,
+      user_id: user?.user_id ?? "",
+      project_id: "",
+      project_title: "",
+      project_color: "",
+      priority: "",
+      status: "",
+      isRecurring: false,
+      repeat_every: "",
+      repeat_days: [],
+      start_date: new Date(),
+      end_date: null,
+      project: "",
+    }),
+    [user?.user_id]
+  );
 
   const {
     validateForm,
@@ -115,7 +125,7 @@ export default function DashboardPage() {
       const withUser = {
         ...values,
         user_id: user.user_id,
-        due_date: values.due_date || undefined
+        due_date: values.due_date || undefined,
       };
       handleSubmitForm(withUser);
     },
@@ -125,17 +135,17 @@ export default function DashboardPage() {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
 
     if (Object.keys(validationErrors).length === 0) {
-      await createTask(values)
+      await createTask(values);
     }
     setSubmitting(false);
   };
 
-
   const createTask = async (values: taskFormValues) => {
     try {
-      if(!user){
+      setIsLoading(true);
+      if (!user) {
         console.error("No User data found");
-        return
+        return;
       }
       const payload: CreateTaskDto = {
         title: values.title,
@@ -150,20 +160,22 @@ export default function DashboardPage() {
         start_date: values.start_date || undefined,
         end_date: values.end_date || undefined,
         status: values.status || undefined,
-      }
+      };
       const response: ITaskResponse = await createTaskApi(payload);
       if (response.status === "success") {
+        setIsLoading(false);
         setUpdateTaskDashboard(!updateTaskDashboard);
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
-          description: response.message || "Your new task has been created successfully",
+          description:
+            response.message || "Your new task has been created successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -172,6 +184,7 @@ export default function DashboardPage() {
         }, 10000); // Toast display duration
       }
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof Error) {
         setToastMessage({
           title: "Something Went Wrong",
@@ -195,13 +208,13 @@ export default function DashboardPage() {
       }, 10000); // Toast display duration
     }
   };
-
   useEffect(() => {
     const fetchUser = async () => {
-      if(isDoneFetchingUser) return;
-      else{
+      if (isDoneFetchingUser) return;
+      else {
         try {
-          if (!user) { // If no user, try getting one from cookies
+          if (!user) {
+            // If no user, try getting one from cookies
             const token = getAccessTokenFromCookies();
             if (!token) {
               console.error("No access_token found in cookies");
@@ -237,8 +250,7 @@ export default function DashboardPage() {
         if (projects?.status === "success") {
           setProjectOptions(projects.data);
           return;
-        }
-        else{
+        } else {
           setProjectOptions([]);
         }
       };
@@ -250,16 +262,17 @@ export default function DashboardPage() {
     if (user) {
       const fetchTasks = async () => {
         const startDate = new Date().toISOString();
-        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
+        const endDate = new Date(
+          new Date().setDate(new Date().getDate() + 1)
+        ).toISOString(); //tomorrow
         const tasks = await getTasksByUser(user.user_id, startDate, endDate);
-        if(tasks){
+        if (tasks) {
           setTasks([]);
           setTasks(tasks);
-        }
-        else{
+        } else {
           setTasks([]);
         }
-      }
+      };
       fetchTasks();
     }
   }, [user, showToast, updateTaskDashboard]);
@@ -267,16 +280,17 @@ export default function DashboardPage() {
   const handleUpdateTask = async (values: taskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      await updateTask(values)
+      await updateTask(values);
     }
     setSubmitting(false);
   };
 
   const updateTask = async (values: taskFormValues) => {
     try {
-      if(!user){
+      setIsLoading(true);
+      if (!user) {
         console.error("No User data found");
-        return
+        return;
       }
       const payload: UpdateTaskDto = {
         title: values.title,
@@ -284,29 +298,32 @@ export default function DashboardPage() {
         due_date: values.due_date || undefined,
         priority: values.priority || undefined,
         status: values.status || undefined,
-        task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
-      }
+        task_id: selectedTaskData ? selectedTaskData.task_id : values.task_id,
+      };
       const response: ITaskResponse = await updateTaskApi(payload);
       if (response.status === "success") {
+        setIsLoading(false);
         setUpdateTaskDashboard(!updateTaskDashboard);
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Updated",
-          description: response.message || "Your task has been updated successfully",
+          description:
+            response.message || "Your task has been updated successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
             setShowToast(false); // Remove after animation completes
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
-      }else{
+      } else {
+        setIsLoading(false);
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
@@ -314,10 +331,10 @@ export default function DashboardPage() {
           description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -326,6 +343,7 @@ export default function DashboardPage() {
         }, 10000); // Toast display duration
       }
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof Error) {
         setToastMessage({
           title: "Something Went Wrong",
@@ -357,26 +375,25 @@ export default function DashboardPage() {
     setFieldValue("status", "");
     setFieldValue("priority", "");
     setFieldValue("due_date", "");
-  }
-  
+  };
+
   useEffect(() => {
-    if(selectedTaskData){
-    setFieldValue("title", selectedTaskData?.title || "");
-    setFieldValue("description", selectedTaskData?.description || "");
-    setFieldValue("priority", selectedTaskData?.priority || "");
-    setFieldValue("status", selectedTaskData?.status || "");
-    setFieldValue("due_date", selectedTaskData?.due_date || null);
-    setFieldValue("isRecurring", false);
-    }
-    else{
-      return
+    if (selectedTaskData) {
+      setFieldValue("title", selectedTaskData?.title || "");
+      setFieldValue("description", selectedTaskData?.description || "");
+      setFieldValue("priority", selectedTaskData?.priority || "");
+      setFieldValue("status", selectedTaskData?.status || "");
+      setFieldValue("due_date", selectedTaskData?.due_date || null);
+      setFieldValue("isRecurring", false);
+    } else {
+      return;
     }
   }, [selectedTaskData, setFieldValue]);
 
   const handleTaskStatus = async (task: ITask) => {
     await updateTask({
       ...task,
-      user_id: user?.user_id || "", 
+      user_id: user?.user_id || "",
       project_color: "",
       isRecurring: false,
       repeat_every: "",
@@ -406,12 +423,16 @@ export default function DashboardPage() {
     setFieldError("project", "");
     setFieldError("status", "");
     setFieldError("due_date", "");
-  }
+  };
 
   return (
     <MainLayout>
       {showToast && (
-        <div className={`fixed bottom-4 right-4 z-50 ${isExitingToast ? "toast-exit" : "toast-enter"}`}>
+        <div
+          className={`fixed bottom-4 right-4 z-50 ${
+            isExitingToast ? "toast-exit" : "toast-enter"
+          }`}
+        >
           <Toast {...toastMessage} onClose={handleToastClose} />
         </div>
       )}
@@ -436,9 +457,26 @@ export default function DashboardPage() {
               hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
               >
                 Start Pomodoro
-                <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054" stroke="#FEAD03" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z" fill="#666666" stroke="#FEAD03" stroke-width="2"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 30 30"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054"
+                    stroke="#FEAD03"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <path
+                    d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z"
+                    fill="#666666"
+                    stroke="#FEAD03"
+                    stroke-width="2"
+                  />
                 </svg>
               </button>
 
@@ -446,8 +484,17 @@ export default function DashboardPage() {
                 className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
               transition-all duration-300 justify-center items-center"
               >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z" fill="#666666"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 15 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z"
+                    fill="#666666"
+                  />
                 </svg>
               </button>
             </div>
@@ -513,8 +560,20 @@ export default function DashboardPage() {
                   setIsUpdateTask(false);
                 }}
               >
-                <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 25 25"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
                 New Task
               </button>
@@ -532,7 +591,7 @@ export default function DashboardPage() {
                     setIsUpdateTask(true);
                   }}
                   handleTaskStatus={(task: ITask) => handleTaskStatus(task)}
-                  />
+                />
               ))}
             </div>
           </div>
@@ -540,7 +599,7 @@ export default function DashboardPage() {
       </div>
 
       {isTaskModalOpen && (
-        <AddTaskModal
+        <TaskModal
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,
@@ -553,13 +612,12 @@ export default function DashboardPage() {
           project={projectOptions}
           isUpdate={isUpdateTask}
           handleUpdateTask={() => handleUpdateTask(values as taskFormValues)}
+          isLoading={isLoading}
         />
       )}
-
     </MainLayout>
   );
 }
-
 
 function TaskItem({
   task,
@@ -596,9 +654,16 @@ function TaskItem({
             className="absolute inset-0 rounded-[10px] border-[2px] border-solid border-primary-200 
                       peer-checked:border-0 group-hover:border-0 pointer-events-none"
           ></div>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 
-                          group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none">
-            <Image src="/svgs/checkmark-circle-yellow.svg" alt="Check" width={20} height={20} />
+          <div
+            className="absolute inset-0 flex items-center justify-center opacity-0 
+                          group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none"
+          >
+            <Image
+              src="/svgs/checkmark-circle-yellow.svg"
+              alt="Check"
+              width={20}
+              height={20}
+            />
           </div>
         </div>
       </div>
