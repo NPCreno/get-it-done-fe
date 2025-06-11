@@ -82,7 +82,7 @@ export default function DashboardPage() {
     due_date: null,
     user_id: user?.user_id ?? "",
     project_id: "",
-    project_title: undefined,
+    project_title: "",
     project_color: "",
     priority: "",
     status: "",
@@ -388,6 +388,26 @@ export default function DashboardPage() {
     });
   };
 
+  const clearAllData = () => {
+    setFieldValue("title", "");
+    setFieldValue("description", "");
+    setFieldValue("priority", "");
+    setFieldValue("project", "");
+    setFieldValue("status", "");
+    setFieldValue("due_date", null);
+    setFieldValue("isRecurring", false);
+    setFieldValue("repeat_every", "");
+    setFieldValue("repeat_days", []);
+    setFieldValue("start_date", null);
+    setFieldValue("end_date", null);
+    setFieldError("title", "");
+    setFieldError("description", "");
+    setFieldError("priority", "");
+    setFieldError("project", "");
+    setFieldError("status", "");
+    setFieldError("due_date", "");
+  }
+
   return (
     <MainLayout>
       {showToast && (
@@ -489,6 +509,7 @@ export default function DashboardPage() {
                   hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
                 onClick={() => {
                   setIsTaskModalOpen(true);
+                  clearAllData();
                   setIsUpdateTask(false);
                 }}
               >
