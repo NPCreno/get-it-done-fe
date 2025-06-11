@@ -3,14 +3,18 @@ import { NextRequest, NextResponse } from "next/server";
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
 
-  const isProtectedRoute = ["/dashboard", "/projects", "/notifications", "/profileSettings"].some(path =>
-    req.nextUrl.pathname.startsWith(path)
-  );
+  const isProtectedRoute = [
+    "/dashboard",
+    "/projects",
+    "/notifications",
+    "/profileSettings",
+  ].some((path) => req.nextUrl.pathname.startsWith(path));
 
   const isRootRoute = req.nextUrl.pathname === "/";
 
   if (token) {
     try {
+      console.log("token validated");
       const [, payload] = token.split(".");
       const decoded = JSON.parse(atob(payload));
       const exp = decoded.exp * 1000;
@@ -28,7 +32,6 @@ export async function middleware(req: NextRequest) {
       }
 
       return NextResponse.next(); // Token is valid, allow access to protected routes
-
     } catch (err) {
       console.error("Invalid token:", err);
       const response = NextResponse.redirect(new URL("/", req.url));
@@ -37,7 +40,9 @@ export async function middleware(req: NextRequest) {
     }
   } else {
     // If there's no token, deny access to protected routes and redirect to "/"
+    console.log("no token");
     if (isProtectedRoute) {
+      console.log("redirecting to /");
       return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next(); // Allow access if no token and on the root route
@@ -45,7 +50,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/dashboard", "/projects", "/notifications", "/profileSettings"],
+  matcher: [
+    "/",
+    "/dashboard",
+    "/projects",
+    "/notifications",
+    "/profileSettings",
+  ],
 };
 
 // import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
