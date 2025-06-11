@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { base64UrlDecode } from "./app/utils/utils";
 
 export async function middleware(req: NextRequest) {
   const token = req.cookies.get("access_token")?.value;
@@ -14,50 +15,38 @@ export async function middleware(req: NextRequest) {
 
   if (token) {
     try {
-      console.log("token validated");
       const [, payload] = token.split(".");
-      const decoded = JSON.parse(atob(payload));
+      const decoded = JSON.parse(base64UrlDecode(payload));
       const exp = decoded.exp * 1000;
 
-      // If token expired, delete the cookie and redirect to "/"
+      console.log("Token exp:", new Date(exp).toISOString());
+      console.log("Now:", new Date().toISOString());
+
       if (Date.now() > exp) {
         const response = NextResponse.redirect(new URL("/", req.url));
-        response.cookies.set("access_token", "", { path: "/", maxAge: -1 }); // Remove the cookie
+        response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
         return response;
       }
 
-      // If user is on root and token is valid, redirect to "/dashboard"
       if (isRootRoute) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
 
-      return NextResponse.next(); // Token is valid, allow access to protected routes
+      return NextResponse.next();
     } catch (err) {
-      console.error("Invalid token:", err);
+      console.error("Token decode error:", err);
+      // Only delete the cookie if we're certain it can't be used
       const response = NextResponse.redirect(new URL("/", req.url));
-      response.cookies.set("access_token", "", { path: "/", maxAge: -1 }); // Remove the cookie on invalid token
+      response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
       return response;
     }
   } else {
-    // If there's no token, deny access to protected routes and redirect to "/"
-    console.log("no token");
     if (isProtectedRoute) {
-      console.log("redirecting to /");
       return NextResponse.redirect(new URL("/", req.url));
     }
-    return NextResponse.next(); // Allow access if no token and on the root route
+    return NextResponse.next();
   }
 }
-
-export const config = {
-  matcher: [
-    "/",
-    "/dashboard",
-    "/projects",
-    "/notifications",
-    "/profileSettings",
-  ],
-};
 
 // import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 // import { NextRequest, NextResponse } from "next/server";

@@ -42,10 +42,10 @@ export const createTaskSchema = yup.object().shape({
     }),
 
   start_date: yup
-    .date()
+    .mixed()
     .when("isRecurring", {
       is: true,
-      then: (schema) => schema.required("Start date is required"),
-      otherwise: (schema) => schema.optional(),
+      then: () => yup.date().required("Start date is required"),
+      otherwise: () => yup.mixed().nullable().optional(),
     }),
 });
