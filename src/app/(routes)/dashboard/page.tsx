@@ -79,7 +79,6 @@ export default function DashboardPage() {
   const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setIsPageLoading] = useState(true);
-  const [isUpdatingTasks, setIsUpdatingTasks] = useState(false);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -304,7 +303,7 @@ export default function DashboardPage() {
       },
     });
   }
-}, [isTaskModalOpen, isUpdateTask]);
+}, [isTaskModalOpen, isUpdateTask, initialValues, resetForm]);
 
   const handleUpdateTask = async (values: taskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
