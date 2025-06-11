@@ -1,10 +1,18 @@
-"use client"
+"use client";
 import MainLayout from "@/app/components/MainLayout";
 import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useState } from "react";
-import { createProject, getProjectsForUser, getUser, getTasksByProject, createTaskApi, updateTaskApi, deleteTaskApi } from "@/app/api/api";
+import {
+  createProject,
+  getProjectsForUser,
+  getUser,
+  getTasksByProject,
+  createTaskApi,
+  updateTaskApi,
+  deleteTaskApi,
+} from "@/app/api/api";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
@@ -60,24 +68,25 @@ interface FormErrors {
 }
 
 export default function ProjectsPage() {
-  const { 
-    user, 
-    setUser,
-    selectedTaskData,
-  } = useFormState();
+  const { user, setUser, selectedTaskData } = useFormState();
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [projectData, setProjectData] = useState<IProject[]>([]);
   const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false);
   const [isViewProjectModalOpen, setIsViewProjectModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState({ title: "", description: "", className: "" });
+  const [toastMessage, setToastMessage] = useState({
+    title: "",
+    description: "",
+    className: "",
+  });
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [selectedProject, setSelectedProject] = useState<IProject | null>(null);
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
   const [isUpdateTask, setIsUpdateTask] = useState(false);
   const [updateTasksData, setUpdateTasksData] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -85,25 +94,28 @@ export default function ProjectsPage() {
     }, 400);
   };
 
-  const initialValues = useMemo(() => ({
-    title: "",
-    description: "",
-    due_date: null,
-    colorLabel: "",
-    color: "",
-    user_id: user?.user_id ?? "",
-    project_id: "",
-    project_title: "",
-    project_color: "",
-    priority: "",
-    status: "",
-    isRecurring: false,
-    repeat_every: "",
-    repeat_days: [],
-    start_date: new Date(),
-    end_date: null,
-    project: "",
-  }), [user?.user_id]);
+  const initialValues = useMemo(
+    () => ({
+      title: "",
+      description: "",
+      due_date: null,
+      colorLabel: "",
+      color: "",
+      user_id: user?.user_id ?? "",
+      project_id: "",
+      project_title: "",
+      project_color: "",
+      priority: "",
+      status: "",
+      isRecurring: false,
+      repeat_every: "",
+      repeat_days: [],
+      start_date: new Date(),
+      end_date: null,
+      project: "",
+    }),
+    [user?.user_id]
+  );
 
   const {
     validateForm,
@@ -118,7 +130,7 @@ export default function ProjectsPage() {
   } = useFormik({
     initialValues,
     enableReinitialize: true,
-    validationSchema: selectedProject ? createTaskSchema  : createProjectSchema,
+    validationSchema: selectedProject ? createTaskSchema : createProjectSchema,
     validateOnChange: false, // Disable real-time validation
     validateOnBlur: false,
     onSubmit: async (values) => {
@@ -126,7 +138,7 @@ export default function ProjectsPage() {
       const withUser = {
         ...values,
         user_id: user.user_id,
-        due_date: values.due_date || null
+        due_date: values.due_date || null,
       };
       handleSubmitForm(withUser as projectOrTaskFormValues);
     },
@@ -134,31 +146,35 @@ export default function ProjectsPage() {
 
   const handleSubmitForm = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
-
+    console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      await createProj(values)
+      await createProj(values);
     }
     setSubmitting(false);
   };
 
   const createProj = async (values: projectOrTaskFormValues) => {
     try {
-      if(!user){
+      setIsLoading(true);
+      if (!user) {
         console.error("No User data found");
-        return
+        return;
       }
-      const response: ICreateProjectResponse = await createProject(values as CreateProjectDto);
+      const response: ICreateProjectResponse = await createProject(
+        values as CreateProjectDto
+      );
       if (response.status === "success") {
+        setIsLoading(false);
         setIsAddProjectModalOpen(false);
         setToastMessage({
           title: "Project Created",
           description: "Your new project has been created successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -167,6 +183,7 @@ export default function ProjectsPage() {
         }, 10000); // Toast display duration
       }
     } catch (error) {
+      setIsLoading(false);
       if (error instanceof Error) {
         setToastMessage({
           title: "Something Went Wrong",
@@ -193,10 +210,11 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if(isDoneFetchingUser) return;
-      else{
+      if (isDoneFetchingUser) return;
+      else {
         try {
-          if (!user) { // If no user, try getting one from cookies
+          if (!user) {
+            // If no user, try getting one from cookies
             const token = getAccessTokenFromCookies();
             if (!token) {
               console.error("No access_token found in cookies");
@@ -232,14 +250,13 @@ export default function ProjectsPage() {
         if (projects?.status === "success") {
           setProjectData(projects.data);
           return;
-        }
-        else{
+        } else {
           setProjectData([]);
         }
       };
       fetchProjects();
     }
-  }, [user, isAddProjectModalOpen, isTaskModalOpen ]);
+  }, [user, isAddProjectModalOpen, isTaskModalOpen]);
 
   const clearValueAndErrors = () => {
     setErrors({});
@@ -248,39 +265,45 @@ export default function ProjectsPage() {
     setFieldValue("due_date", null);
     setFieldValue("colorLabel", "");
     setFieldValue("color", "");
-  }
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchTasksByProj = async () => {
-      try {
-        const startDate = new Date().toISOString();
-        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
-        const tasks = await getTasksByProject(selectedProject?.project_id ?? "", startDate, endDate);
-        if(tasks){
-          setTasks(tasks);
-        }
-        else{
+      if (selectedProject) {
+        try {
+          const startDate = new Date().toISOString();
+          const endDate = new Date(
+            new Date().setDate(new Date().getDate() + 1)
+          ).toISOString(); //tomorrow
+          const tasks = await getTasksByProject(
+            selectedProject?.project_id ?? "",
+            startDate,
+            endDate
+          );
+          if (tasks) {
+            setTasks(tasks);
+          } else {
+            setTasks([]);
+          }
+        } catch (error) {
           setTasks([]);
+          console.error("Failed to fetch tasks by project:", error);
         }
-      } catch (error) {
-        setTasks([]);
-        console.error("Failed to fetch tasks by project:", error);
       }
-    }
+    };
     fetchTasksByProj();
-  },[selectedProject, updateTasksData])
+  }, [selectedProject, updateTasksData]);
 
-
-  useEffect(() =>{
-    if(!isTaskModalOpen && !isViewProjectModalOpen){
+  useEffect(() => {
+    if (!isTaskModalOpen && !isViewProjectModalOpen) {
       setSelectedProject(null);
     }
-  }, [isViewProjectModalOpen, isTaskModalOpen])
+  }, [isViewProjectModalOpen, isTaskModalOpen]);
 
   const handleCreateTask = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      await createTask(values)
+      await createTask(values);
     }
     setSubmitting(false);
   };
@@ -288,23 +311,25 @@ export default function ProjectsPage() {
   const handleUpdateTask = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
-      await updateTask(values)
+      await updateTask(values);
     }
     setSubmitting(false);
   };
 
   const createTask = async (values: projectOrTaskFormValues) => {
     try {
-      if(!user){
+      if (!user) {
         console.error("No User data found");
-        return
+        return;
       }
       const payload: CreateTaskDto = {
         title: values.title,
         description: values.description,
         due_date: values.due_date || undefined,
         user_id: user.user_id,
-        project_id: selectedProject ? selectedProject.project_id : values.project_id,
+        project_id: selectedProject
+          ? selectedProject.project_id
+          : values.project_id,
         priority: values.priority || undefined,
         isRecurring: values.isRecurring || false,
         repeat_every: values.repeat_every || undefined,
@@ -312,7 +337,7 @@ export default function ProjectsPage() {
         start_date: values.start_date || undefined,
         end_date: values.end_date || undefined,
         status: values.status || "Pending",
-      }
+      };
       const response: ITaskResponse = await createTaskApi(payload);
       if (response.status === "success") {
         clearValueAndErrors();
@@ -320,20 +345,21 @@ export default function ProjectsPage() {
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
-          description: response.message || "Your new task has been created successfully",
+          description:
+            response.message || "Your new task has been created successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
             setShowToast(false); // Remove after animation completes
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
-      }else{
+      } else {
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
@@ -341,10 +367,10 @@ export default function ProjectsPage() {
           description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -379,9 +405,10 @@ export default function ProjectsPage() {
 
   const updateTask = async (values: projectOrTaskFormValues) => {
     try {
-      if(!user){
+      setIsLoading(true);
+      if (!user) {
         console.error("No User data found");
-        return
+        return;
       }
       const payload: UpdateTaskDto = {
         title: values.title,
@@ -389,29 +416,32 @@ export default function ProjectsPage() {
         due_date: values.due_date || undefined,
         priority: values.priority || undefined,
         status: values.status || undefined,
-        task_id: selectedTaskData? selectedTaskData.task_id : values.task_id,
-      }
+        task_id: selectedTaskData ? selectedTaskData.task_id : values.task_id,
+      };
       const response: ITaskResponse = await updateTaskApi(payload);
       if (response.status === "success") {
+        setIsLoading(false);
         clearValueAndErrors();
         setUpdateTasksData(!updateTasksData);
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Created",
-          description: response.message || "Your new task has been created successfully",
+          description:
+            response.message || "Your new task has been created successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
             setShowToast(false); // Remove after animation completes
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
-      }else{
+      } else {
+        setIsLoading(false);
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
@@ -419,10 +449,10 @@ export default function ProjectsPage() {
           description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -464,20 +494,21 @@ export default function ProjectsPage() {
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Deleted",
-          description: response.message || "Your task has been deleted successfully",
+          description:
+            response.message || "Your task has been deleted successfully",
           className: "text-green-600",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
             setShowToast(false); // Remove after animation completes
           }, 400); // Must match the toastOut animation duration
         }, 10000); // Toast display duration
-      }else{
+      } else {
         clearValueAndErrors();
         setIsTaskModalOpen(false);
         setToastMessage({
@@ -485,10 +516,10 @@ export default function ProjectsPage() {
           description: response?.error || "Something Went Wrong",
           className: "text-error-default",
         });
-      
+
         setShowToast(true);
         setIsExitingToast(false);
-      
+
         setTimeout(() => {
           setIsExitingToast(true); // Start exit animation
           setTimeout(() => {
@@ -521,68 +552,69 @@ export default function ProjectsPage() {
     }
   };
   useEffect(() => {
-    if(selectedTaskData){
-    setFieldValue("title", selectedTaskData?.title || "");
-    setFieldValue("description", selectedTaskData?.description || "");
-    setFieldValue("priority", selectedTaskData?.priority || "");
-    setFieldValue("status", selectedTaskData?.status || "");
-    setFieldValue("due_date", selectedTaskData?.due_date || null);
-    setFieldValue("isRecurring", false);
-    }
-    else{
-      return
+    if (selectedTaskData) {
+      setFieldValue("title", selectedTaskData?.title || "");
+      setFieldValue("description", selectedTaskData?.description || "");
+      setFieldValue("priority", selectedTaskData?.priority || "");
+      setFieldValue("status", selectedTaskData?.status || "");
+      setFieldValue("due_date", selectedTaskData?.due_date || null);
+      setFieldValue("isRecurring", false);
+    } else {
+      return;
     }
   }, [selectedTaskData, setFieldValue]);
 
-
   const handleTaskStatus = async (task: ITask) => {
-      const mappedTask: projectOrTaskFormValues = {
-        title: task.title,
-        description: task.description,
-        due_date: task.due_date ?? null,
-        colorLabel: "", 
-        color: "",      
-        user_id: user?.user_id ?? "", 
-        project_id: task.project_id,
-        project_title: task.project_title ?? "",
-        project_color: "", 
-        priority: task.priority,
-        status: task.status,
-        isRecurring: false,
-        repeat_every: "",
-        repeat_days: [],
-        start_date: null,
-        end_date: null,
-        project: "",  
-        task_id: task.task_id,
+    const mappedTask: projectOrTaskFormValues = {
+      title: task.title,
+      description: task.description,
+      due_date: task.due_date ?? null,
+      colorLabel: "",
+      color: "",
+      user_id: user?.user_id ?? "",
+      project_id: task.project_id,
+      project_title: task.project_title ?? "",
+      project_color: "",
+      priority: task.priority,
+      status: task.status,
+      isRecurring: false,
+      repeat_every: "",
+      repeat_days: [],
+      start_date: null,
+      end_date: null,
+      project: "",
+      task_id: task.task_id,
+    };
+
+    await updateTask(mappedTask);
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
+  };
+
+  useEffect(() => {
+    if (user) {
+      const fetchProjects = async () => {
+        const projects = await getProjectsForUser(user.user_id);
+        if (projects?.status === "success") {
+          setProjectOptions(projects.data);
+          return;
+        } else {
+          setProjectOptions([]);
+        }
       };
-    
-      await updateTask(mappedTask);
-    };
-
-    const handleDeleteTask = async (taskId: string) => {
-      await deleteTask(taskId);
-    };
-
-    useEffect(() => {
-      if (user) {
-        const fetchProjects = async () => {
-          const projects = await getProjectsForUser(user.user_id);
-          if (projects?.status === "success") {
-            setProjectOptions(projects.data);
-            return;
-          }
-          else{
-            setProjectOptions([]);
-          }
-        };
-        fetchProjects();
-      }
-    }, [user, isTaskModalOpen]);
+      fetchProjects();
+    }
+  }, [user, isTaskModalOpen]);
   return (
     <MainLayout>
       {showToast && (
-        <div className={`fixed bottom-4 right-4 z-50 ${isExitingToast ? "toast-exit" : "toast-enter"}`}>
+        <div
+          className={`fixed bottom-4 right-4 z-50 ${
+            isExitingToast ? "toast-exit" : "toast-enter"
+          }`}
+        >
           <Toast {...toastMessage} onClose={handleToastClose} />
         </div>
       )}
@@ -609,32 +641,47 @@ export default function ProjectsPage() {
                   clearValueAndErrors();
                 }}
               >
-                <svg width="25" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg
+                  width="25"
+                  height="25"
+                  viewBox="0 0 24 25"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
+                    stroke="white"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
                 </svg>
-
                 New Project
               </button>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-5">
-            {projectData.length > 0 ? projectData.map((project, index) => (
-              <ProjectCard
-                key={index}
-                project={project}
-                onClick={() => {
-                  setSelectedProject(project);
-                  setIsViewProjectModalOpen(true);
-                }}
-                onAddTaskClick={() => {
-                  setSelectedProject(project);
-                  setIsTaskModalOpen(true);
-                }}
-              />
-            )) : (
+            {projectData.length > 0 ? (
+              projectData.map((project, index) => (
+                <ProjectCard
+                  key={index}
+                  project={project}
+                  onClick={() => {
+                    setSelectedProject(project);
+                    setIsViewProjectModalOpen(true);
+                  }}
+                  onAddTaskClick={() => {
+                    setSelectedProject(project);
+                    setIsTaskModalOpen(true);
+                  }}
+                />
+              ))
+            ) : (
               <div className="flex justify-center items-center h-full">
-                <p className="text-text text-[13px] font-lato">No projects found</p>
+                <p className="text-text text-[13px] font-lato">
+                  No projects found
+                </p>
               </div>
             )}
           </div>
@@ -654,20 +701,22 @@ export default function ProjectsPage() {
       {isViewProjectModalOpen && (
         <ViewProjectModal
           onClose={() => setIsViewProjectModalOpen(false)}
-          project={selectedProject ?? {
-            title: "",
-            description: "",
-            due_date: new Date(),
-            tasks: 0
-          }}
+          project={
+            selectedProject ?? {
+              title: "",
+              description: "",
+              due_date: new Date(),
+              tasks: 0,
+            }
+          }
           handleCreateTask={() => {
-            setIsViewProjectModalOpen(false)
+            setIsViewProjectModalOpen(false);
             setIsTaskModalOpen(true);
             setIsUpdateTask(false);
           }}
           tasks={tasks ? tasks : []}
           handleUpdateTask={() => {
-            setIsViewProjectModalOpen(false)
+            setIsViewProjectModalOpen(false);
             setIsTaskModalOpen(true);
             setIsUpdateTask(true);
           }}
@@ -686,14 +735,18 @@ export default function ProjectsPage() {
             setFieldValue,
             setFieldError,
           }}
-          handleCreateTask={() => handleCreateTask(values as projectOrTaskFormValues)}
+          handleCreateTask={() =>
+            handleCreateTask(values as projectOrTaskFormValues)
+          }
           project={projectOptions}
           preselectedProject={selectedProject}
           isUpdate={isUpdateTask}
-          handleUpdateTask={() => handleUpdateTask(values as projectOrTaskFormValues)}
+          handleUpdateTask={() =>
+            handleUpdateTask(values as projectOrTaskFormValues)
+          }
+          isLoading={isLoading}
         />
       )}
-
     </MainLayout>
   );
 }
