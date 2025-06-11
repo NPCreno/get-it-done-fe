@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { IUser } from "../interface/IUser";
 import { ITask } from "../interface/ITask";
 
 // Define the types for form state and additional universal states
@@ -20,8 +19,6 @@ type UniversalStateType = {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarWidth: number;
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
-  user: IUser | null;
-  setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
   selectedTaskData: ITask | null;
   setSelectedTaskData: React.Dispatch<React.SetStateAction<ITask | null>>;
 };
@@ -41,7 +38,6 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [sidebarWidth, setSidebarWidth] = useState(60);
-  const [user, setUser] = useState<IUser | null>(null);
   const [selectedTaskData, setSelectedTaskData] = useState<ITask | null>(null);
 
   return (
@@ -55,8 +51,6 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading,
         sidebarWidth,
         setSidebarWidth,
-        user,
-        setUser,
         selectedTaskData,
         setSelectedTaskData,
       }}
