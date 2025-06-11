@@ -281,6 +281,7 @@ export const getProjectsForUser = async (userId: string) => {
 export const getTasksByUser= async (userId: string, startDate: string, endDate: string) => {
   try {
     const token = getAccessToken();
+    let data;
     const response = await fetch(`${apiUrl}/tasks/getTasksByUser/${userId}?startDate=${startDate}&endDate=${endDate}`, 
         { 
       method: 'GET',
@@ -290,15 +291,16 @@ export const getTasksByUser= async (userId: string, startDate: string, endDate: 
       },
 
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to get user');
+    if (response.ok) {
+      data = await response.json();
+    }
+    else{
+      data = []
     }
 
-    const data = await response.json();
     return data;
   } catch (err) {
-    console.error('Error creating user:', err);
+    console.error('Error fetching user:', err);
     throw err;
   }
 };

@@ -3,7 +3,7 @@ import MainLayout from "@/app/components/MainLayout";
 import ChartCard from "../../components/chartCard";
 import StatsCard from "../../components/statsCard";
 import TaskModal from "@/app/components/modals/taskModal";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
@@ -79,6 +79,8 @@ export default function DashboardPage() {
   const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setIsPageLoading] = useState(true);
+  const [isUpdatingTasks, setIsUpdatingTasks] = useState(false);
+  const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -95,8 +97,8 @@ export default function DashboardPage() {
       project_id: "",
       project_title: "",
       project_color: "",
-      priority: "",
-      status: "",
+      priority: "Low",
+      status: "Pending",
       isRecurring: false,
       repeat_every: "",
       repeat_days: [],
@@ -117,6 +119,7 @@ export default function DashboardPage() {
     handleChange,
     setSubmitting,
     setErrors,
+    resetForm,
   } = useFormik({
     initialValues,
     enableReinitialize: true,
@@ -136,7 +139,7 @@ export default function DashboardPage() {
 
   const handleSubmitForm = async (values: taskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
-    
+    console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
       await createTask(values);
     }
@@ -262,26 +265,46 @@ export default function DashboardPage() {
   }, [user, isTaskModalOpen]);
 
   useEffect(() => {
-    setIsPageLoading(true)
-    if (user) {
-      const fetchTasks = async () => {
-        const startDate = new Date().toISOString();
-        const endDate = new Date(
-          new Date().setDate(new Date().getDate() + 1)
-        ).toISOString(); //tomorrow
-        const tasks = await getTasksByUser(user.user_id, startDate, endDate);
-        if (tasks) {
-          setTasks([]);
-          setTasks(tasks);
-          setIsPageLoading(false)
-        } else {
-          setTasks([]);
-          setIsPageLoading(false)
-        }
-      };
-      fetchTasks();
-    }
-  }, [user, showToast, updateTaskDashboard]);
+    const fetchTasks = async () => {
+      if (!user) return;
+  
+      // Only show loading spinner for first load
+      if (isFirstLoad.current) {
+        setIsPageLoading(true);
+      }
+  
+      const startDate = new Date().toISOString();
+      const endDate = new Date(
+        new Date().setDate(new Date().getDate() + 1)
+      ).toISOString();
+  
+      const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
+  
+      if (fetchedTasks) {
+        setTasks(fetchedTasks);
+      } else {
+        setTasks([]); // or keep previous state?
+      }
+  
+      if (isFirstLoad.current) {
+        setIsPageLoading(false);
+        isFirstLoad.current = false;
+      }
+    };
+  
+    fetchTasks();
+  }, [user, updateTaskDashboard, showToast]);
+
+  useEffect(() => {
+  if (isTaskModalOpen && !isUpdateTask) {
+    resetForm({
+      values: {
+        ...initialValues,
+        status: "Pending",
+      },
+    });
+  }
+}, [isTaskModalOpen, isUpdateTask]);
 
   const handleUpdateTask = async (values: taskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
@@ -614,9 +637,9 @@ export default function DashboardPage() {
 
         {(tasks.length ===0 && !pageLoading) &&(
           <>
-            <div className="w-full h-full flex items-center justify-center ">
-              <div className="flex flex-col gap-5 items-center max-w-[352px] h-auto">
-                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div className="w-full h-full flex items-start justify-center mt-12">
+              <div className="flex flex-col gap-5 items-center max-w-[352px] justify-start">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
                 <path d="M87.5 50.0093C87.5 29.3062 70.7031 12.5093 50 12.5093C29.2969 12.5093 12.5 29.3062 12.5 50.0093C12.5 70.7124 29.2969 87.5093 50 87.5093C70.7031 87.5093 87.5 70.7124 87.5 50.0093Z" stroke="#FEAD03" stroke-width="7" stroke-miterlimit="10"/>
                 <g filter="url(#filter0_d_1156_894)">
                 <path d="M71.875 37.5054L50.0254 62.5054L40.6602 53.1304M37.4902 62.5054L28.125 53.1304M59.709 37.5054L49.6406 49.0288" stroke="#FEAD03" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" shape-rendering="crispEdges"/>
@@ -634,16 +657,16 @@ export default function DashboardPage() {
                 </filter>
                 </defs>
                 </svg>
-                <h1 className="font-lato text-2xl text-primary-default font-bold">
+                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
                   Welcome to Your Dashboard ✨
                 </h1>
-                <span className="font-lato text-base text-text text-center">
+                <span className="font-lato text-base text-text text-center fade-in-delay-2">
                   Start organizing your life by creating your first task
                   Every great journey begins with a single step!
                 </span>
                 <button
                   className="px-5 py-[5px] w-full flex flex-row gap-[5px] items-center justify-center text-white font-lato bg-primary-default rounded-[10px] 
-                    hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                    hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 fade-in-delay-3"
                   onClick={() => {
                     setIsTaskModalOpen(true);
                     clearAllData();
