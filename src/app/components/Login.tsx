@@ -207,6 +207,7 @@ export default function Login({
 
           {/* forgot password */}
           <button
+            type="button"
             className="font-lato text-xs text-primary-default ml-2 font-bold"
             onClick={() => onChangeView("forgotPassword")}
           >
@@ -228,6 +229,7 @@ export default function Login({
             {isLoading ? <div className="loader"></div> : "Login"}
           </button>
           <button
+            type="button"
             className="rounded-3xl bg-white border-solid border-[2px] border-primary-default font-bold font-poppins h-10 text-primary-default"
             onClick={() => onChangeView("signup")}
           >
