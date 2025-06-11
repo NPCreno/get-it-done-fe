@@ -426,14 +426,14 @@ export default function TaskModal({
               <button
                 className="bg-primary-default rounded-[5px] flex justify-center items-center text-white font-lato 
                 text-[13px] font-bold p-[10px]"
+                type="button"
                 onClick={() =>
                   isUpdate
                     ? handleUpdateTask(formik.values)
                     : handleCreateTask(formik.values)
                 }
               >
-                {isUpdate ? "Update" : "Create"}
-                {isLoading ? <div className="loader"></div> : ""}
+                {isLoading ? <div className="loader"></div> : (isUpdate ? "Update" : "Create")}
               </button>
             </div>
           </div>
