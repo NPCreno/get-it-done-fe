@@ -134,7 +134,7 @@ export default function ProjectsPage() {
 
   const handleSubmitForm = async (values: projectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
-
+    console.log("validationErrors: ", validationErrors)
     if (Object.keys(validationErrors).length === 0) {
       await createProj(values)
     }
@@ -252,19 +252,21 @@ export default function ProjectsPage() {
 
   useEffect(()=>{
     const fetchTasksByProj = async () => {
-      try {
-        const startDate = new Date().toISOString();
-        const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
-        const tasks = await getTasksByProject(selectedProject?.project_id ?? "", startDate, endDate);
-        if(tasks){
-          setTasks(tasks);
-        }
-        else{
+      if(selectedProject){
+        try {
+          const startDate = new Date().toISOString();
+          const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(); //tomorrow
+          const tasks = await getTasksByProject(selectedProject?.project_id ?? "", startDate, endDate);
+          if(tasks){
+            setTasks(tasks);
+          }
+          else{
+            setTasks([]);
+          }
+        } catch (error) {
           setTasks([]);
+          console.error("Failed to fetch tasks by project:", error);
         }
-      } catch (error) {
-        setTasks([]);
-        console.error("Failed to fetch tasks by project:", error);
       }
     }
     fetchTasksByProj();
