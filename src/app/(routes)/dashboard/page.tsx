@@ -82,7 +82,7 @@ export default function DashboardPage() {
     due_date: null,
     user_id: user?.user_id ?? "",
     project_id: "",
-    project_title: "",
+    project_title: undefined,
     project_color: "",
     priority: "",
     status: "",
