@@ -13,7 +13,7 @@ export default function NotificationsPage() {
   const [user, setUser] = useState<IUser | null>(null);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   // const [pageLoading, setIsPageLoading] = useState(false);
-  const pageLoading = true
+  const pageLoading = false
   // const isFirstLoad = useRef(true);
   // const [refreshPage, setRefreshPage] = useState(false)
 
