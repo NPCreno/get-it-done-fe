@@ -5,14 +5,15 @@ import NotificationCard from "@/app/components/notificationCard";
 import { INotificationProps } from "@/app/interface/INotification";
 import { IUser } from "@/app/interface/IUser";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 
 
 export default function NotificationsPage() {
   const [user, setUser] = useState<IUser | null>(null);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
-  const [pageLoading, setIsPageLoading] = useState(false);
+  // const [pageLoading, setIsPageLoading] = useState(false);
+  const pageLoading = true
   // const isFirstLoad = useRef(true);
   // const [refreshPage, setRefreshPage] = useState(false)
 
@@ -173,10 +174,10 @@ useEffect(() => {
                 </svg>
 
                 <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
-                  You're All Caught Up! ✨
+                  You&apos;re All Caught Up! ✨
                 </h1>
                 <span className="font-lato text-base text-text text-center fade-in-delay-2">
-                  No new notifications right now. When you start creating tasks and achieving goals, you'll see your progress updates here.
+                  No new notifications right now. When you start creating tasks and achieving goals, you&apos;ll see your progress updates here.
                 </span>
               </div>
             </div>
