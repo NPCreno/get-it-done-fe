@@ -3,7 +3,7 @@ import MainLayout from "@/app/components/MainLayout";
 import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createProject,
   getProjectsForUser,
@@ -89,6 +89,9 @@ export default function ProjectsPage() {
   const [isUpdateTask, setIsUpdateTask] = useState(false);
   const [updateTasksData, setUpdateTasksData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [pageLoading, setIsPageLoading] = useState(true);
+  const isFirstLoad = useRef(true);
+  const [refreshPage, setRefreshPage] = useState(false)
   const handleToastClose = () => {
     setIsExitingToast(true);
     setTimeout(() => {
@@ -167,6 +170,7 @@ export default function ProjectsPage() {
       );
       if (response.status === "success") {
         setIsLoading(false);
+        setRefreshPage(!refreshPage)
         setIsAddProjectModalOpen(false);
         setToastMessage({
           title: "Project Created",
@@ -591,24 +595,51 @@ export default function ProjectsPage() {
     await updateTask(mappedTask);
   };
 
+  const clearAllData = () => {
+    setFieldValue("title", "");
+    setFieldValue("description", "");
+    setFieldValue("due_date", null);
+    setFieldValue("colorLabel", "");
+    setFieldValue("color", "");
+    setFieldError("title", "");
+    setFieldError("description", "");
+    setFieldError("due_date", "");
+    setFieldError("colorLabel", "");
+    setFieldError("color", "");
+  };
+
   const handleDeleteTask = async (taskId: string) => {
     await deleteTask(taskId);
   };
 
   useEffect(() => {
-    if (user) {
       const fetchProjects = async () => {
+        if (!user) return;
+        // Only show loading spinner for first load
+        if (isFirstLoad.current) {
+          setIsPageLoading(true);
+        }
+        
         const projects = await getProjectsForUser(user.user_id);
         if (projects?.status === "success") {
+          if (isFirstLoad.current) {
+            setIsPageLoading(false);
+            isFirstLoad.current = false;
+          }
           setProjectOptions(projects.data);
           return;
         } else {
+          if (isFirstLoad.current) {
+            setIsPageLoading(false);
+            isFirstLoad.current = false;
+          }
           setProjectOptions([]);
         }
+
       };
       fetchProjects();
-    }
-  }, [user, isTaskModalOpen]);
+  }, [user, isTaskModalOpen, refreshPage]);
+
   return (
     <MainLayout>
       {showToast && (
@@ -623,70 +654,120 @@ export default function ProjectsPage() {
       <div className="main flex justify-center ju w-full">
         {/* Main Page */}
         <div className="inside flex flex-col gap-5 max-w-[1440px] w-full mx-auto">
-          <div className="flex justify-between">
-            {/* Left header */}
-            <div className="flex flex-col">
-              <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
-                Projects
-              </h1>
-              <p className="font-lato text-[13px] text-text fade-in-delay select-none">
-                Organize your tasks into projects
-              </p>
-            </div>
 
-            <div className="flex flex-row gap-[10px] items-end">
-              <button
-                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
-                           hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-                onClick={() => {
-                  setIsAddProjectModalOpen(true);
-                  clearValueAndErrors();
-                }}
-              >
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 24 25"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
-                    stroke="white"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                New Project
-              </button>
-            </div>
-          </div>
+        {pageLoading &&(
+          <div className="">LOADING DATA....</div>
+        )}
 
-          <div className="flex flex-wrap gap-5">
-            {projectData.length > 0 ? (
-              projectData.map((project, index) => (
-                <ProjectCard
-                  key={index}
-                  project={project}
-                  onClick={() => {
-                    setSelectedProject(project);
-                    setIsViewProjectModalOpen(true);
-                  }}
-                  onAddTaskClick={() => {
-                    setSelectedProject(project);
-                    setIsTaskModalOpen(true);
-                  }}
-                />
-              ))
-            ) : (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-text text-[13px] font-lato">
-                  No projects found
+        {(projectOptions.length !=0 && !pageLoading) && (
+          <>
+            <div className="flex justify-between">
+              {/* Left header */}
+              <div className="flex flex-col">
+                <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
+                  Projects
+                </h1>
+                <p className="font-lato text-[13px] text-text fade-in-delay select-none">
+                  Organize your tasks into projects
                 </p>
               </div>
-            )}
-          </div>
+
+              <div className="flex flex-row gap-[10px] items-end">
+                <button
+                  className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
+                            hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                  onClick={() => {
+                    setIsAddProjectModalOpen(true);
+                    clearValueAndErrors();
+                  }}
+                >
+                  <svg
+                    width="25"
+                    height="25"
+                    viewBox="0 0 24 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
+                      stroke="white"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  New Project
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-5">
+              {projectData.length > 0 ? (
+                projectData.map((project, index) => (
+                  <ProjectCard
+                    key={index}
+                    project={project}
+                    onClick={() => {
+                      setSelectedProject(project);
+                      setIsViewProjectModalOpen(true);
+                    }}
+                    onAddTaskClick={() => {
+                      setSelectedProject(project);
+                      setIsTaskModalOpen(true);
+                    }}
+                  />
+                ))
+              ) : (
+                <div className="flex justify-center items-center h-full">
+                  <p className="text-text text-[13px] font-lato">
+                    No projects found
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+          
+        {(projectOptions.length ===0 && !pageLoading) &&(
+          <>
+            <div className="w-full h-full flex items-start justify-center mt-12">
+              <div className="flex flex-col gap-5 items-center max-w-[352px] justify-start">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
+                <path d="M12.5 37.5063V23.4438C12.5 21.3718 13.3231 19.3847 14.7882 17.9196C16.2534 16.4544 18.2405 15.6313 20.3125 15.6313H35.1348C36.6773 15.6314 38.1853 16.0881 39.4687 16.9438L44.9062 20.5688C46.1897 21.4246 47.6977 21.8813 49.2402 21.8813H79.6875C81.7595 21.8813 83.7466 22.7044 85.2118 24.1696C86.6769 25.6347 87.5 27.6218 87.5 29.6938V37.5063" stroke="#FEAD03" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M93.7308 44.2578L90.5628 76.5723C90.5628 78.6419 89.7416 80.627 88.2795 82.0917C86.8173 83.5564 84.8337 84.3811 82.764 84.3848H17.2367C15.167 84.3811 13.1834 83.5564 11.7212 82.0917C10.2591 80.627 9.43784 78.6419 9.43785 76.5723L6.26988 44.2578C6.20112 43.3978 6.31118 42.5329 6.5931 41.7175C6.87503 40.9021 7.32272 40.1539 7.90799 39.52C8.49326 38.8861 9.20343 38.3802 9.99379 38.0343C10.7842 37.6883 11.6376 37.5097 12.5003 37.5098H87.5199C88.381 37.5124 89.2323 37.693 90.0203 38.0401C90.8084 38.3873 91.5162 38.8935 92.0993 39.5271C92.6825 40.1607 93.1284 40.908 93.4092 41.7221C93.6899 42.5361 93.7994 43.3994 93.7308 44.2578V44.2578Z" stroke="#FEAD03" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12.5 37.5063V23.4438C12.5 21.3718 13.3231 19.3847 14.7882 17.9196C16.2534 16.4544 18.2405 15.6313 20.3125 15.6313H35.1348C36.6773 15.6314 38.1853 16.0881 39.4687 16.9438L44.9062 20.5688C46.1897 21.4246 47.6977 21.8813 49.2402 21.8813H79.6875C81.7595 21.8813 83.7466 22.7044 85.2118 24.1696C86.6769 25.6347 87.5 27.6218 87.5 29.6938V37.5063" stroke="#FEAD03" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M93.7308 44.2578L90.5628 76.5723C90.5628 78.6419 89.7416 80.627 88.2795 82.0917C86.8173 83.5564 84.8337 84.3811 82.764 84.3848H17.2367C15.167 84.3811 13.1834 83.5564 11.7212 82.0917C10.2591 80.627 9.43784 78.6419 9.43785 76.5723L6.26988 44.2578C6.20112 43.3978 6.31118 42.5329 6.5931 41.7175C6.87503 40.9021 7.32272 40.1539 7.90799 39.52C8.49326 38.8861 9.20343 38.3802 9.99379 38.0343C10.7842 37.6883 11.6376 37.5097 12.5003 37.5098H87.5199C88.381 37.5124 89.2323 37.693 90.0203 38.0401C90.8084 38.3873 91.5162 38.8935 92.0993 39.5271C92.6825 40.1607 93.1284 40.908 93.4092 41.7221C93.6899 42.5361 93.7994 43.3994 93.7308 44.2578V44.2578Z" stroke="#FEAD03" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M50 47V75.5" stroke="#FEAD03" stroke-width="7"/>
+                <path d="M36 61C46.5442 61 52.4558 61 63 61" stroke="#FEAD03" stroke-width="7"/>
+                </svg>
+
+                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
+                  No Projects Yet ✨
+                </h1>
+                <span className="font-lato text-base text-text text-center fade-in-delay-2">
+                  Create your first project to organize your tasks and boost your productivity.
+                </span>
+                <button
+                  className="px-5 py-[5px] w-full flex flex-row gap-[5px] items-center justify-center text-white font-lato bg-primary-default rounded-[10px] 
+                    hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 fade-in-delay-3"
+                  onClick={() => {
+                    setIsAddProjectModalOpen(true);
+                    clearAllData();
+                  }}
+                >
+                  <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.0234375" y="0.523438" width="23.9531" height="23.9531" stroke="white" stroke-width="0.046875"/>
+                  <path d="M3 9.50147V6.12646C3 5.62918 3.19754 5.15227 3.54917 4.80064C3.90081 4.44901 4.37772 4.25146 4.875 4.25146H8.43234C8.80256 4.25147 9.16448 4.36108 9.4725 4.56646L10.7775 5.43646C11.0855 5.64185 11.4474 5.75146 11.8177 5.75146H19.125C19.6223 5.75146 20.0992 5.94901 20.4508 6.30064C20.8025 6.65227 21 7.12918 21 7.62647V9.50147" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M22.4954 11.122L21.7351 18.8774C21.7351 19.3742 21.538 19.8506 21.1871 20.2021C20.8362 20.5536 20.3601 20.7516 19.8634 20.7524H4.1368C3.64009 20.7516 3.16402 20.5536 2.8131 20.2021C2.46218 19.8506 2.26508 19.3742 2.26508 18.8774L1.50477 11.122C1.48827 10.9156 1.51468 10.708 1.58234 10.5123C1.65001 10.3166 1.75745 10.137 1.89792 9.98489C2.03838 9.83275 2.20882 9.71135 2.39851 9.62832C2.5882 9.54529 2.79302 9.50243 3.00008 9.50244H21.0048C21.2114 9.50308 21.4158 9.54641 21.6049 9.62973C21.794 9.71304 21.9639 9.83454 22.1038 9.98661C22.2438 10.1387 22.3508 10.318 22.4182 10.5134C22.4856 10.7088 22.5119 10.916 22.4954 11.122V11.122Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="12" y1="12" x2="12" y2="18" stroke="white" stroke-width="2"/>
+                  <line x1="9" y1="15" x2="15" y2="15" stroke="white" stroke-width="2"/>
+                  </svg>
+                  Add Your First Project
+                </button>
+              </div>
+            </div>
+          </>
+        )}
         </div>
       </div>
 
