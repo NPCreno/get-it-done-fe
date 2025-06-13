@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { Toast } from "@/app/components/toast";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IUser } from "@/app/interface/IUser";
-
+import ConfirmationModal from "@/app/components/modals/confirmation";
+import Cookies from 'js-cookie';
 interface profileSettingsFormValues {
   fullname: string;
   username: string;
@@ -29,6 +30,7 @@ export default function ProfileSettingsPage() {
   });
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const {
     validateForm,
     setFieldValue,
@@ -129,6 +131,11 @@ export default function ProfileSettingsPage() {
     setTimeout(() => {
       setShowToast(false);
     }, 400);
+  };
+
+  const confirmLogout = () => {
+    Cookies.remove('access_token');
+    window.location.href = '/';
   };
 
   useEffect(() => {
@@ -548,8 +555,8 @@ export default function ProfileSettingsPage() {
               <button
                 type="button"
                 className="rounded-[10px] bg-error-300 flex flex-row justify-center items-center h-10 gap-5
-              hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300
-              "
+                hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                onClick={() => setIsLogoutModalOpen(true)}
               >
                 <svg
                   width="24"
@@ -575,6 +582,16 @@ export default function ProfileSettingsPage() {
           </form>
         </div>
       </div>
+
+      {isLogoutModalOpen && (
+        <ConfirmationModal
+          onClose={() => setIsLogoutModalOpen(false)}
+          onConfirm={confirmLogout}
+          confirmationTitle={"Are you sure you want to log out?"}
+          confirmationDescription={"This will end your current session. You can log in again anytime"}
+          confirmBtnLabel={"Log out"}
+        ></ConfirmationModal>
+      )}
     </MainLayout>
   );
 }
