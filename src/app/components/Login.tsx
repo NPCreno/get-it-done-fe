@@ -63,8 +63,7 @@ export default function Login({
       }
 
       if (access_token) {
-        localStorage.setItem("access_token", access_token); // Store token in both localStorage and cookies
-        document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`;
+        document.cookie = `access_token=${access_token}; path=/; secure; SameSite=Strict`;
         router.push("/dashboard");
       } else {
         setFieldError("usernameOrEmail", "Invalid login credentials"); // Set field errors if login failed
