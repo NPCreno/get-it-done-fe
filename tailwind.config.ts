@@ -9,6 +9,22 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		animation: {
+			softBounce: 'softBounce 0.6s ease-out forwards',
+			fillTextLoop: 'fillText 1s ease-in-out infinite',
+			fadeIn: 'fadeIn 1s ease-in-out forwards',
+		  },
+		  keyframes: {
+			fillText: {
+			  '0%': { backgroundSize: '0% 100%' },
+			  '50%': { backgroundSize: '100% 100%' },
+			  '100%': { backgroundSize: '0% 100%' },
+			},
+			fadeIn: {
+			  '0%': { opacity: "0", transform: 'translateY(20px)' },
+			  '100%': { opacity: "1", transform: 'translateY(0)' },
+			},
+		  },
   		colors: {
   			primary: {
   				'100': '#FEEAC0',

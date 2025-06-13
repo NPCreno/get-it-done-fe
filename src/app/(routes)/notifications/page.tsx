@@ -1,5 +1,6 @@
 "use client"
 import { getUser } from "@/app/api/api";
+import LoadingPage from "@/app/components/loader";
 import MainLayout from "@/app/components/MainLayout";
 import NotificationCard from "@/app/components/notificationCard";
 import { INotificationProps } from "@/app/interface/INotification";
@@ -14,6 +15,7 @@ export default function NotificationsPage() {
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   // const [pageLoading, setIsPageLoading] = useState(false);
   const pageLoading = false
+  const [showLoader, setShowLoader] = useState(true);
   // const isFirstLoad = useRef(true);
   // const [refreshPage, setRefreshPage] = useState(false)
 
@@ -128,6 +130,12 @@ useEffect(() => {
   fetchUser();
 }, [user, setUser, isDoneFetchingUser]);
 
+useEffect(() => {
+  if (!pageLoading) {
+    setTimeout(() => setShowLoader(false), 500); // Match transition duration
+  }
+}, [pageLoading]);
+
   return (
     <MainLayout>
       <div className="main flex justify-center w-full flex-col overflow-y-auto">
@@ -149,6 +157,11 @@ useEffect(() => {
             </div>  
           </div>
 
+        {showLoader && (
+          <div className={`fixed inset-0 z-50 transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <LoadingPage />
+          </div>
+        )}
 
           {/* Main contents */}
           {pageLoading &&(

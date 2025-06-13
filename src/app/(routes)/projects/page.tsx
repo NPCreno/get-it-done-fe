@@ -28,6 +28,7 @@ import TaskModal from "@/app/components/modals/taskModal";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
+import LoadingPage from "@/app/components/loader";
 
 interface projectOrTaskFormValues {
   title: string;
@@ -90,6 +91,7 @@ export default function ProjectsPage() {
   const [updateTasksData, setUpdateTasksData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setIsPageLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(true);
   const isFirstLoad = useRef(true);
   const [refreshPage, setRefreshPage] = useState(false)
   const handleToastClose = () => {
@@ -640,6 +642,12 @@ export default function ProjectsPage() {
       fetchProjects();
   }, [user, isTaskModalOpen, refreshPage]);
 
+  useEffect(() => {
+    if (!pageLoading) {
+      setTimeout(() => setShowLoader(false), 500); // Match transition duration
+    }
+  }, [pageLoading]);
+  
   return (
     <MainLayout>
       {showToast && (
@@ -655,8 +663,10 @@ export default function ProjectsPage() {
         {/* Main Page */}
         <div className="inside flex flex-col gap-5 max-w-[1440px] w-full mx-auto">
 
-        {pageLoading &&(
-          <div className="">LOADING DATA....</div>
+        {showLoader && (
+          <div className={`fixed inset-0 z-50 transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <LoadingPage />
+          </div>
         )}
 
         {(projectOptions.length !=0 && !pageLoading) && (
