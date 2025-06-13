@@ -189,10 +189,14 @@ export default function Login({
       </div>
 
       <div className="flex flex-row gap-6">
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("Facebook Oauth2 coming soon")}
+        >
           <Image src="/fb-logo.png" alt="fb-logo" width={24} height={24} />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("Gmail Oauth2 coming soon")}
+        >
           <Image
             src="/google-logo.png"
             alt="google-logo"
@@ -200,7 +204,9 @@ export default function Login({
             height={24}
           />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("AppleID Oauth2 coming soon")}
+        >
           <Image
             src="/apple-logo.png"
             alt="apple-logo"
