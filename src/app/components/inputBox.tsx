@@ -12,7 +12,7 @@ interface InputBoxProps {
     project_id?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime";
+  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime" | 'password' | 'email';
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -25,6 +25,7 @@ interface InputBoxProps {
   }[];  
   customClass?: string;
   labelCustomClass?: string;
+  isLanding?: boolean;
 }
 
 interface CustomDropdownChangeEvent extends React.ChangeEvent<HTMLInputElement>{
@@ -48,6 +49,7 @@ export default function InputBox({
   dropdownptions,
   customClass,
   labelCustomClass,
+  isLanding,
 }: InputBoxProps) {
   return (
     <div className="w-full">
@@ -55,28 +57,28 @@ export default function InputBox({
         {isLabelVisible && (
           <label
             htmlFor={label}
-            className={`text-base font-normal font-lato ${
-              error ? "text-error-default" : "text-text"
-            }`}
+            className={`text-base font-normal font-lato 
+              ${error ? "text-error-default" : (isLanding ? "text-primary-default" : "text-text")}`
+            }
           >
             {label}
           </label>
         )}
       </div>
 
-      {type === "text" ? (
+      {(type === "text" || type === "password" || type === "email")? (
         <input
           onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
           }}
           value={value.name ?? ""}
           onChange={onChange}
-          type="text"
+          type={type}
           id={label}
           onBlur={onBlur}
           className={`rounded-md border w-full h-[40px] py-2 px-2
-            outline-none transition-all duration-200 text-text
-            ${error ? "focus:ring-error border-error" : "focus:ring-text focus:ring-2 border-[#E0E0E0]"}
+            outline-none transition-all duration-200 ${isLanding ? "text-primary-default" : "text-text"}
+            ${error ? "focus:ring-error border-error" : "focus:ring-primary-default focus:ring-2 border-[#E0E0E0]"}
             disabled:opacity-50 disabled:cursor-not-allowed ${customClass}`}
           placeholder={placeholder}
           disabled={disabled}

@@ -23,6 +23,7 @@ export async function middleware(req: NextRequest) {
       console.log("Now:", new Date().toISOString());
 
       if (Date.now() > exp) {
+        console.warn("Deleting access_token: Token expired");
         const response = NextResponse.redirect(new URL("/", req.url));
         response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
         return response;
@@ -34,14 +35,14 @@ export async function middleware(req: NextRequest) {
 
       return NextResponse.next();
     } catch (err) {
-      console.error("Token decode error:", err);
-      // Only delete the cookie if we're certain it can't be used
+      console.error("Deleting access_token: Token decode error", err);
       const response = NextResponse.redirect(new URL("/", req.url));
       response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
       return response;
     }
   } else {
     if (isProtectedRoute) {
+      console.warn("Deleting access_token: Missing token on protected route");
       return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();

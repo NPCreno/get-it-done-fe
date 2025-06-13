@@ -5,6 +5,7 @@ import { loginSchema } from "@/app/schemas/loginSchema";
 import { useRouter } from "next/navigation";
 import { loginEmail, loginUsername } from "../api/api";
 import Image from "next/image";
+import InputBox from "./inputBox";
 interface LoginFormValues {
   usernameOrEmail: string;
   password: string;
@@ -24,7 +25,6 @@ export default function Login({
     values,
     errors,
     handleSubmit,
-    handleChange,
     setSubmitting,
     handleBlur,
     setFieldError,
@@ -101,87 +101,28 @@ export default function Login({
         <div className="flex flex-col justify-center gap-2">
           <div className="flex flex-col justify-center">
             {/* Username or Email */}
-            <div className="min-h-[95px]">
-              <div className={` ${errors.usernameOrEmail ? "shake" : ""}`}>
-                <label
-                  htmlFor="usernameOrEmail"
-                  className={`text-base font-normal font-lato ${
-                    errors.usernameOrEmail
-                      ? "text-error-default "
-                      : "text-primary-default"
-                  }`}
-                >
-                  Email or Username
-                </label>
-              </div>
-              <input
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSubmit();
-                  }
-                }}
-                value={values.usernameOrEmail}
-                onChange={handleChange}
-                type="text"
-                id="usernameOrEmail"
-                name="usernameOrEmail"
-                onBlur={handleBlur}
-                className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                  outline-none transition-all duration-200 
-                  text-primary-default ${
-                    errors.usernameOrEmail
-                      ? "focus:ring-error border-error"
-                      : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                  }`}
-                placeholder="Enter email or username"
-              />
-              {errors.usernameOrEmail && (
-                <span className="text-error-default font-lato text-xs top-0">
-                  {errors.usernameOrEmail as string}
-                </span>
-              )}
-            </div>
+            <InputBox 
+              type="text"
+              label="Email or Username" 
+              placeholder="Enter email or username" 
+              value={{name: values.usernameOrEmail}} 
+              onChange={(e) => setFieldValue("usernameOrEmail", e.target.value)} 
+              isLabelVisible={true}
+              error={errors.usernameOrEmail}
+              isLanding={true}
+            />
 
             {/* Password */}
-            <div className="min-h-[95px]">
-              <div className={` ${errors.password ? "shake" : ""}`}>
-                <label
-                  htmlFor="password"
-                  className={`text-base font-normal font-lato ${
-                    errors.password
-                      ? "text-error-default "
-                      : "text-primary-default"
-                  }`}
-                >
-                  Password
-                </label>
-              </div>
-              <input
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSubmit();
-                  }
-                }}
-                value={values.password ?? ""}
-                onChange={handleChange}
-                type="password"
-                id="password"
-                onBlur={handleBlur}
-                className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                          outline-none transition-all duration-200 
-                          text-primary-default ${
-                            errors.password
-                              ? "focus:ring-error border-error"
-                              : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                          }`}
-                placeholder="Enter password"
-              />
-              {errors.password && (
-                <span className="text-error-default font-lato text-xs top-0">
-                  {errors.password as string}
-                </span>
-              )}
-            </div>
+            <InputBox 
+              type="password"
+              label="Password" 
+              placeholder="Enter password" 
+              value={{name: values.password}} 
+              onChange={(e) => setFieldValue("password", e.target.value)} 
+              isLabelVisible={true}
+              error={errors.password}
+              isLanding={true}
+            />
 
             <div className="mt-2 flex flex-row justify-between">
               {/* remember password */}
@@ -248,10 +189,14 @@ export default function Login({
       </div>
 
       <div className="flex flex-row gap-6">
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("Facebook Oauth2 coming soon")}
+        >
           <Image src="/fb-logo.png" alt="fb-logo" width={24} height={24} />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("Gmail Oauth2 coming soon")}
+        >
           <Image
             src="/google-logo.png"
             alt="google-logo"
@@ -259,7 +204,9 @@ export default function Login({
             height={24}
           />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center">
+        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
+        onClick={() => alert("AppleID Oauth2 coming soon")}
+        >
           <Image
             src="/apple-logo.png"
             alt="apple-logo"
