@@ -23,6 +23,7 @@ import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import Image from "next/image";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
+import LoadingPage from "@/app/components/loader";
 
 interface taskFormValues {
   user_id: string;
@@ -79,6 +80,7 @@ export default function DashboardPage() {
   const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setIsPageLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(true);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -453,6 +455,12 @@ export default function DashboardPage() {
     setFieldError("due_date", "");
   };
 
+  useEffect(() => {
+    if (!pageLoading) {
+      setTimeout(() => setShowLoader(false), 500); // Match transition duration
+    }
+  }, [pageLoading]);
+
   return (
     <MainLayout>
       {showToast && (
@@ -468,8 +476,10 @@ export default function DashboardPage() {
         {/* Main Page */}
         <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
 
-        {pageLoading &&(
-          <div className="">LOADING DATA....</div>
+        {showLoader && (
+          <div className={`fixed inset-0 z-50 transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <LoadingPage />
+          </div>
         )}
 
         {(tasks.length !=0 && !pageLoading) &&(
