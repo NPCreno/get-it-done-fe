@@ -114,7 +114,7 @@ export default function Login({
 
             {/* Password */}
             <InputBox 
-              type="text"
+              type="password"
               label="Password" 
               placeholder="Enter password" 
               value={{name: values.password}} 
