@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
 import { createUser, loginEmail } from "../api/api";
+import InputBox from "./inputBox";
 
 interface SignupFormValues {
   username: string;
@@ -27,9 +28,8 @@ export default function Signup({
     values,
     errors,
     handleSubmit,
-    handleChange,
     setSubmitting,
-    handleBlur,
+    setFieldValue,
   } = useFormik({
     initialValues: {
       username: "",
@@ -118,202 +118,64 @@ export default function Signup({
       <form className="flex flex-col w-full" id="signupForm" name="signupForm" onSubmit={handleSubmit}>
         <div className="flex flex-col justify-center">
           {/* Full name */}
-          <div className="min-h-[95px]">
-            <div className={` ${errors.fullname ? "shake" : ""}`}>
-              <label
-                htmlFor="fullname"
-                className={`text-base font-normal font-lato ${
-                  errors.fullname ? "text-error-default " : "text-primary-default"
-                }`}
-              >
-                Full Name
-              </label>
-            </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault(); // Prevent form submission when "Enter" is pressed
-                }
-              }}
-              value={values.fullname ?? ""}
-              onChange={handleChange}
-              type="text"
-              id="fullname"
-              name="fullname"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                outline-none transition-all duration-200 
-                text-primary-default ${
-                  errors.fullname
-                    ? "focus:ring-error border-error"
-                    : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                }`}
-              placeholder="Enter your Full Name"
-            />
-            {errors.fullname && (
-              <span className="text-error-default font-lato text-xs top-0">
-                {errors.fullname as string}
-              </span>
-            )}
-          </div>
+          <InputBox 
+            type="text"
+            label="Full Name" 
+            placeholder="Enter your Full Name" 
+            value={{name: values.fullname}} 
+            onChange={(e) => setFieldValue("fullname", e.target.value)} 
+            isLabelVisible={true}
+            error={errors.fullname}
+            isLanding={true}
+          />
 
           {/* Username */}
-          <div className="min-h-[95px]">
-            <div className={` ${errors.username ? "shake" : ""}`}>
-              <label
-                htmlFor="username"
-                className={`text-base font-normal font-lato ${
-                  errors.username ? "text-error-default " : "text-primary-default"
-                }`}
-              >
-                Username
-              </label>
-            </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                }
-              }}
-              value={values.username ?? ""}
-              onChange={handleChange}
-              type="username"
-              id="username"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                        outline-none transition-all duration-200 
-                        text-primary-default ${
-                          errors.username
-                            ? "focus:ring-error border-error"
-                            : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                        }`}
-              placeholder="Enter your Username"
-            />
-            {errors.username && (
-              <span className="text-error-default font-lato text-xs top-0">
-                {errors.username as string}
-              </span>
-            )}
-          </div>
+          <InputBox 
+            type="text"
+            label="Username" 
+            placeholder="Enter your Username" 
+            value={{name: values.username}} 
+            onChange={(e) => setFieldValue("username", e.target.value)} 
+            isLabelVisible={true}
+            error={errors.username}
+            isLanding={true}
+          />
 
           {/* Email */}
-          <div className="min-h-[95px]">
-            <div className={` ${errors.email ? "shake" : ""}`}>
-              <label
-                htmlFor="email"
-                className={`text-base font-normal font-lato ${
-                  errors.email ? "text-error-default " : "text-primary-default"
-                }`}
-              >
-                Email
-              </label>
-            </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                }
-              }}
-              value={values.email ?? ""}
-              onChange={handleChange}
-              type="email"
-              id="email"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                        outline-none transition-all duration-200 
-                        text-primary-default ${
-                          errors.email
-                            ? "focus:ring-error border-error"
-                            : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                        }`}
-              placeholder="Enter your email address"
-            />
-            {errors.email && (
-              <span className="text-error-default font-lato text-xs top-0">
-                {errors.email as string}
-              </span>
-            )}
-          </div>
+          <InputBox 
+            type="email"
+            label="Email" 
+            placeholder="Enter your Email" 
+            value={{name: values.email}} 
+            onChange={(e) => setFieldValue("email", e.target.value)} 
+            isLabelVisible={true}
+            error={errors.email}
+            isLanding={true}
+          />
 
           {/* Password */}
-          <div className="min-h-[95px]">
-            <div className={` ${errors.password ? "shake" : ""}`}>
-              <label
-                htmlFor="password"
-                className={`text-base font-normal font-lato ${
-                  errors.password ? "text-error-default " : "text-primary-default"
-                }`}
-              >
-                Password
-              </label>
-            </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                }
-              }}
-              value={values.password ?? ""}
-              onChange={handleChange}
-              type="password"
-              id="password"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                        outline-none transition-all duration-200 
-                        text-primary-default ${
-                          errors.password
-                            ? "focus:ring-error border-error"
-                            : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                        }`}
-              placeholder="Enter your password"
-            />
-            {errors.password && (
-              <span className="text-error-default font-lato text-xs top-0">
-                {errors.password as string}
-              </span>
-            )}
-          </div>
+          <InputBox 
+            type="password"
+            label="Password" 
+            placeholder="Enter your Password" 
+            value={{name: values.password}} 
+            onChange={(e) => setFieldValue("password", e.target.value)} 
+            isLabelVisible={true}
+            error={errors.password}
+            isLanding={true}
+          />
 
           {/* Confirm Password */}
-          <div className="min-h-[95px]">
-            <div className={` ${errors.confirmPassword ? "shake" : ""}`}>
-              <label
-                htmlFor="password"
-                className={`text-base font-normal font-lato ${
-                  errors.confirmPassword
-                    ? "text-error-default "
-                    : "text-primary-default"
-                }`}
-              >
-                Confirm Password
-              </label>
-            </div>
-            <input
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                }
-              }}
-              value={values.confirmPassword ?? ""}
-              onChange={handleChange}
-              type="password"
-              id="confirmPassword"
-              onBlur={handleBlur}
-              className={`rounded-xl border  w-full h-[46px] py-2 px-2 
-                        outline-none transition-all duration-200 
-                        text-primary-default ${
-                          errors.confirmPassword
-                            ? "focus:ring-error border-error"
-                            : "focus:ring-primary-default focus:ring-2  border-[#E0E0E0]"
-                        }`}
-              placeholder="Confirm your password"
-            />
-            {errors.confirmPassword && (
-              <span className="text-error-default font-lato text-xs top-0">
-                {errors.confirmPassword as string}
-              </span>
-            )}
-          </div>
+          <InputBox 
+            type="password"
+            label="Confirm Password" 
+            placeholder="Confirm your Password" 
+            value={{name: values.confirmPassword}} 
+            onChange={(e) => setFieldValue("confirmPassword", e.target.value)} 
+            isLabelVisible={true}
+            error={errors.confirmPassword}
+            isLanding={true}
+          />
         </div>
 
         {/* buttons */}

@@ -25,7 +25,6 @@ export default function Login({
     values,
     errors,
     handleSubmit,
-    handleChange,
     setSubmitting,
     handleBlur,
     setFieldError,

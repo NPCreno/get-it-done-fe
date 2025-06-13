@@ -12,7 +12,7 @@ interface InputBoxProps {
     project_id?: string;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime" | 'password';
+  type?: "text" | "textarea" | "date" | "dropdown" | "weekdayselector" | "datewithtime" | 'password' | 'email';
   error?: string;
   disabled?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -66,7 +66,7 @@ export default function InputBox({
         )}
       </div>
 
-      {(type === "text" || type === "password" )? (
+      {(type === "text" || type === "password" || type === "email")? (
         <input
           onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
