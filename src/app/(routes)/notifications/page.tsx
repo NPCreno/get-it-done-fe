@@ -157,8 +157,8 @@ useEffect(() => {
             </div>  
           </div>
 
-        {showLoader && (
-          <div className={`fixed inset-0 z-50 transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          {showLoader && (
+          <div className={`transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <LoadingPage />
           </div>
         )}

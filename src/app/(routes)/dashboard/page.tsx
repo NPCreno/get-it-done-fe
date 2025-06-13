@@ -477,7 +477,7 @@ export default function DashboardPage() {
         <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
 
         {showLoader && (
-          <div className={`fixed inset-0 z-50 transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+          <div className={`transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <LoadingPage />
           </div>
         )}
