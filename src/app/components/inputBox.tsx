@@ -68,9 +68,6 @@ export default function InputBox({
 
       {(type === "text" || type === "password" || type === "email")? (
         <input
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.preventDefault();
-          }}
           value={value.name ?? ""}
           onChange={onChange}
           type={type}
@@ -85,9 +82,6 @@ export default function InputBox({
         />
       ) : type === "textarea" ? (
         <textarea
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.preventDefault();
-          }}
           value={value.name ?? ""}
           onChange={onChange}
           id={label}
