@@ -99,6 +99,8 @@ const TaskCard = ({ task, handleUpdateTask, handleTaskStatus, handleDeleteTask }
   const priorityTextColor = task.priority === "Low" ? "text-secondary-500" : task.priority === "Medium" ? "text-accent-500" : "text-error-500";
 
   const handleCheckToggle = () => {
+    const audio = new Audio('/soundfx/3.mp3'); 
+    audio.play();
     const updatedTask = {
       ...task,
       status: task.status === "Complete" ? "Pending" : "Complete",

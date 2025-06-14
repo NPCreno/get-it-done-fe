@@ -13,6 +13,7 @@ import {
   getUser,
   getTasksByUser,
   updateTaskApi,
+  getDashboardData,
 } from "@/app/api/api";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
@@ -24,6 +25,7 @@ import Image from "next/image";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
+import { IDashboardData } from "@/app/interface/IDashboardData";
 
 interface taskFormValues {
   user_id: string;
@@ -76,6 +78,7 @@ export default function DashboardPage() {
   const [isExitingToast, setIsExitingToast] = useState(false);
   const [isDoneFetchingUser, setIsDoneFetchingUser] = useState(false);
   const [tasks, setTasks] = useState<ITask[]>([]);
+  const [dashboardData, setDashboardData] = useState<IDashboardData | undefined>();
   const [isUpdateTask, setIsUpdateTask] = useState(false);
   const [updateTaskDashboard, setUpdateTaskDashboard] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -280,13 +283,20 @@ export default function DashboardPage() {
       ).toISOString();
   
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
-  
+      const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
+      debugger
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {
         setTasks([]); // or keep previous state?
       }
-  
+
+      if(fetchedDashboardData.status === "success"){
+        setDashboardData(fetchedDashboardData.data)
+      }else{
+        setDashboardData(undefined)
+      }
+
       if (isFirstLoad.current) {
         setIsPageLoading(false);
         isFirstLoad.current = false;
@@ -551,25 +561,25 @@ export default function DashboardPage() {
             <StatsCard
               icon="/svgs/list-outline.svg"
               header="All Tasks"
-              content="300"
+              content={String(dashboardData ? dashboardData.all_tasks : 0)}
               delay="fade-in-left-delay-1"
             />
             <StatsCard
               icon="/svgs/timer-outline.svg"
-              header="In Progress"
-              content="15"
+              header="To Do"
+              content={String(dashboardData ? dashboardData.pending_tasks : 0)}
               delay="fade-in-left-delay-2"
             />
             <StatsCard
               icon="/svgs/folder-open-outline.svg"
               header="All Projects"
-              content="3"
+              content={String(dashboardData ? dashboardData.all_projects : 0)}
               delay="fade-in-left-delay-3"
             />
             <StatsCard
               icon="/svgs/checkbox-outline.svg"
               header="Complete"
-              content="300"
+              content={String(dashboardData ? dashboardData.complete_tasks : 0)}
               delay="fade-in-left-delay-4"
             />
           </div>
@@ -740,6 +750,8 @@ function TaskItem({
   const { setSelectedTaskData } = useFormState();
 
   const handleCheckToggle = () => {
+    const audio = new Audio('/soundfx/3.mp3'); // path to your mp3 file
+    audio.play();
     const updatedTask = {
       ...task,
       status: task.status === "Complete" ? "Pending" : "Complete",

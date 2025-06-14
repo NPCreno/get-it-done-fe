@@ -79,8 +79,7 @@ export default function Signup({
     const { access_token } = await loginEmail(email, password);
 
     if (access_token) {
-      localStorage.setItem("access_token", access_token); //store in local storage
-      document.cookie = `access_token=${access_token}; path=/; max-age=3600; secure; SameSite=Strict`; // Store in cookie (expires in 1 hour)
+      document.cookie = `access_token=${access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
       onChangeView("signedUp");
     }
   }

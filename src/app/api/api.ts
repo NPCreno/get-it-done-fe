@@ -329,3 +329,30 @@ export const getTasksByProject= async (project_id: string, startDate: string, en
     throw err;
   }
 };
+
+export const getDashboardData= async (userId: string, startDate: string, endDate: string) => {
+  try {
+    const token = getAccessToken();
+    let data;
+    const response = await fetch(`${apiUrl}/tasks/getDashboardData/${userId}?startDate=${startDate}&endDate=${endDate}`, 
+        { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+
+    });
+    if (response.ok) {
+      data = await response.json();
+    }
+    else{
+      data = {}
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching dashboard data:', err);
+    throw err;
+  }
+};
