@@ -750,6 +750,8 @@ function TaskItem({
   const { setSelectedTaskData } = useFormState();
 
   const handleCheckToggle = () => {
+    const audio = new Audio('/soundfx/3.mp3'); // path to your mp3 file
+    audio.play();
     const updatedTask = {
       ...task,
       status: task.status === "Complete" ? "Pending" : "Complete",
