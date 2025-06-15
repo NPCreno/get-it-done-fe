@@ -1,13 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { FiMenu, FiX} from "react-icons/fi";
 import { useFormState } from "@/app/context/FormProvider";
 import SidebarLink from "./sidebarLink";
 
 export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleSidebar = () => setIsOpen(!isOpen);
   const { sidebarWidth, setSidebarWidth, isSidebarOpen, setIsSidebarOpen } = useFormState();
 
   return (
