@@ -284,7 +284,6 @@ export default function DashboardPage() {
   
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
-      debugger
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {

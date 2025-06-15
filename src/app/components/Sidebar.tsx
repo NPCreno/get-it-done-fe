@@ -14,7 +14,7 @@ export default function Sidebar() {
     <>
       {/* Sidebar for large screens */}
       <aside
-        className="hidden md:flex flex-col h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300"
+        className="flex flex-col h-full py-5 px-[10px] bg-white text-black rounded-[10px] items-start group transition-all duration-300"
         style={{ width: `${sidebarWidth}px` }} // Use global state for width
         onMouseEnter={() => {
           setSidebarWidth(146);
@@ -80,13 +80,6 @@ export default function Sidebar() {
           />
         </nav>
       </aside>
-
-      {/* Sidebar for small screens */}
-      <div className="md:hidden flex items-center p-4 bg-gray-900 text-white">
-        <button onClick={toggleSidebar} className="text-2xl">
-          {isOpen ? <FiX /> : <FiMenu />}
-        </button>
-      </div>
     </>
   );
 }
