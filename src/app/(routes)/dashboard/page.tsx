@@ -218,6 +218,7 @@ export default function DashboardPage() {
       }, 10000); // Toast display duration
     }
   };
+
   useEffect(() => {
     const fetchUser = async () => {
       if (isDoneFetchingUser) return;
@@ -284,7 +285,6 @@ export default function DashboardPage() {
   
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
-      debugger
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {
@@ -557,7 +557,7 @@ export default function DashboardPage() {
           </div>
 
           {/* first row cards */}
-          <div className="flex flex-row gap-5 h-[100px] w-full fade-in-delay-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
             <StatsCard
               icon="/svgs/list-outline.svg"
               header="All Tasks"
@@ -585,20 +585,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Chart cards */}
-          <div className="flex flex-row gap-5 h-[260px] w-full fade-in-delay-2">
-            <ChartCard
-              header="Task Completion Trend"
-              delay="fade-in-left-delay-1"
-            />
-            <ChartCard
-              header="Most Productive Hours"
-              delay="fade-in-left-delay-2"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
+            <ChartCard header="Task Completion Trend" delay="fade-in-left-delay-1" />
+            <ChartCard header="Most Productive Hours" delay="fade-in-left-delay-2" />
             <ChartCard header="Daily Progress" delay="fade-in-left-delay-3" />
-            <ChartCard
-              header="Productivity Streak"
-              delay="fade-in-left-delay-4"
-            />
+            <ChartCard header="Productivity Streak" delay="fade-in-left-delay-4" />
           </div>
 
           <div className="w-full p-5 flex flex-col bg-white rounded-[10px] fade-in-delay-2 flex-grow">
@@ -636,7 +627,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Scrollable Task List */}
-            <div className="flex flex-col gap-[10px] mt-5 overflow-y-auto flex-grow basis-0">
+            <div className="flex flex-col gap-[10px] mt-5 lg:overflow-y-auto flex-grow basis-0">
               {/* Task Item */}
               {tasks.map((task, index) => (
                 <TaskItem
@@ -654,7 +645,7 @@ export default function DashboardPage() {
           </>
         )}
 
-        {(tasks.length ===0 && !pageLoading) &&(
+        {(tasks.length === 0 && !pageLoading) &&(
           <>
             <div className="w-full h-full flex items-start justify-center mt-12">
               <div className="flex flex-col gap-5 items-center max-w-[352px] justify-start">

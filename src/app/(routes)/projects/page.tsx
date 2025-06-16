@@ -685,7 +685,7 @@ export default function ProjectsPage() {
               <div className="flex flex-row gap-[10px] items-end">
                 <button
                   className="px-4 py-[5px] flex flex-row gap-4 text-white font-lato bg-primary-default rounded-[10px] 
-                            hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                            hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 ml-3"
                   onClick={() => {
                     setIsAddProjectModalOpen(true);
                     clearValueAndErrors();
@@ -698,12 +698,13 @@ export default function ProjectsPage() {
                   <line x1="12" y1="12" x2="12" y2="18" stroke="white" stroke-width="2"/>
                   <line x1="9" y1="15" x2="15" y2="15" stroke="white" stroke-width="2"/>
                   </svg>
-                  New Project
+
+                  <span className="min-w-[87px]">New Project</span>
                 </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-5">
+            <div className="grid gap-5 lg:grid-cols-4 md:grid-cols-2">
               {projectData.length > 0 ? (
                 projectData.map((project, index) => (
                   <ProjectCard
