@@ -200,13 +200,13 @@ export default function ProfileSettingsPage() {
           </div>
 
           <form
-            className="flex flex-row gap-5"
+            className="flex flex-col md:flex-row gap-5"
             id="profileSettings"
             name="profileSettings"
             onSubmit={handleSubmit}
           >
             {/* left side */}
-            <div className="flex flex-col gap-5 min-w-[934px] h-full">
+            <div className="flex flex-col gap-5 w-full md:min-w-[400px] lg:min-w-[700px] h-full">
               {/* Profile Information */}
               <div className="flex flex-col rounded-[10px] bg-white p-5">
                 {/* profile information header */}
@@ -440,7 +440,7 @@ export default function ProfileSettingsPage() {
                       </p>
                     </div>
 
-                    <div className="flex flex-row justify-center items-center gap-4">
+                    <div className="flex flex-row justify-center items-center gap-4 ml-3">
                       <ToggleSwitch
                         name="enableNotifications"
                         value={values.enableNotifications}
@@ -463,7 +463,7 @@ export default function ProfileSettingsPage() {
                       </p>
                     </div>
 
-                    <div className="flex flex-row justify-center items-center gap-4">
+                    <div className="flex flex-row justify-center items-center gap-4 ml-3">
                       <ToggleSwitch
                         name="soundFx"
                         value={values.soundFx}
@@ -479,7 +479,7 @@ export default function ProfileSettingsPage() {
             </div>
 
             {/* right side */}
-            <div className="flex flex-col gap-5 min-w-[350px] fade-in-delay-2">
+            <div className="flex flex-col gap-5 w-full md:w-[350px] lg:w-[350px] fade-in-delay-2">
               <div className="flex flex-col gap-5 p-5 bg-white rounded-[10px]">
                 {/* Appearance header */}
                 <div className="flex-flex-col">
