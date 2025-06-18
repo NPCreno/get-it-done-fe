@@ -186,7 +186,7 @@ useEffect(() => {
                 <path d="M68.75 34.3877L42.5 65.6377L31.25 53.1377" stroke="#FEAD03" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
 
-                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
+                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay text-center">
                   You&apos;re All Caught Up! ✨
                 </h1>
                 <span className="font-lato text-base text-text text-center fade-in-delay-2">

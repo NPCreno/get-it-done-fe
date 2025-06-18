@@ -1,7 +1,9 @@
+"use client";
 import { useState, useEffect } from "react";
 import { useFormState } from "../context/FormProvider";
-import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 export default function SidebarLink({
   href,
   icon,
@@ -15,28 +17,43 @@ export default function SidebarLink({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [currentPage, setCurrentPage] = useState("");
-  const { isSidebarOpen } =
-    useFormState();
+  const { isSidebarOpen } = useFormState();
+  const router = useRouter();
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCurrentPage(window.location.pathname);
     }
   }, []);
 
-  const isActive = currentPage === href; // Check if this link matches the current page
+  const isActive = currentPage === href;
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // simulate double click
+    const dblClickEvent = new MouseEvent("dblclick", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
+
+    e.currentTarget.dispatchEvent(dblClickEvent);
+
+    // navigate
+    router.push(href);
+  };
 
   return (
-    <Link
-      href={href}
+    <div
+      onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`flex items-center gap-4 rounded-[10px] h-[35px] w-[35px] justify-start 
-        group-hover:w-[126px] transition-all duration-300 linkbtn 
+        group-hover:w-[126px] transition-all duration-300 linkbtn cursor-pointer
         ${
           isActive || isHovered
             ? "bg-primary-default shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)]"
             : "hover:bg-primary-default"
         }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <Image
         src={isActive || isHovered ? iconHover : icon}
@@ -53,6 +70,6 @@ export default function SidebarLink({
       >
         {text}
       </span>
-    </Link>
+    </div>
   );
 }

@@ -557,7 +557,7 @@ export default function DashboardPage() {
           </div>
 
           {/* first row cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
+          <div className="grid sm:grid-cols md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
             <StatsCard
               icon="/svgs/list-outline.svg"
               header="All Tasks"
@@ -667,7 +667,7 @@ export default function DashboardPage() {
                 </filter>
                 </defs>
                 </svg>
-                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
+                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay text-center">
                   Welcome to Your Dashboard ✨
                 </h1>
                 <span className="font-lato text-base text-text text-center fade-in-delay-2">

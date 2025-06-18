@@ -744,7 +744,7 @@ export default function ProjectsPage() {
                 <path d="M36 61C46.5442 61 52.4558 61 63 61" stroke="#FEAD03" stroke-width="7"/>
                 </svg>
 
-                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay">
+                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay text-center">
                   No Projects Yet ✨
                 </h1>
                 <span className="font-lato text-base text-text text-center fade-in-delay-2">
