@@ -42,9 +42,8 @@ export default function PomodoroModal({
         <h1 className='text-white text-[100px] font-bold font-lato'>25:00</h1>
 
         <div className="relative w-[106px] h-[44px]">
-            <div className="absolute top-[4px] left-0 bg-[#DEDEDE] h-[40px] w-[106px] rounded-[5px]" />
-            <button className="absolute top-0 left-0 text-primary-default text-[23px] font-bold font-lato bg-white h-[40px] w-[106px] rounded-[5px] 
-            active:translate-y-[4px] transition-transform">
+            <div className="absolute top-[4px] left-0 bg-[#DEDEDE] h-[40px] w-[106px] rounded-[5px] shadow-[4px_4px_4px_rgba(0,0,0,0.2)]" />
+            <button className="absolute top-0 left-0 text-primary-default text-[23px] font-bold font-lato bg-white h-[40px] w-[106px] rounded-[5px] active:translate-y-[4px] transition-transform">
                 Start
             </button>
         </div>
