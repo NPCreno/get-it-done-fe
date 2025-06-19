@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { IProject } from '@/app/interface/IProject';
-import { ITask } from '@/app/interface/ITask';
-import { useFormState } from '@/app/context/FormProvider';
-import Image from 'next/image';
 
 type TimerType = 'pomodoro' | 'shortBreak' | 'longBreak';
 
@@ -47,15 +43,11 @@ export default function PomodoroModal({
   const currentTimer = TimerConfig[activeTimer];
 
   const handleEscapeKey = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       onClose();
     }
   };
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleEscapeKey);
-    return () => window.removeEventListener('keydown', handleEscapeKey);
-  }, []);
+  window.addEventListener("keydown", handleEscapeKey);
 
   const handleTimerChange = (timerType: TimerType) => {
     setActiveTimer(timerType);
@@ -63,8 +55,45 @@ export default function PomodoroModal({
     setIsActive(false);
   };
 
+  // Sound effect for starting the timer
+  const playStartSound = () => {
+    const audio = new Audio('/soundfx/start.mp3');
+    audio.volume = 0.5; // Set volume to 50%
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  };
+
+  // Countdown effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft(prevTime => {
+          if (prevTime <= 1) {
+            clearInterval(interval!);
+            setIsActive(false);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsActive(false);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isActive, timeLeft]);
+
   const toggleTimer = () => {
-    setIsActive(!isActive);
+    const newIsActive = !isActive;
+    setIsActive(newIsActive);
+    
+    // Play sound when starting the timer
+    if (newIsActive) {
+      playStartSound();
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -92,7 +121,7 @@ export default function PomodoroModal({
             }}
           />
           
-          {Object.entries(TimerConfig).map(([key, config], index) => {
+          {Object.entries(TimerConfig).map(([key, config]) => {
             const isActive = activeTimer === key;
             return (
               <button
@@ -109,7 +138,16 @@ export default function PomodoroModal({
             );
           })}
         </div>
-        <h1 className='text-white text-[100px] font-bold font-lato'>{formatTime(timeLeft)}</h1>
+        <div className='relative'>
+          <h1 className='text-white text-[100px] font-bold font-lato text-center'>
+            {formatTime(timeLeft)}
+          </h1>
+          {isActive && (
+            <span className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-white/80 text-sm font-lato'>
+              {activeTimer === 'pomodoro' ? 'Time to focus!' : 'Take a break!'}
+            </span>
+          )}
+        </div>
 
         <div className="relative w-[106px] h-[44px]">
           <div className={`absolute top-[4px] left-0 h-[40px] w-[106px] rounded-[5px] transition-colors duration-200 ${
