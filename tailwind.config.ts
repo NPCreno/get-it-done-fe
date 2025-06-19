@@ -77,6 +77,15 @@ const config: Config = {
 				'700': '#15361A',
 				default: '#53D86A'
 			},
+			darkBlue: {
+				'100': '#BFCBD1',
+				'200': '#7F97A3',
+				'300': '#406477',
+				'500': '#012538',
+				'600': '#021A26',
+				'700': '#030F15',
+				default: '#003049'
+			}, 
   			warning: '#FEC242',
   			info: '#2196F3',
   			background: '#EEEEEE',
