@@ -1,12 +1,21 @@
-import React, { useEffect, useState } from 'react';
-
-type TimerType = 'pomodoro' | 'shortBreak' | 'longBreak';
+import React, { useEffect, useCallback, useMemo } from 'react';
+import { useTimer } from '@/hooks/useTimer';
+import type { TimerType } from '@/lib/timerService';
 
 interface PomodoroModalProps {
   onClose: () => void;
 }
 
-const TimerConfig = {
+interface TimerConfig {
+  label: string;
+  time: number;
+  bgGradient: string;
+  buttonColor: string;
+  borderColor: string;
+  textColor: string;
+}
+
+const TIMER_CONFIG: Record<TimerType, TimerConfig> = {
   pomodoro: {
     label: 'Pomodoro',
     time: 25 * 60, // 25 minutes in seconds
@@ -31,76 +40,83 @@ const TimerConfig = {
     borderColor: 'border-success-600',
     textColor: 'text-success-600'
   }
-};
+} as const;
 
 export default function PomodoroModal({ 
   onClose,
 }: PomodoroModalProps) {
-  const [activeTimer, setActiveTimer] = useState<TimerType>('pomodoro');
-  const [timeLeft, setTimeLeft] = useState(TimerConfig.pomodoro.time);
-  const [isActive, setIsActive] = useState(false);
- 
-  const currentTimer = TimerConfig[activeTimer];
+  const { 
+    timeLeft, 
+    isActive, 
+    currentTimer: activeTimer, 
+    toggle, 
+    start,
+    pause,
+    reset,
+    setCurrentTimer,
+    isAtDefaultTime
+  } = useTimer('pomodoro');
 
-  const handleEscapeKey = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      onClose();
-    }
-  };
-  window.addEventListener("keydown", handleEscapeKey);
+  // Get the current timer configuration
+  const currentTimer = useMemo(() => {
+    return TIMER_CONFIG[activeTimer] || TIMER_CONFIG.pomodoro;
+  }, [activeTimer]);
+  
+  // Safe timer type for rendering
+  const safeTimerType = useMemo(() => 
+    (activeTimer in TIMER_CONFIG ? activeTimer : 'pomodoro') as TimerType
+  , [activeTimer]);
 
-  const handleTimerChange = (timerType: TimerType) => {
-    setActiveTimer(timerType);
-    setTimeLeft(TimerConfig[timerType].time);
-    setIsActive(false);
-  };
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, [onClose]);
 
-  // Sound effect for starting the timer
-  const playStartSound = () => {
+  const playStartSound = useCallback(() => {
     const audio = new Audio('/soundfx/start.mp3');
     audio.volume = 0.5; // Set volume to 50%
     audio.play().catch(e => console.log('Audio play failed:', e));
-  };
+  }, []);
 
-  // Countdown effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(prevTime => {
-          if (prevTime <= 1) {
-            clearInterval(interval!);
-            setIsActive(false);
-            return 0;
-          }
-          return prevTime - 1;
-        });
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
+  const handleTimerChange = useCallback((timerType: TimerType) => {
+    // Only change timer type if it's different from current and valid
+    if (timerType !== activeTimer && timerType in TIMER_CONFIG) {
+      const wasActive = isActive;
+      if (wasActive) {
+        pause(); // Pause current timer before changing type
+      }
+      setCurrentTimer(timerType);
+      if (wasActive) {
+        start(timerType); // Restart with new timer type if it was active
+      }
     }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, timeLeft]);
-
-  const toggleTimer = () => {
-    const newIsActive = !isActive;
-    setIsActive(newIsActive);
-    
-    // Play sound when starting the timer
-    if (newIsActive) {
-      playStartSound();
-    }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+  }, [activeTimer, isActive, pause, setCurrentTimer, start]);
+  
+  // Format time for display
+  const displayTime = useMemo(() => {
+    const mins = Math.floor(Math.max(0, timeLeft) / 60);
+    const secs = Math.max(0, timeLeft % 60);
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  }, [timeLeft]);
+
+  const toggleTimer = useCallback(() => {
+    toggle();
+  }, [toggle]);
+
+  // Clean up any resources when modal is closed
+  useEffect(() => {
+    return () => {
+      // Any cleanup if needed when component unmounts
+    };
+  }, []);
+
+
 
   return (
     <div
@@ -116,13 +132,13 @@ export default function PomodoroModal({
           <div 
             className={`absolute left-0 top-0.5 h-[calc(100%-4px)] rounded-full transition-all duration-300 ease-out ${currentTimer.buttonColor}`}
             style={{
-              width: `calc(${100 / Object.keys(TimerConfig).length}% - 2px)`,
-              transform: `translateX(calc(${Object.keys(TimerConfig).indexOf(activeTimer) * 100}% + 1px))`
+              width: `calc(${100 / Object.keys(TIMER_CONFIG).length}% - 2px)`,
+              transform: `translateX(calc(${Object.keys(TIMER_CONFIG).indexOf(activeTimer) * 100}% + 1px))`
             }}
           />
           
-          {Object.entries(TimerConfig).map(([key, config]) => {
-            const isActive = activeTimer === key;
+          {(Object.entries(TIMER_CONFIG) as Array<[TimerType, TimerConfig]>).map(([key, config]) => {
+            const isActive = safeTimerType === key;
             return (
               <button
                 key={key}
@@ -131,7 +147,8 @@ export default function PomodoroModal({
                     ? 'text-white' 
                     : 'text-white/80 hover:text-white hover:bg-white/20'
                 }`}
-                onClick={() => handleTimerChange(key as TimerType)}
+                onClick={() => handleTimerChange(key)}
+                disabled={isActive}
               >
                 {config.label}
               </button>
@@ -140,13 +157,31 @@ export default function PomodoroModal({
         </div>
         <div className='relative'>
           <h1 className='text-white text-[100px] font-bold font-lato text-center'>
-            {formatTime(timeLeft)}
+            {displayTime}
           </h1>
           {isActive && (
             <span className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-white/80 text-sm font-lato'>
               {activeTimer === 'pomodoro' ? 'Time to focus!' : 'Take a break!'}
             </span>
           )}
+        </div>
+
+        
+        <div className="relative w-[106px] h-[44px]">
+          <div className={`absolute top-[4px] left-0 h-[40px] w-[106px] rounded-[5px] transition-colors duration-200 ${
+            isAtDefaultTime ? 'bg-[#DEDEDE]' : 'bg-[#DEDEDE]'
+          } shadow-[4px_4px_4px_rgba(0,0,0,0.2)]`} />
+          <button 
+            className={`absolute left-0 text-[23px] font-bold font-lato bg-white h-[40px] w-[106px] rounded-[5px] transition-all duration-200 ${
+              isAtDefaultTime 
+                ? 'translate-y-[4px] shadow-none text-gray-400' 
+                : 'top-0 text-error-300 [text-shadow:0_0_8px_rgba(239,68,68,0.8)] hover:translate-y-[-2px] active:translate-y-[4px] '
+            }`}
+            onClick={reset}
+            disabled={isAtDefaultTime}
+          >
+            Reset
+          </button>
         </div>
 
         <div className="relative w-[106px] h-[44px]">
