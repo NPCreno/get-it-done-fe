@@ -26,6 +26,7 @@ import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
 import { IDashboardData } from "@/app/interface/IDashboardData";
+import PomodoroModal from "@/app/components/modals/pomodoro";
 
 interface taskFormValues {
   user_id: string;
@@ -84,6 +85,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [pageLoading, setIsPageLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
+  const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -511,6 +513,7 @@ export default function DashboardPage() {
               <button
                 className="text-text text-[13px] px-5 bg-white rounded-[10px] h-[35px] flex flex-row items-center 
               hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+              onClick={() => setIsPomodoroModalOpen(true)}
               >
                 Start Pomodoro
                 <svg
@@ -724,6 +727,10 @@ export default function DashboardPage() {
           handleUpdateTask={() => handleUpdateTask(values as taskFormValues)}
           isLoading={isLoading}
         />
+      )}
+
+      {isPomodoroModalOpen && (
+        <PomodoroModal onClose={() => setIsPomodoroModalOpen(false)} />
       )}
     </MainLayout>
   );
