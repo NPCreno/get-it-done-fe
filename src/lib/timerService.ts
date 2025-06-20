@@ -229,14 +229,6 @@ export class TimerService {
         this.resetToDefault();
         return;
       }
-      
-      const typedState = state as {
-        isRunning: boolean;
-        endTime: number | null;
-        currentTimeLeft: number;
-        currentTimerType: TimerType;
-        savedAt: number;
-      };
 
       // Don't restore if the state is too old (e.g., > 24 hours)
       const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
