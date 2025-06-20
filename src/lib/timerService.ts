@@ -20,7 +20,7 @@ export interface TimerState {
 type Subscriber = (state: TimerState) => void;
 
 export class TimerService {
-  private static instance: TimerService;
+  private static instance: TimerService | null = null;
   private subscribers: Subscriber[] = [];
   private intervalId: NodeJS.Timeout | null = null;
   private endTime: number | null = null;
@@ -28,19 +28,48 @@ export class TimerService {
   private currentTimeLeft: number = TimerConfig.pomodoro;
   private currentTimerType: TimerType = 'pomodoro';
   private audio: HTMLAudioElement | null = null;
+  private beforeUnloadHandler: (() => void) | null = null;
 
   private constructor() {
     // Only initialize audio in browser environment
     if (typeof window !== 'undefined') {
       this.audio = new Audio();
       this.loadState();
-      window.addEventListener('beforeunload', () => this.saveState());
+      this.beforeUnloadHandler = () => this.saveState();
+      window.addEventListener('beforeunload', this.beforeUnloadHandler);
     }
+  }
+
+  // Clean up all resources
+  public destroy(): void {
+    this.pause();
+    this.subscribers = [];
+    
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
+    }
+    
+    if (this.audio) {
+      this.audio.pause();
+      this.audio = null;
+    }
+    
+    // Clear the singleton instance
+    TimerService.instance = null;
   }
 
   public static getInstance(): TimerService {
     if (!TimerService.instance) {
       TimerService.instance = new TimerService();
+      // Register cleanup on window unload
+      if (typeof window !== 'undefined') {
+        window.addEventListener('unload', () => {
+          if (TimerService.instance) {
+            TimerService.instance.destroy();
+          }
+        });
+      }
     }
     return TimerService.instance;
   }
@@ -192,7 +221,16 @@ export class TimerService {
       const saved = localStorage.getItem('pomodoroTimerState');
       if (!saved) return;
 
-      const state = JSON.parse(saved) as {
+      let state;
+      try {
+        state = JSON.parse(saved);
+      } catch (parseError) {
+        console.error('Invalid JSON in stored timer state:', parseError);
+        this.resetToDefault();
+        return;
+      }
+      
+      const typedState = state as {
         isRunning: boolean;
         endTime: number | null;
         currentTimeLeft: number;

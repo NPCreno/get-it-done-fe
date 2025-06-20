@@ -1,85 +1,94 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import type { TimerType, TimerState } from '@/lib/timerService';
 import { timerService, TimerConfig } from '@/lib/timerService';
 
-interface UseTimerReturn {
-  timeLeft: number;
-  isActive: boolean;
-  currentTimer: TimerType;
-  isAtDefaultTime: boolean;
-  toggle: (timerType?: TimerType) => void;
-  start: (timerType?: TimerType) => void;
-  pause: () => void;
-  reset: () => void;
-  setCurrentTimer: (timerType: TimerType) => void;
-}
-
-export const useTimer = (initialTimerType: TimerType): UseTimerReturn => {
+export const useTimer = (initialTimerType: TimerType = 'pomodoro') => {
+  const [timerState, setTimerState] = useState<TimerState>(() => ({
+    timeLeft: TimerConfig[initialTimerType],
+    isRunning: false,
+    currentTimer: initialTimerType
+  }));
+  
+  const isMountedRef = useRef(true);
   const initialTimerRef = useRef(initialTimerType);
-  const [currentTimer, setCurrentTimer] = useState<TimerType>(initialTimerType);
-  const [timeLeft, setTimeLeft] = useState(timerService.getCurrentState().timeLeft);
-  const [isActive, setIsActive] = useState(timerService.getCurrentState().isRunning);
 
-  // Subscribe to timer updates
+  // Subscribe to timer service updates
   useEffect(() => {
-    const handleStateUpdate = (state: TimerState) => {
-      setTimeLeft(state.timeLeft);
-      setIsActive(state.isRunning);
-      setCurrentTimer(state.currentTimer);
+    isMountedRef.current = true;
+    
+    const handleStateChange = (newState: TimerState) => {
+      if (isMountedRef.current) {
+        setTimerState(newState);
+      }
     };
 
-    // Initial state
-    handleStateUpdate(timerService.getCurrentState());
+    // Subscribe and get current state
+    const unsubscribe = timerService.subscribe(handleStateChange);
     
-    // Subscribe to updates
-    const unsubscribe = timerService.subscribe(handleStateUpdate);
+    // Initial sync
+    const currentState = timerService.getCurrentState();
+    handleStateChange(currentState);
 
-    // Cleanup subscription on unmount
     return () => {
+      isMountedRef.current = false;
       unsubscribe();
     };
   }, []);
-  
-  // Update timer type when it changes
+
+  // Handle cleanup on unmount
   useEffect(() => {
-    if (!isActive && initialTimerRef.current !== initialTimerType) {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Sync with initialTimerType prop if it changes
+  useEffect(() => {
+    if (initialTimerRef.current !== initialTimerType) {
       timerService.setTimerType(initialTimerType);
       initialTimerRef.current = initialTimerType;
     }
-  }, [initialTimerType, isActive]);
+  }, [initialTimerType]);
 
-  const toggle = useCallback((timerType: TimerType = currentTimer) => {
+  const toggle = useCallback((timerType: TimerType = timerState.currentTimer) => {
     timerService.toggle(timerType);
-  }, [currentTimer]);
+  }, [timerState.currentTimer]);
 
-  const start = useCallback((timerType: TimerType = currentTimer) => {
+  const start = useCallback((timerType: TimerType = timerState.currentTimer) => {
     timerService.start(timerType);
-  }, [currentTimer]);
+  }, [timerState.currentTimer]);
 
   const pause = useCallback(() => {
     timerService.pause();
   }, []);
 
+  const reset = useCallback((timerType: TimerType = timerState.currentTimer) => {
+    timerService.reset(timerType);
+  }, [timerState.currentTimer]);
+
   const setCurrentTimerType = useCallback((timerType: TimerType) => {
     timerService.setTimerType(timerType);
   }, []);
 
-  const reset = useCallback(() => {
-    timerService.reset(currentTimer);
-  }, [currentTimer]);
-
-  // Check if current time is at default for the current timer type
-  const isAtDefaultTime = timeLeft === TimerConfig[currentTimer];
-
-  return {
-    timeLeft,
-    isActive,
-    currentTimer,
-    isAtDefaultTime,
+  // Memoize the return value to prevent unnecessary re-renders
+  return useMemo(() => ({
+    timeLeft: timerState.timeLeft,
+    isActive: timerState.isRunning,
+    currentTimer: timerState.currentTimer,
+    isAtDefaultTime: timerState.timeLeft === TimerConfig[timerState.currentTimer],
     toggle,
     start,
     pause,
     reset,
     setCurrentTimer: setCurrentTimerType,
-  };
+  }), [
+    timerState.timeLeft, 
+    timerState.isRunning, 
+    timerState.currentTimer, 
+    toggle, 
+    start, 
+    pause, 
+    reset, 
+    setCurrentTimerType
+  ]);
 };
