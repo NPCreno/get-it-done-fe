@@ -27,12 +27,15 @@ export class TimerService {
   private isRunning: boolean = false;
   private currentTimeLeft: number = TimerConfig.pomodoro;
   private currentTimerType: TimerType = 'pomodoro';
-  private audio: HTMLAudioElement;
+  private audio: HTMLAudioElement | null = null;
 
   private constructor() {
-    this.audio = new Audio();
-    this.loadState();
-    window.addEventListener('beforeunload', () => this.saveState());
+    // Only initialize audio in browser environment
+    if (typeof window !== 'undefined') {
+      this.audio = new Audio();
+      this.loadState();
+      window.addEventListener('beforeunload', () => this.saveState());
+    }
   }
 
   public static getInstance(): TimerService {
@@ -49,11 +52,16 @@ export class TimerService {
 
   private async playSound(url: string): Promise<void> {
     try {
-      this.audio.src = url;
-      this.audio.volume = 0.5;
-      await this.audio.play();
+      // Only play sound in browser environment with audio support
+      if (typeof window !== 'undefined' && this.audio) {
+        this.audio.src = url;
+        this.audio.volume = 0.5;
+        await this.audio.play().catch(error => {
+          console.error('Error playing sound:', error);
+        });
+      }
     } catch (error) {
-      console.error('Error playing sound:', error);
+      console.error('Error in playSound:', error);
     }
   }
 

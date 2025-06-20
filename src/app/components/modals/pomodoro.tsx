@@ -50,7 +50,6 @@ export default function PomodoroModal({
     isActive, 
     currentTimer: activeTimer, 
     toggle, 
-    start,
     pause,
     reset,
     setCurrentTimer,
@@ -77,12 +76,6 @@ export default function PomodoroModal({
     window.addEventListener("keydown", handleEscapeKey);
     return () => window.removeEventListener("keydown", handleEscapeKey);
   }, [onClose]);
-
-  const playStartSound = useCallback(() => {
-    const audio = new Audio('/soundfx/start.mp3');
-    audio.volume = 0.5; // Set volume to 50%
-    audio.play().catch(e => console.log('Audio play failed:', e));
-  }, []);
 
   const handleTimerChange = useCallback(async (timerType: TimerType) => {
     // Only change timer type if it's different from current and valid
