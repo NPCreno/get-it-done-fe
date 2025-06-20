@@ -84,19 +84,28 @@ export default function PomodoroModal({
     audio.play().catch(e => console.log('Audio play failed:', e));
   }, []);
 
-  const handleTimerChange = useCallback((timerType: TimerType) => {
+  const handleTimerChange = useCallback(async (timerType: TimerType) => {
     // Only change timer type if it's different from current and valid
     if (timerType !== activeTimer && timerType in TIMER_CONFIG) {
-      const wasActive = isActive;
-      if (wasActive) {
-        pause(); // Pause current timer before changing type
-      }
-      setCurrentTimer(timerType);
-      if (wasActive) {
-        start(timerType); // Restart with new timer type if it was active
+      // If timer is active, show confirmation dialog
+      if (isActive) {
+        const confirmChange = window.confirm(
+          `Switching to ${timerType.replace(/^\w/, c => c.toUpperCase())} mode will reset the timer. Are you sure?`
+        );
+        
+        if (!confirmChange) {
+          return; // User cancelled the switch
+        }
+        
+        // Pause current timer and switch mode without auto-starting
+        pause();
+        setCurrentTimer(timerType);
+      } else {
+        // If timer wasn't active, just switch the mode
+        setCurrentTimer(timerType);
       }
     }
-  }, [activeTimer, isActive, pause, setCurrentTimer, start]);
+  }, [activeTimer, isActive, pause, setCurrentTimer]);
   
   // Format time for display
   const displayTime = useMemo(() => {
