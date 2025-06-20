@@ -1,3 +1,5 @@
+import React, { useEffect } from 'react';
+
 interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
@@ -20,11 +22,16 @@ export default function ConfirmationModal({
     }
   };
 
-  window.addEventListener('keydown', handleEscapeKey);
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      window.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [handleEscapeKey]);
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
+      className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[100]"
       onClick={onClose}
     >
       <div
