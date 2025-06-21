@@ -157,7 +157,7 @@ export default function TaskModal({
       }}
     >
       <div
-        className="modal-popup bg-white w-[550px] rounded-[10px] p-5 shadow-lg overflow-hidden transition-all duration-300 ease-in-out"
+        className="modal-popup bg-white w-[550px] rounded-[10px] p-5 shadow-lg overflow-hidden transition-all duration-200 ease-in-out"
         onClick={(e) => e.stopPropagation()}
         style={{ height }}
       >
