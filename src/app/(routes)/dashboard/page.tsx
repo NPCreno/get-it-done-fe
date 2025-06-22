@@ -590,7 +590,7 @@ export default function DashboardPage() {
           {/* Chart cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
             <ChartCard header="Task Completion Trend" delay="fade-in-left-delay-1" />
-            <ChartCard header="Most Productive Hours" delay="fade-in-left-delay-2" />
+            <ChartCard header="Task Distribution by project" delay="fade-in-left-delay-2" />
             <ChartCard header="Daily Progress" delay="fade-in-left-delay-3" />
             <ChartCard header="Productivity Streak" delay="fade-in-left-delay-4" />
           </div>

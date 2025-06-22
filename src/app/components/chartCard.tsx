@@ -1,7 +1,9 @@
 "use client";
 
+import * as React from "react";
 import { ChartAreaGradient } from "./shadcn/areaChart";
 import Image from "next/image";
+import { ChartPieInteractive } from "./shadcn/pieChart";
 
 export default function ChartCard({
   header,
@@ -11,7 +13,7 @@ export default function ChartCard({
   delay: string;
 }) {
   // Task completion trend data (hardcoded for now)
-  const taskData = [
+  const taskCompletionData = [
     { day: "Mon", completed: 8, pending: 5 },
     { day: "Tue", completed: 10, pending: 7 },
     { day: "Wed", completed: 6, pending: 3 },
@@ -21,17 +23,81 @@ export default function ChartCard({
     { day: "Sun", completed: 4, pending: 2 },
   ];
 
+  // Sample project data by month with enhanced contrast pastel colors
+  const projectDataByMonth: Record<string, Array<{ title: string; value: number; fill: string }>> = {
+    january: [
+      { title: "Project Alpha", value: 20, fill: "#8CD9C2" }, // Darker mint green
+      { title: "Project Beta", value: 30, fill: "#A5B3E6" },  // Darker periwinkle
+      { title: "Project Gamma", value: 15, fill: "#FFC6A5" }, // Darker peach
+      { title: "Project Delta", value: 35, fill: "#C6E0A5" }  // Darker tea green
+    ],
+    february: [
+      { title: "Project Alpha", value: 25, fill: "#FF9E9A" }, // Darker melon
+      { title: "Project Beta", value: 35, fill: "#8CD9C2" },  // Darker mint green
+      { title: "Project Gamma", value: 20, fill: "#A5B3E6" }, // Darker periwinkle
+      { title: "Project Delta", value: 40, fill: "#FFC6A5" }  // Darker peach
+    ],
+    march: [
+      { title: "Project Alpha", value: 30, fill: "#C6E0A5" }, // Darker tea green
+      { title: "Project Beta", value: 25, fill: "#FF9E9A" },  // Darker melon
+      { title: "Project Gamma", value: 25, fill: "#8CD9C2" }, // Darker mint green
+      { title: "Project Delta", value: 20, fill: "#A5B3E6" }  // Darker periwinkle
+    ],
+    april: [
+      { title: "Project Alpha", value: 15, fill: "#FFC6A5" }, // Darker peach
+      { title: "Project Beta", value: 40, fill: "#C6E0A5" },  // Darker tea green
+      { title: "Project Gamma", value: 30, fill: "#FF9E9A" }, // Darker melon
+      { title: "Project Delta", value: 25, fill: "#8CD9C2" }  // Darker mint green
+    ],
+    may: [
+      { title: "Project Alpha", value: 20, fill: "#A5B3E6" }, // Darker periwinkle
+      { title: "Project Beta", value: 25, fill: "#FFC6A5" },  // Darker peach
+      { title: "Project Gamma", value: 35, fill: "#C6E0A5" }, // Darker tea green
+      { title: "Project Delta", value: 30, fill: "#FF9E9A" }  // Darker melon
+    ],
+    june: [
+      { title: "Project Alpha", value: 20, fill: "#8CD9C2" }, // Darker mint green
+      { title: "Project Beta", value: 25, fill: "#A5B3E6" },  // Darker periwinkle
+      { title: "Project Gamma", value: 35, fill: "#FFC6A5" }, // Darker peach
+      { title: "Project Delta", value: 30, fill: "#C6E0A5" }  // Darker tea green
+    ]
+  };
+
+  const [selectedMonth, setSelectedMonth] = React.useState('january');
+  
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+  };
+
+  const taskDistributionData = {
+    data: projectDataByMonth[selectedMonth] || [],
+    title: "Task Distribution",
+    description: `Completed Tasks by project (${selectedMonth.charAt(0).toUpperCase() + selectedMonth.slice(1)})`
+  };
+
   const renderChart = () => {
     switch (header) {
       case "Task Completion Trend":
         return (
           <div className="w-full h-full">
             <ChartAreaGradient 
-              data={taskData}
+              data={taskCompletionData}
               colors={{
                 completed: "#53D86A",
                 pending: "#FED580"
               }}
+            />
+          </div>
+        );
+      case "Task Distribution by project":
+        return (
+          <div className="w-full h-full">
+            <ChartPieInteractive 
+              data={taskDistributionData.data}
+              title={taskDistributionData.title}
+              description={taskDistributionData.description}
+              selectedMonth={selectedMonth}
+              onMonthChange={handleMonthChange}
             />
           </div>
         );

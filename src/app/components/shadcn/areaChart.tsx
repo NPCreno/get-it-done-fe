@@ -48,14 +48,14 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
     },
   } satisfies ChartConfig
   return (
-    <Card>
-      <CardHeader className="p-4">
-        <CardTitle className="text-sm font-semibold">Task Completion Trend</CardTitle>
-        <CardDescription className="text-xs">
+    <Card className="flex flex-col h-full min-h-[280px]">
+      <CardHeader className="p-4 pb-2">
+        <CardTitle>Task Completion Trend</CardTitle>
+        <CardDescription>
           Showing task completion vs creation for the week
         </CardDescription>
       </CardHeader>
-      <CardContent className="pt-4 px-4 pb-0">
+      <CardContent className="px-4 pt-0 pb-2 flex-1">
         <ChartContainer config={chartConfig}>
           <AreaChart
             accessibilityLayer
@@ -63,9 +63,10 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
             margin={{
               left: 16,
               right: 16,
-              top: 16,
-              bottom: 16,
+              top: 8,
+              bottom: 8,
             }}
+            height={200}
           >
             <CartesianGrid vertical={false} />
             <XAxis
