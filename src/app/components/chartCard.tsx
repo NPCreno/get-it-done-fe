@@ -7,7 +7,7 @@ import { ChartPieInteractive } from "./shadcn/pieChart";
 import MonthlyHeatmap from "./MonthlyHeatmap";
 import { subDays, format } from 'date-fns';
 import { CardTitle } from "./shadcn/card";
-import { renderStreakCounter } from "./streakCounter";
+import StreakCounter from "./streakCounter";
 
 export default function ChartCard({
   header,
@@ -127,17 +127,13 @@ export default function ChartCard({
           </div>
         );
       case "Productivity Streak":
-        return renderStreakCounter(streakCount, header);
+        return <StreakCounter streakCount={streakCount} header={header} />;
       case "Calendar Heat map":
         return (
           <div className="w-full h-full p-4 bg-white rounded-[10px] shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left">
             <CardTitle>{header}</CardTitle>
             <MonthlyHeatmap 
               values={heatmapData}
-              onDateClick={(date) => {
-                // Handle date click if needed
-                console.log('Date clicked:', date);
-              }}
               className="h-full"
             />
           </div>

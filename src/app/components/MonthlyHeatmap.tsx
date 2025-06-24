@@ -7,14 +7,11 @@ import {
   subMonths, 
   startOfMonth, 
   endOfMonth, 
-  eachDayOfInterval, 
-  isSameDay, 
   isSameMonth, 
-  getDay,
-  parseISO,
-  isToday
+  isToday,
+  addDays
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeatmapValue {
   date: string;
@@ -23,28 +20,20 @@ interface HeatmapValue {
 
 interface MonthlyHeatmapProps {
   values: HeatmapValue[];
-  onDateClick?: (date: Date) => void;
   className?: string;
 }
 
 export default function MonthlyHeatmap({ 
   values = [], 
-  onDateClick,
   className = '' 
 }: MonthlyHeatmapProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
-  
-  const dateFormat = 'd';
-  const days = [];
   let day = startDate;
-  let formattedDate = '';
-  let monthStartIndex = 0;
 
   // Create a map of date to count for quick lookup
   const valueMap = values.reduce<Record<string, number>>((acc, { date, count }) => {
@@ -54,11 +43,6 @@ export default function MonthlyHeatmap({
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-  const handleDateClick = (day: Date) => {
-    setSelectedDate(day);
-    if (onDateClick) onDateClick(day);
-  };
-
   const getDayClass = (day: Date) => {
     const dayKey = format(day, 'yyyy-MM-dd');
     const count = valueMap[dayKey] || 0;
@@ -88,7 +72,7 @@ export default function MonthlyHeatmap({
   // Generate day headers (S, M, T, W, T, F, S)
   const dayHeaders = [];
   const dayHeaderFormat = 'EEEEEE';
-  let startDateHeaders = startOfWeek(new Date());
+  const startDateHeaders = startOfWeek(new Date());
   
   for (let i = 0; i < 7; i++) {
     dayHeaders.push(
@@ -106,13 +90,11 @@ export default function MonthlyHeatmap({
     for (let i = 0; i < 7; i++) {
       const dayKey = format(day, 'yyyy-MM-dd');
       const count = valueMap[dayKey] || 0;
-      const cloneDay = day;
       
       daysInWeek.push(
         <div
           key={day.toString()}
           className={getDayClass(day)}
-          onClick={() => handleDateClick(cloneDay)}
           title={`${dayKey}: ${count} ${count === 1 ? 'task' : 'tasks'}`}
         />
       );
@@ -192,8 +174,3 @@ function endOfWeek(date: Date) {
   return new Date(d.setDate(diff));
 }
 
-function addDays(date: Date, days: number) {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}

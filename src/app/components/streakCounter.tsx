@@ -3,8 +3,12 @@ import { useEffect } from "react";
 import { CardTitle } from "./shadcn/card";
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 
-  // Render the fire icon with streak counter
-  export const renderStreakCounter = (streakCount: number, header: string) => {
+interface StreakCounterProps {
+  streakCount: number;
+  header: string;
+}
+
+export default function StreakCounter({ streakCount, header }: StreakCounterProps) {
     
     const isInactive = streakCount === 0;
     const isActive = streakCount > 0 && streakCount < 6;
@@ -33,22 +37,22 @@ import { DotLottie } from '@lottiefiles/dotlottie-web';
     }
 
     useEffect(() => {
-        if (streakCount > 7) {
-            const canvas = document.querySelector('#fire-animation-canvas') as HTMLCanvasElement | null;
-            if (canvas) {
-            new DotLottie({
-                autoplay: true,
-                loop: true,
-                canvas: canvas,
-                src: "https://lottie.host/b903d801-3895-4a94-9340-c59c8e989e28/1fi7YdANEj.lottie",
-            });
-            
-            return () => {
-                // Cleanup Lottie animation on unmount
-            };
-            }
-        }
-        }, [streakCount]);
+      if (streakCount > 7) {
+          const canvas = document.querySelector('#fire-animation-canvas') as HTMLCanvasElement | null;
+          if (canvas) {
+          new DotLottie({
+              autoplay: true,
+              loop: true,
+              canvas: canvas,
+              src: "https://lottie.host/b903d801-3895-4a94-9340-c59c8e989e28/1fi7YdANEj.lottie",
+          });
+          
+          return () => {
+              // Cleanup Lottie animation on unmount
+          };
+          }
+      }
+      }, [streakCount]);
 
     return (
       <div className={`flex flex-col h-full p-4 text-center bg-white rounded-[10px] shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] ${
@@ -125,3 +129,4 @@ import { DotLottie } from '@lottiefiles/dotlottie-web';
       </div>
     );
   };
+
