@@ -35,11 +35,11 @@ export default function LandingPage() {
     <div className="flex flex-row">
       {/* left side */}
       <div className="w-screen lg:w-[50vw] min-h-screen bg-gradient-to-t from-primary-300 to-white flex flex-col justify-center items-center">
-        <div className="flex flex-col items-center gap-4 lg:hidden w-[430px] mb-3">
-          <h1 className="font-rancho text-8xl text-primary-default text-center">
+        <div className="flex flex-col items-center gap-2 sm:gap-3 lg:hidden w-full max-w-[90%] sm:max-w-[430px] mb-3 px-4 sm:px-0">
+          <h1 className="font-rancho text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary-default text-center leading-tight">
             Get it Done!
           </h1>
-          <span className="font-lato text-2xl text-primary-default text-center">
+          <span className="font-lato text-base sm:text-lg md:text-xl text-primary-default text-center max-w-[90%]">
             Stay organized, boost productivity, and achieve your goals.
           </span>
         </div>
@@ -53,11 +53,11 @@ export default function LandingPage() {
       </div>
       {/* right side */}
       <div className="min-w-[50vw] min-h-screen bg-white flex-col justify-center items-center hidden lg:flex">
-        <div className="flex flex-col gap-9 items-center p-10">
-          <h1 className="font-rancho text-8xl text-primary-default text-center">
+        <div className="flex flex-col gap-6 lg:gap-8 items-center p-6 lg:p-10 w-full max-w-4xl">
+          <h1 className="font-rancho text-6xl lg:text-7xl xl:text-8xl text-primary-default text-center leading-tight">
             Get it Done!
           </h1>
-          <span className="font-lato text-2xl text-primary-default text-center">
+          <span className="font-lato text-xl lg:text-2xl text-primary-default text-center max-w-[90%] lg:max-w-3xl">
             Stay organized, boost productivity, and achieve your goals.
           </span>
           <Image
