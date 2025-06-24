@@ -13,7 +13,7 @@ export default function MainLayout({
   const { sidebarWidth, setSidebarWidth, isMobileSidebarOpen, closeMobileSidebar } = useFormState();
   const [isMobile, setIsMobile] = useState(false);
 
-  // Check if the screen is mobile size on mount and on resize
+  // Check if the screen is mobile size on mount and on resize with debounce
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768); // Tailwind's md breakpoint is 768px
@@ -22,11 +22,24 @@ export default function MainLayout({
     // Initial check
     checkIfMobile();
 
-    // Add event listener for window resize
-    window.addEventListener('resize', checkIfMobile);
+    // Debounce the resize handler
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkIfMobile, 100);
+    };
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    
+    // Add event listener with signal for cleanup
+    window.addEventListener('resize', handleResize, { signal });
 
     // Clean up
-    return () => window.removeEventListener('resize', checkIfMobile);
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Close mobile sidebar when clicking on main content
