@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFormState } from "../context/FormProvider";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -21,7 +21,6 @@ export default function SidebarLink({
   forceShowText?: boolean;
   className?: string;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
   const { isSidebarOpen } = useFormState();
   const router = useRouter();
   const pathname = usePathname();
@@ -55,10 +54,6 @@ export default function SidebarLink({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsHovered(true)}
-      onBlur={() => setIsHovered(false)}
       className={`flex items-center gap-2 rounded-[10px] h-[35px] ${isActive ? "w-full" : "w-[35px]"} justify-start 
         group-hover:w-[126px] transition-all duration-300 linkbtn cursor-pointer
         ${isActive 
