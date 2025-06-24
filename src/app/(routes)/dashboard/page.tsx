@@ -600,7 +600,7 @@ export default function DashboardPage() {
             <ChartCard 
               header="Productivity Streak" 
               delay="fade-in-left-delay-3"
-              streakCount={dashboardData?.streak_count || 8}
+              streakCount={dashboardData?.streak_count || 10}
             />
             <ChartCard 
               header="Calendar Heat map" 

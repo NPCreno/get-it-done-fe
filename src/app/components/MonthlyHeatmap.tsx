@@ -156,7 +156,7 @@ export default function MonthlyHeatmap({
         ))}
       </div>
       
-      <div className="grid grid-rows-6 grid-flow-col gap-1">
+      <div className="grid grid-rows-5 grid-flow-col gap-1">
         {rows}
       </div>
       
