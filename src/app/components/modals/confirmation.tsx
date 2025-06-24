@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 
 interface ConfirmationModalProps {
   onClose: () => void;
@@ -16,11 +16,11 @@ export default function ConfirmationModal({
   confirmBtnLabel,
 }: ConfirmationModalProps) {
  
-  const handleEscapeKey = (event: KeyboardEvent) => {
+  const handleEscapeKey = useCallback((event: KeyboardEvent) => {
     if (event.key === 'Escape') {
       onClose();
     }
-  };
+  }, [onClose]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleEscapeKey);

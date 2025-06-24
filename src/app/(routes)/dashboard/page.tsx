@@ -589,10 +589,23 @@ export default function DashboardPage() {
 
           {/* Chart cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
-            <ChartCard header="Task Completion Trend" delay="fade-in-left-delay-1" />
-            <ChartCard header="Most Productive Hours" delay="fade-in-left-delay-2" />
-            <ChartCard header="Daily Progress" delay="fade-in-left-delay-3" />
-            <ChartCard header="Productivity Streak" delay="fade-in-left-delay-4" />
+            <ChartCard 
+              header="Task Completion Trend" 
+              delay="fade-in-left-delay-1" 
+            />
+            <ChartCard 
+              header="Task Distribution by project" 
+              delay="fade-in-left-delay-2" 
+            />
+            <ChartCard 
+              header="Productivity Streak" 
+              delay="fade-in-left-delay-3"
+              streakCount={dashboardData?.streak_count || 10}
+            />
+            <ChartCard 
+              header="Calendar Heat map" 
+              delay="fade-in-left-delay-4"
+            />
           </div>
 
           <div className="w-full p-5 flex flex-col bg-white rounded-[10px] fade-in-delay-2 flex-grow">
@@ -758,9 +771,9 @@ function TaskItem({
   };
 
   return (
-    <div className="flex flex-row w-full h-[42px] py-[11px] justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
+    <div className="flex flex-row w-full h-[42px] items-center justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
       <div className="flex flex-row gap-5 items-center">
-        <div className="group w-5 h-5 relative">
+        <div className="group w-6 h-6 relative">
           <input
             id="checkTask"
             type="checkbox"
@@ -770,7 +783,7 @@ function TaskItem({
             className="peer appearance-none w-full h-full cursor-pointer"
           />
           <div
-            className="absolute inset-0 rounded-[10px] border-[2px] border-solid border-primary-200 
+            className="absolute inset-0 rounded-full border-[2px] border-solid border-gray-300
                       peer-checked:border-0 group-hover:border-0 pointer-events-none"
           ></div>
           <div
@@ -778,10 +791,10 @@ function TaskItem({
                           group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none"
           >
             <Image
-              src="/svgs/checkmark-circle-yellow.svg"
+              src="/svgs/checkmark-circle-green.svg"
               alt="Check"
-              width={20}
-              height={20}
+              width={26}
+              height={26}
             />
           </div>
         </div>

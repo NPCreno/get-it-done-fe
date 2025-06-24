@@ -3,5 +3,5 @@ export interface IDashboardData {
     pending_tasks: number;
     complete_tasks: number;
     all_projects: number;
+    streak_count: number;
   }
-  
