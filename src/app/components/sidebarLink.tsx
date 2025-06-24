@@ -1,71 +1,87 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useFormState } from "../context/FormProvider";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function SidebarLink({
   href,
   icon,
   iconHover,
   text,
+  onClick,
+  forceShowText = false,
+  className = "",
 }: {
   href: string;
   icon: string;
   iconHover: string;
   text: string;
+  onClick?: () => void;
+  forceShowText?: boolean;
+  className?: string;
 }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [currentPage, setCurrentPage] = useState("");
   const { isSidebarOpen } = useFormState();
   const router = useRouter();
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setCurrentPage(window.location.pathname);
-    }
-  }, []);
-
-  const isActive = currentPage === href;
+  const pathname = usePathname();
+  
+  // Determine if current route matches the link's href
+  const isActive = pathname === href;
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // simulate double click
-    const dblClickEvent = new MouseEvent("dblclick", {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-    });
-
-    e.currentTarget.dispatchEvent(dblClickEvent);
-
-    // navigate
+    e.preventDefault();
+    
+    // Call the provided onClick handler if it exists
+    if (onClick) {
+      onClick();
+    }
+    
+    // Navigate to the new route
     router.push(href);
+  };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+    }
   };
 
   return (
     <div
+      role="menuitem"
+      tabIndex={0}
       onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`flex items-center gap-4 rounded-[10px] h-[35px] w-[35px] justify-start 
+      onKeyDown={handleKeyDown}
+      className={`flex items-center gap-2 rounded-[10px] h-[35px] ${isActive ? "w-full" : "w-[35px]"} justify-start 
         group-hover:w-[126px] transition-all duration-300 linkbtn cursor-pointer
-        ${
-          isActive || isHovered
-            ? "bg-primary-default shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)]"
-            : "hover:bg-primary-default"
-        }`}
+        ${isActive 
+          ? "bg-primary-default shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,0.25)]" 
+          : "hover:bg-primary-default/10"
+        } ${className}`}
+      aria-current={isActive ? 'page' : undefined}
     >
-      <Image
-        src={isActive || isHovered ? iconHover : icon}
-        alt={text}
-        width={20}
-        height={20}
-        className="ml-2 transition-opacity duration-300"
-      />
+      <div className="relative ml-2 w-5 h-5 flex-shrink-0">
+        <Image
+          src={icon}
+          alt={text}
+          width={20}
+          height={20}
+          className={`absolute transition-opacity duration-300 ${isActive ? 'opacity-0' : 'opacity-100'}`}
+        />
+        <Image
+          src={iconHover}
+          alt={text}
+          width={20}
+          height={20}
+          className={`absolute transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </div>
       <span
-        className={`font-bold font-lato text-[13px] transition-opacity duration-300
-            ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}
-            ${isActive || isHovered ? "text-white" : "text-primary-default"}
+        className={`font-bold font-lato text-[13px] transition-all duration-300 whitespace-nowrap
+            ${(isSidebarOpen || forceShowText) ? "opacity-100 w-auto ml-2" : "opacity-0 w-0 ml-0"}
+            ${isActive ? "text-white" : "text-primary-default"}
+            ${forceShowText ? '!opacity-100 !w-auto !ml-2' : ''}
           `}
       >
         {text}

@@ -13,7 +13,7 @@ export default function StatsCard({
 }) {
   return (
     <div
-      className={`px-6 flex flex-row justify-start items-center gap-8 bg-white rounded-[10px] w-full h-[100px]
+      className={`px-6 flex flex-row justify-start items-center gap-8 bg-white rounded-[10px] w-full h-[75px]
       hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left ${delay}`}
     >
       <Image src={icon} alt={header} width={30} height={30} />
@@ -21,7 +21,7 @@ export default function StatsCard({
         <span className="text-[#838383] text-base font-bold font-lato">
           {header}
         </span>
-        <span className="text-text text-[28px] font-lato">{content}</span>
+        <span className="flex items-center h-[20px] text-text text-[28px] font-lato">{content}</span>
       </div>
     </div>
   );

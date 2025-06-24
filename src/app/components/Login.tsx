@@ -79,20 +79,20 @@ export default function Login({
   };
 
   return (
-    <div className="flex flex-col rounded-2xl gap-10 bg-white w-[430px] h-auto p-10 items-center justify-center shadow-2xl">
+    <div className="flex flex-col rounded-none sm:rounded-2xl gap-4 sm:gap-6 bg-white w-full max-w-[430px] h-auto p-4 sm:p-6 md:p-8 lg:p-10 items-center justify-center shadow-2xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col items-center gap-2">
-        <h1 className="font-lato text-[40px] text-primary-default text-center font-bold h-16">
+      <div className="flex flex-col items-center gap-1 sm:gap-2 w-full pt-5">
+        <h1 className="font-lato text-2xl sm:text-3xl md:text-4xl text-primary-default text-center font-bold">
           Welcome Back!
         </h1>
-        <span className="font-lato text-lg text-primary-default text-center font-normal h-6">
+        <span className="font-lato text-sm sm:text-base text-primary-default text-center font-normal">
           Enter to start getting things done
         </span>
       </div>
 
       {/* form */}
       <form
-        className="flex flex-col w-full"
+        className="flex flex-col w-full mt-2 sm:mt-4"
         id="loginForm"
         name="loginForm"
         onSubmit={handleSubmit}
@@ -123,7 +123,7 @@ export default function Login({
               isLanding={true}
             />
 
-            <div className="mt-2 flex flex-row justify-between">
+            <div className="mt-4 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
               {/* remember password */}
               <div className="flex flex-row">
                 <div className="border-[2px] border-solid rounded-[5px] border-primary-default w-5 h-5 flex items-center justify-center cursor-pointer">
@@ -161,7 +161,7 @@ export default function Login({
         </div>
 
         {/* buttons */}
-        <div className="w-full flex flex-col gap-5 mt-8">
+        <div className="w-full flex flex-col gap-4 sm:gap-5 mt-6 sm:mt-8">
           <button
             type="submit"
             className="rounded-3xl bg-primary-default font-bold font-poppins h-10 text-white 
@@ -179,38 +179,43 @@ export default function Login({
         </div>
       </form>
 
-      <div className="flex flex-row justify-center items-center gap-6">
-        <div className="w-14 h-[3px] bg-primary-default" />
-        <span className="font-normal font-poppins text-primary-default text-center">
+      <div className="w-full flex flex-row justify-center items-center gap-2 sm:gap-4 my-2 sm:my-4">
+        <div className="flex-1 h-[1px] sm:h-[2px] bg-gray-200" />
+        <span className="font-normal text-xs sm:text-sm font-poppins text-gray-500 text-center px-2">
           or sign in with
         </span>
-        <div className="w-14 h-[3px] bg-primary-default" />
+        <div className="flex-1 h-[1px] sm:h-[2px] bg-gray-200" />
       </div>
 
-      <div className="flex flex-row gap-6">
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
-        onClick={() => alert("Facebook Oauth2 coming soon")}
+      <div className="w-full flex flex-row justify-center gap-3 sm:gap-5 flex-wrap mt-2">
+        <button 
+          className="h-10 w-10 sm:h-12 sm:w-12 border border-solid border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+          onClick={() => alert("Facebook Oauth2 coming soon")}
         >
-          <Image src="/fb-logo.png" alt="fb-logo" width={24} height={24} />
+          <Image src="/fb-logo.png" alt="Facebook login" width={20} height={20} className="w-5 h-5" />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
-        onClick={() => alert("Gmail Oauth2 coming soon")}
+        <button 
+          className="h-10 w-10 sm:h-12 sm:w-12 border border-solid border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+          onClick={() => alert("Gmail Oauth2 coming soon")}
         >
           <Image
             src="/google-logo.png"
-            alt="google-logo"
-            width={24}
-            height={24}
+            alt="Google login"
+            width={20}
+            height={20}
+            className="w-5 h-5"
           />
         </button>
-        <button className="h-12 w-12 border-[2px] border-solid border-primary-default rounded-[50px] flex items-center justify-center"
-        onClick={() => alert("AppleID Oauth2 coming soon")}
+        <button 
+          className="h-10 w-10 sm:h-12 sm:w-12 border border-solid border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors duration-200"
+          onClick={() => alert("AppleID Oauth2 coming soon")}
         >
           <Image
             src="/apple-logo.png"
-            alt="apple-logo"
-            width={24}
-            height={24}
+            alt="Apple login"
+            width={20}
+            height={20}
+            className="w-5 h-5"
           />
         </button>
       </div>

@@ -13,9 +13,13 @@ type FormStateType = {
 type UniversalStateType = {
   formState: FormStateType;
   setFormState: React.Dispatch<React.SetStateAction<FormStateType>>;
-  isSidebarOpen: boolean; // Example universal state
-  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>; // Setter function
-  isLoading: boolean; // Another global state (e.g., loading spinner)
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isMobileSidebarOpen: boolean;
+  setIsMobileSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
+  isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   sidebarWidth: number;
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
@@ -35,10 +39,20 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   });
 
   // Additional universal states
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar toggle state
-  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(60);
   const [selectedTaskData, setSelectedTaskData] = useState<ITask | null>(null);
+
+  // Mobile sidebar actions
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(!isMobileSidebarOpen);
+  };
+
+  const closeMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
+  };
 
   return (
     <FormContext.Provider
@@ -47,6 +61,10 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setFormState,
         isSidebarOpen,
         setIsSidebarOpen,
+        isMobileSidebarOpen,
+        setIsMobileSidebarOpen,
+        toggleMobileSidebar,
+        closeMobileSidebar,
         isLoading,
         setIsLoading,
         sidebarWidth,
