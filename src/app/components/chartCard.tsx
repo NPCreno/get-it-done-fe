@@ -5,6 +5,9 @@ import { ChartAreaGradient } from "./shadcn/areaChart";
 import Image from "next/image";
 import { ChartPieInteractive } from "./shadcn/pieChart";
 import { DotLottie } from '@lottiefiles/dotlottie-web';
+import MonthlyHeatmap from "./MonthlyHeatmap";
+import { subDays, format } from 'date-fns';
+import { CardTitle } from "./shadcn/card";
 
 export default function ChartCard({
   header,
@@ -15,6 +18,24 @@ export default function ChartCard({
   delay: string;
   streakCount?: number;
 }) {
+  // Generate sample heatmap data for the last 30 days
+  const generateHeatmapData = () => {
+    const data = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 30; i++) {
+      const date = subDays(today, i);
+      data.push({
+        date: format(date, 'yyyy-MM-dd'),
+        count: Math.floor(Math.random() * 5) // 0-4 tasks per day
+      });
+    }
+    
+    return data;
+  };
+
+  const heatmapData = generateHeatmapData();
+
   // Task completion trend data (hardcoded for now)
   const taskCompletionData = [
     { day: "Mon", completed: 8, pending: 5 },
@@ -128,6 +149,7 @@ export default function ChartCard({
 
     return (
       <div className="flex flex-col items-center justify-center h-full p-4 text-center bg-white rounded-[10px] shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)]">
+        <CardTitle>{header}</CardTitle>
         <div className="relative mb-4">
           {isOnFirePlus ? (
             <div id="fire-animation-container" className="relative w-16 h-16">
@@ -214,7 +236,6 @@ export default function ChartCard({
   const renderChart = () => {
     switch (header) {
       case "Task Completion Trend":
-
         return (
           <div className="w-full h-full">
             <ChartAreaGradient 
@@ -240,6 +261,20 @@ export default function ChartCard({
         );
       case "Productivity Streak":
         return renderStreakCounter();
+      case "Calendar Heat map":
+        return (
+          <div className="w-full h-full p-4 bg-white rounded-[10px] shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left">
+            <CardTitle>{header}</CardTitle>
+            <MonthlyHeatmap 
+              values={heatmapData}
+              onDateClick={(date) => {
+                // Handle date click if needed
+                console.log('Date clicked:', date);
+              }}
+              className="h-full"
+            />
+          </div>
+        );
       default:
         return (
           <div
