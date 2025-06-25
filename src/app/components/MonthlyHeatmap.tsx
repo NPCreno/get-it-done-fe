@@ -101,7 +101,7 @@ export default function MonthlyHeatmap({
       day = addDays(day, 1);
     }
     rows.push(
-      <div key={day.toString()} className="grid grid-cols-7 gap-1 mb-1">
+      <div key={day.toString()} className="grid grid-cols-7 gap-1 mb-1 justify-items-center">
         {daysInWeek}
       </div>
     );
