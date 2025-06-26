@@ -484,9 +484,9 @@ export default function DashboardPage() {
           <Toast {...toastMessage} onClose={handleToastClose} />
         </div>
       )}
-      <div className="main flex justify-center w-full gap-5  h-full">
+      <div className="main flex justify-center w-full h-full">
         {/* Main Page */}
-        <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
+        <div className="inside max-w-[1440px] w-full mx-auto gap-6 md:gap-8 flex flex-col">
 
         {showLoader && (
           <div className={`transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -498,15 +498,20 @@ export default function DashboardPage() {
          <>
          
           {/* Header */}
-          <div className="flex justify-between">
+          <div className="flex flex-col md:flex-row justify-between gap-4">
             {/* Left header */}
             <div className="flex flex-col">
-              <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
-                Dashboard
-              </h1>
-              <p className="font-lato text-[13px] text-text fade-in-delay select-none">
-                Track your tasks and monitor your progress
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 bg-primary-default rounded-full"></div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none">
+                    Dashboard
+                  </h1>
+                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none mt-1">
+                    Track your tasks and monitor your progress
+                  </p>
+                </div>
+              </div>
             </div>
             {/* Right header */}
             <div className="flex flex-row gap-[10px] items-end">
@@ -560,7 +565,7 @@ export default function DashboardPage() {
           </div>
 
           {/* first row cards */}
-          <div className="grid sm:grid-cols md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
             <StatsCard
               icon="/svgs/list-outline.svg"
               header="All Tasks"
@@ -608,15 +613,18 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="w-full p-5 flex flex-col bg-white rounded-[10px] fade-in-delay-2 flex-grow">
+          <div className="w-full p-6 flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 fade-in-delay-2 flex-grow border border-gray-100">
             {/* Header - Fixed */}
-            <div className="flex flex-row justify-between">
-              <h1 className="text-2xl font-lato font-bold text-primary-default">
-                Recent Tasks
-              </h1>
+            <div className="flex flex-col sm:flex-row justify-between gap-4 pb-4 border-b border-gray-100">
+              <div>
+                <h1 className="text-xl font-lato font-bold text-gray-800">
+                  Recent Tasks
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">Your most recent activities and tasks</p>
+              </div>
               <button
-                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
-                  hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] h-[40px] 
+                  hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 items-center justify-center"
                 onClick={() => {
                   setIsTaskModalOpen(true);
                   clearAllData();
@@ -663,8 +671,8 @@ export default function DashboardPage() {
 
         {(tasks.length === 0 && !pageLoading) &&(
           <>
-            <div className="w-full h-full flex items-start justify-center mt-12">
-              <div className="flex flex-col gap-5 items-center max-w-[352px] justify-start">
+            <div className="w-full h-full flex items-center justify-center py-16 px-4">
+              <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
                 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
                 <path d="M87.5 50.0093C87.5 29.3062 70.7031 12.5093 50 12.5093C29.2969 12.5093 12.5 29.3062 12.5 50.0093C12.5 70.7124 29.2969 87.5093 50 87.5093C70.7031 87.5093 87.5 70.7124 87.5 50.0093Z" stroke="#FEAD03" stroke-width="7" stroke-miterlimit="10"/>
                 <g filter="url(#filter0_d_1156_894)">
@@ -683,16 +691,19 @@ export default function DashboardPage() {
                 </filter>
                 </defs>
                 </svg>
-                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay text-center">
-                  Welcome to Your Dashboard ✨
-                </h1>
-                <span className="font-lato text-base text-text text-center fade-in-delay-2">
-                  Start organizing your life by creating your first task
-                  Every great journey begins with a single step!
-                </span>
+                <div className="space-y-2">
+                  <h1 className="font-lato text-2xl md:text-3xl text-gray-800 font-bold fade-in-delay bg-gradient-to-r from-primary-default to-yellow-400 bg-clip-text text-transparent">
+                    Welcome to Your Dashboard ✨
+                  </h1>
+                  <p className="font-lato text-gray-600 fade-in-delay-2 max-w-md leading-relaxed">
+                    Start organizing your life by creating your first task.
+                    <br />
+                    Every great journey begins with a single step!
+                  </p>
+                </div>
                 <button
-                  className="px-5 py-[5px] w-full flex flex-row gap-[5px] items-center justify-center text-white font-lato bg-primary-default rounded-[10px] 
-                    hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 fade-in-delay-3"
+                  className="px-6 py-3 w-full flex flex-row gap-2 items-center justify-center text-white font-lato bg-gradient-to-r from-primary-default to-yellow-400 rounded-xl 
+                    hover:shadow-lg hover:shadow-primary-default/20 transition-all duration-300 fade-in-delay-3 transform hover:-translate-y-0.5"
                   onClick={() => {
                     setIsTaskModalOpen(true);
                     clearAllData();
