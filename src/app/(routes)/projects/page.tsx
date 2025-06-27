@@ -31,45 +31,8 @@ import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
-
-interface projectOrTaskFormValues {
-  title: string;
-  description: string;
-  due_date: Date | null;
-  colorLabel: string;
-  color: string;
-  user_id: string;
-  project_id: string;
-  project_title: string;
-  project_color: string;
-  priority: string;
-  status: string;
-  isRecurring: boolean;
-  repeat_every: string;
-  repeat_days: string[];
-  start_date: Date | null;
-  end_date: Date | null;
-  project: string;
-  task_id?: string;
-}
-
-interface FormErrors {
-  title?: string;
-  description?: string;
-  priority?: string;
-  project?: string;
-  project_id?: string;
-  project_title?: string;
-  project_color?: string;
-  status?: string;
-  due_date?: string;
-  isRecurring?: string;
-  repeat_every?: string;
-  repeat_days?: string[] | string;
-  start_date?: string;
-  end_date?: string;
-  user_id?: string;
-}
+import { IProjectOrTaskFormValues } from "@/app/interface/forms/IProjectorTaskFormValues";
+import { IProjectFormErrors } from "@/app/interface/forms/IProjectFormErrors";
 
 export default function ProjectsPage() {
   const [user, setUser] = useState<IUser | null>(null);
@@ -149,11 +112,11 @@ export default function ProjectsPage() {
         user_id: user.user_id,
         due_date: values.due_date || null,
       };
-      handleSubmitForm(withUser as projectOrTaskFormValues);
+      handleSubmitForm(withUser as IProjectOrTaskFormValues);
     },
   });
 
-  const handleSubmitForm = async (values: projectOrTaskFormValues) => {
+  const handleSubmitForm = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
@@ -162,7 +125,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const createProj = async (values: projectOrTaskFormValues) => {
+  const createProj = async (values: IProjectOrTaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -310,7 +273,7 @@ export default function ProjectsPage() {
     }
   }, [isViewProjectModalOpen, isTaskModalOpen]);
 
-  const handleCreateTask = async (values: projectOrTaskFormValues) => {
+  const handleCreateTask = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await createTask(values);
@@ -318,7 +281,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const handleUpdateTask = async (values: projectOrTaskFormValues) => {
+  const handleUpdateTask = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await updateTask(values);
@@ -326,7 +289,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const createTask = async (values: projectOrTaskFormValues) => {
+  const createTask = async (values: IProjectOrTaskFormValues) => {
     try {
       if (!user) {
         console.error("No User data found");
@@ -413,7 +376,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const updateTask = async (values: projectOrTaskFormValues) => {
+  const updateTask = async (values: IProjectOrTaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -575,7 +538,7 @@ export default function ProjectsPage() {
   }, [selectedTaskData, setFieldValue]);
 
   const handleTaskStatus = async (task: ITask) => {
-    const mappedTask: projectOrTaskFormValues = {
+    const mappedTask: IProjectOrTaskFormValues = {
       title: task.title,
       description: task.description,
       due_date: task.due_date ?? null,
@@ -826,20 +789,20 @@ export default function ProjectsPage() {
         <TaskModal
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
-            values: values as projectOrTaskFormValues,
-            errors: errors as FormErrors,
+            values: values as IProjectOrTaskFormValues,
+            errors: errors as IProjectFormErrors,
             handleChange,
             setFieldValue,
             setFieldError,
           }}
           handleCreateTask={() =>
-            handleCreateTask(values as projectOrTaskFormValues)
+            handleCreateTask(values as IProjectOrTaskFormValues)
           }
           project={projectOptions}
           preselectedProject={selectedProject}
           isUpdate={isUpdateTask}
           handleUpdateTask={() =>
-            handleUpdateTask(values as projectOrTaskFormValues)
+            handleUpdateTask(values as IProjectOrTaskFormValues)
           }
           isLoading={isLoading}
         />

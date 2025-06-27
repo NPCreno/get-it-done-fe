@@ -93,7 +93,6 @@ export default function DashboardPage() {
     handleSubmit,
     handleChange,
     setSubmitting,
-    setErrors,
     resetForm,
   } = useFormik({
     initialValues,
