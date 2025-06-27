@@ -63,7 +63,6 @@ export default function ProjectCard({
 
   return (
     <motion.div
-      layout
       whileHover={{ y: -4 }}
       onClick={onClick}
       className={`group relative p-5 rounded-2xl bg-gradient-to-br ${gradientClass} 
@@ -159,11 +158,9 @@ export default function ProjectCard({
           <span className="font-medium">{progress}%</span>
         </div>
         <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden">
-          <motion.div 
+          <div 
             className={`h-full rounded-full ${textColor} bg-opacity-30`}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            style={{ width: `${progress}%` }}
           />
         </div>
         <div className="flex justify-between mt-1">

@@ -708,20 +708,27 @@ export default function ProjectsPage() {
 
             <div className="grid gap-5 lg:grid-cols-4 md:grid-cols-2">
               {projectData.length > 0 ? (
-                projectData.map((project, index) => (
-                  <ProjectCard
-                    key={index}
-                    project={project}
-                    onClick={() => {
-                      setSelectedProject(project);
-                      setIsViewProjectModalOpen(true);
-                    }}
-                    onAddTaskClick={() => {
-                      setSelectedProject(project);
-                      setIsTaskModalOpen(true);
-                    }}
-                  />
-                ))
+                projectData.map((project, index) => {
+                  // Calculate animation delay based on index (staggered effect)
+                  const delay = Math.min(index * 0.1, 0.5); // Cap at 0.5s max delay
+                  const animationClass = `fade-in${index > 0 ? `-delay-${Math.min(index, 4)}` : ''}`;
+                  
+                  return (
+                    <div key={index} className={animationClass}>
+                      <ProjectCard
+                        project={project}
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setIsViewProjectModalOpen(true);
+                        }}
+                        onAddTaskClick={() => {
+                          setSelectedProject(project);
+                          setIsTaskModalOpen(true);
+                        }}
+                      />
+                    </div>
+                  );
+                })
               ) : (
                 <div className="flex justify-center items-center h-full">
                   <p className="text-text text-[13px] font-lato">
