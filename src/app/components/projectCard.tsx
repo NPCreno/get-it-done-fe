@@ -63,12 +63,20 @@ export default function ProjectCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       onClick={onClick}
       className={`group relative p-5 rounded-2xl bg-gradient-to-br ${gradientClass} 
-        border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 
-        cursor-pointer overflow-hidden`}
+        border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 
+        cursor-pointer overflow-hidden hover:shadow-${projectColor}-100/30`}
     >
+      {/* Animated gradient overlay on hover */}
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-500"
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 1 }}
+      />
       {/* Header with title and menu button */}
       <div className="flex justify-between items-start gap-3 mb-3">
         <div className="flex-1 min-w-0">
@@ -83,11 +91,13 @@ export default function ProjectCard({
             )}
           </div>
           
-          {project.description && (
-            <p className="text-sm text-gray-600 line-clamp-2">
-              {project.description}
-            </p>
-          )}
+          <div className="min-h-[40px]">
+            {project.description ? (
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {project.description}
+              </p>
+            ) : <div className="h-5"></div>}
+          </div>
         </div>
 
         <div className="relative">
@@ -96,7 +106,7 @@ export default function ProjectCard({
               e.stopPropagation();
               setShowActions(!showActions);
             }}
-            className="p-1 rounded-lg hover:bg-white/50 transition-colors text-gray-400 hover:text-gray-600"
+            className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-200 text-white/70 hover:text-white"
             aria-label="More options"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -174,7 +184,12 @@ export default function ProjectCard({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-white/20">
+      <motion.div 
+        className="flex items-center justify-between pt-4 mt-3 border-t border-white/10"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         {/* Team avatars */}
         <div className="flex -space-x-2">
           {teamMembers.map((member) => (
@@ -186,49 +201,99 @@ export default function ProjectCard({
               {member.avatar}
             </div>
           ))}
-          <button 
-            className="w-7 h-7 rounded-full bg-white/50 flex items-center justify-center text-xs text-gray-500 border-2 border-white hover:bg-white/70 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle add team member
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Quick actions */}
-        <div className="flex items-center gap-2">
-          <button 
+          <motion.button 
+            className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-xs text-gray-700 border-2 border-white hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md"
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
               onAddTaskClick();
             }}
-            className="p-1.5 rounded-lg bg-white/70 hover:bg-white text-gray-700 transition-colors"
-            title="Add Task"
+            title="Add new task"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-current">
               <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </button>
+          </motion.button>
+        </div>
+
+        {/* Quick actions */}
+        <motion.div 
+          className="flex items-center gap-2"
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <motion.button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddTaskClick();
+            }}
+            className="relative px-4 py-2 flex flex-row gap-2 items-center justify-center rounded-xl h-[36px] font-medium text-white 
+                     bg-gradient-to-r from-primary-default to-primary-200 shadow-sm hover:shadow-md
+                     transform transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0 active:scale-95 overflow-hidden group
+                     before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary-200 before:to-primary-default
+                     before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+          >
+            {/* Animated ring effect */}
+            <span className="absolute inset-0 rounded-xl overflow-hidden">
+              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            </span>
+            
+            {/* Plus icon with subtle animation */}
+            <div className="relative z-10 flex items-center justify-center">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="transition-transform duration-300 group-hover:rotate-90"
+              >
+                <path
+                  d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white"
+                />
+              </svg>
+            </div>
+            
+            {/* Button text with subtle tracking */}
+            <span className="relative z-10 text-sm font-medium">Add Task</span>
+            
+            {/* Subtle shine effect on hover */}
+            <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
+          </motion.button>
           
           {hasDueDate && (
-            <div className="flex items-center text-xs bg-white/70 px-2 py-1 rounded-lg text-gray-700">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="mr-1" xmlns="http://www.w3.org/2000/svg">
+            <motion.div 
+              className="flex items-center text-xs bg-white/90 px-3 py-1.5 rounded-xl text-gray-800 border border-white/30 shadow-sm"
+              whileHover={{ y: -1 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1.5 text-current" xmlns="http://www.w3.org/2000/svg">
                 <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" 
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               {new Date(project.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </div>
+            </motion.div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Decorative elements */}
-      <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/20"></div>
-      <div className="absolute -right-3 -bottom-3 w-12 h-12 rounded-full bg-white/30"></div>
+      <motion.div 
+        className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/20"
+        whileHover={{ scale: 1.1 }}
+        transition={{ duration: 0.3 }}
+      />
+      <motion.div 
+        className="absolute -right-3 -bottom-3 w-12 h-12 rounded-full bg-white/30"
+        whileHover={{ scale: 1.2 }}
+        transition={{ duration: 0.3 }}
+      />
     </motion.div>
   );
 }
