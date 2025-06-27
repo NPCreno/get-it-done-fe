@@ -486,7 +486,7 @@ export default function DashboardPage() {
               <div className="absolute -left-2 -top-2 w-24 h-24 bg-primary-50 rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
             {/* Right header */}
-            <div className="flex flex-row gap-[10px] items-end">
+            <div className="flex flex-col lg:flex-row gap-[10px] md:items-end items-start">
               {/* Enhanced Expandable Search */}
               <div className="relative flex justify-end">
                 <div 
