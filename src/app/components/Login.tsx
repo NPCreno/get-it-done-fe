@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
 import { useRouter } from "next/navigation";
-import { loginEmail, loginUsername } from "../api/api";
+import { loginEmail, loginUsername } from "../api/userRequests";
 import Image from "next/image";
 import InputBox from "./inputBox";
 interface LoginFormValues {

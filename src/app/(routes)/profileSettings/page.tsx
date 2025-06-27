@@ -1,5 +1,5 @@
 "use client";
-import { getUser, updateUser } from "@/app/api/api";
+import { getUser, updateUser } from "@/app/api/userRequests";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
 import { updateUserSchema } from "@/app/schemas/updateUserSchema";

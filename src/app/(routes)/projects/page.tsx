@@ -4,15 +4,17 @@ import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getUser } from "@/app/api/userRequests";
 import {
-  createProject,
-  getProjectsForUser,
-  getUser,
   getTasksByProject,
   createTaskApi,
   updateTaskApi,
   deleteTaskApi,
-} from "@/app/api/api";
+} from "@/app/api/taskRequests";
+import {
+  getProjectsForUser,
+  createProject,
+} from "@/app/api/projectsRequests";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";

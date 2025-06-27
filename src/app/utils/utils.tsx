@@ -24,3 +24,11 @@ export function getAccessTokenFromCookies(): string | null {
 export function base64UrlDecode(str: string) {
   return atob(str.replace(/-/g, "+").replace(/_/g, "/").padEnd(str.length + (4 - (str.length % 4)) % 4, "="));
 }
+
+export const getAccessToken = () => {
+  const value = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('access_token='))
+    ?.split('=')[1];
+  return value || null;
+};

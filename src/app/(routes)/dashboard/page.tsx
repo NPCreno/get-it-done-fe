@@ -8,61 +8,28 @@ import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 import {
-  createTaskApi,
-  getProjectsForUser,
-  getUser,
+  createTaskApi,  
   getTasksByUser,
   updateTaskApi,
   getDashboardData,
-} from "@/app/api/api";
+} from "@/app/api/taskRequests";
+import {getProjectsForUser} from "@/app/api/projectsRequests";
+import { getUser } from "@/app/api/userRequests";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
 import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { Toast } from "@/app/components/toast";
 import { ITask } from "@/app/interface/ITask";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
-import Image from "next/image";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
 import { IDashboardData } from "@/app/interface/IDashboardData";
 import PomodoroModal from "@/app/components/modals/pomodoro";
-
-interface taskFormValues {
-  user_id: string;
-  project_id?: string | null;
-  project_title: string;
-  project_color: string;
-  title: string;
-  description: string;
-  priority: string;
-  status: string;
-  due_date?: Date | null;
-  isRecurring: boolean;
-  repeat_every: string;
-  repeat_days: string[];
-  start_date: Date | null;
-  end_date: Date | null;
-  project: string;
-  task_id?: string;
-}
-interface FormErrors {
-  title?: string;
-  description?: string;
-  priority?: string;
-  project?: string;
-  project_id?: string;
-  project_title?: string;
-  project_color?: string;
-  status?: string;
-  due_date?: string;
-  isRecurring?: string;
-  repeat_every?: string;
-  repeat_days?: string[] | string;
-  start_date?: string;
-  end_date?: string;
-  user_id?: string;
-}
+import { ITaskCompletionTrendData } from "@/app/interface/ITaskCompletionTrendData";
+import { TaskItem } from "@/app/components/taskItem";
+import { ITaskFormErrors } from "@/app/interface/forms/ITaskFormErrors";
+import { ITaskFormValues } from "@/app/interface/forms/ITaskFormValues";
 
 export default function DashboardPage() {
   const { selectedTaskData } = useFormState();
@@ -86,6 +53,7 @@ export default function DashboardPage() {
   const [pageLoading, setIsPageLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
   const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
+  const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -143,7 +111,7 @@ export default function DashboardPage() {
     },
   });
 
-  const handleSubmitForm = async (values: taskFormValues) => {
+  const handleSubmitForm = async (values: ITaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
@@ -152,7 +120,7 @@ export default function DashboardPage() {
     setSubmitting(false);
   };
 
-  const createTask = async (values: taskFormValues) => {
+  const createTask = async (values: ITaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -319,7 +287,7 @@ export default function DashboardPage() {
   }
 }, [isTaskModalOpen, isUpdateTask, initialValues, resetForm]);
 
-  const handleUpdateTask = async (values: taskFormValues) => {
+  const handleUpdateTask = async (values: ITaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await updateTask(values);
@@ -327,7 +295,7 @@ export default function DashboardPage() {
     setSubmitting(false);
   };
 
-  const updateTask = async (values: taskFormValues) => {
+  const updateTask = async (values: ITaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -595,8 +563,9 @@ export default function DashboardPage() {
           {/* Chart cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
             <ChartCard 
-              header="Task Completion Trend" 
+              header="Task Completion Trend"  
               delay="fade-in-left-delay-1" 
+              taskCompletionData={taskCompletionData ? taskCompletionData : []}
             />
             <ChartCard 
               header="Task Distribution by project" 
@@ -740,7 +709,7 @@ export default function DashboardPage() {
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,
-            errors: errors as FormErrors,
+            errors: errors as ITaskFormErrors,
             handleChange,
             setFieldValue,
             setFieldError,
@@ -748,7 +717,7 @@ export default function DashboardPage() {
           handleCreateTask={() => handleSubmit()}
           project={projectOptions}
           isUpdate={isUpdateTask}
-          handleUpdateTask={() => handleUpdateTask(values as taskFormValues)}
+          handleUpdateTask={() => handleUpdateTask(values as ITaskFormValues)}
           isLoading={isLoading}
         />
       )}
@@ -760,87 +729,4 @@ export default function DashboardPage() {
   );
 }
 
-function TaskItem({
-  task,
-  handleUpdateTask,
-  handleTaskStatus,
-}: {
-  task: ITask;
-  handleUpdateTask: () => void;
-  handleTaskStatus: (task: ITask) => void;
-}) {
-  const { setSelectedTaskData } = useFormState();
 
-  const handleCheckToggle = () => {
-    const audio = new Audio('/soundfx/3.mp3'); // path to your mp3 file
-    audio.play();
-    const updatedTask = {
-      ...task,
-      status: task.status === "Complete" ? "Pending" : "Complete",
-    };
-    handleTaskStatus(updatedTask);
-  };
-
-  return (
-    <div className="flex flex-row w-full h-[42px] items-center justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
-      <div className="flex flex-row gap-5 items-center">
-        <div className="group w-6 h-6 relative">
-          <input
-            id="checkTask"
-            type="checkbox"
-            checked={task.status === "Complete"}
-            readOnly
-            onClick={handleCheckToggle}
-            className="peer appearance-none w-full h-full cursor-pointer"
-          />
-          <div
-            className="absolute inset-0 rounded-full border-[2px] border-solid border-gray-300
-                      peer-checked:border-0 group-hover:border-0 pointer-events-none"
-          ></div>
-          <div
-            className="absolute inset-0 flex items-center justify-center opacity-0 
-                          group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none"
-          >
-            <Image
-              src="/svgs/checkmark-circle-green.svg"
-              alt="Check"
-              width={26}
-              height={26}
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        className="flex flex-row gap-5 items-center flex-grow w-full justify-end"
-        onClick={() => {
-          setSelectedTaskData(task);
-          handleUpdateTask();
-        }}
-      >
-        <div className="flex flex-row justify-between w-full">
-          <span
-            className={`font-lato text-4 text-text ${
-              task.status === "Complete" ? "line-through" : ""
-            }`}
-          >
-            {task.title}
-          </span>
-          <div className="flex flex-row gap-2 items-center">
-            <div
-              className={`flex ${
-                task.project_title != null ? "bg-[#D4D4D4]" : "bg-[#ffffff]"
-              } font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center`}
-            >
-              {task.project_title}
-            </div>
-            <div
-              className={`rounded-[10px] w-[10px] h-[10px] ${
-                task.status === "Complete" ? "bg-green-600" : "bg-[#FFC107]"
-              }`}
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

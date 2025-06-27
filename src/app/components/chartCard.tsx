@@ -8,15 +8,18 @@ import MonthlyHeatmap from "./MonthlyHeatmap";
 import { subDays, format } from 'date-fns';
 import { CardTitle } from "./shadcn/card";
 import StreakCounter from "./streakCounter";
+import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
 
 export default function ChartCard({
   header,
   delay,
   streakCount = 0, // Default to 0 if not provided
+  taskCompletionData,
 }: {
   header: string;
   delay: string;
   streakCount?: number;
+  taskCompletionData?: ITaskCompletionTrendData[];
 }) {
   // Generate sample heatmap data for the last 30 days
   const generateHeatmapData = () => {
@@ -36,16 +39,16 @@ export default function ChartCard({
 
   const heatmapData = generateHeatmapData();
 
-  // Task completion trend data (hardcoded for now)
-  const taskCompletionData = [
-    { day: "Mon", completed: 8 },
-    { day: "Tue", completed: 10 },
-    { day: "Wed", completed: 6 },
-    { day: "Thu", completed: 9 },
-    { day: "Fri", completed: 7 },
-    { day: "Sat", completed: 5 },
-    { day: "Sun", completed: 4 },
-  ];
+  // // Task completion trend data (hardcoded for now)
+  // const taskCompletionData = [
+  //   { day: "Mon", completed: 8 },
+  //   { day: "Tue", completed: 10 },
+  //   { day: "Wed", completed: 6 },
+  //   { day: "Thu", completed: 9 },
+  //   { day: "Fri", completed: 7 },
+  //   { day: "Sat", completed: 5 },
+  //   { day: "Sun", completed: 4 },
+  // ];
 
   // Sample project data by month with enhanced contrast pastel colors
   const projectDataByMonth: Record<string, Array<{ title: string; value: number; fill: string }>> = {
@@ -106,7 +109,7 @@ export default function ChartCard({
         return (
           <div className="w-full h-full">
             <ChartAreaGradient 
-              data={taskCompletionData}
+              data={taskCompletionData ? taskCompletionData : []}
               colors={{
                 completed: "#53D86A",
               }}
