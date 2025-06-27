@@ -14,8 +14,6 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/app/components/shadcn/chart"
@@ -25,14 +23,12 @@ export const description = "An area chart with gradient fill"
 interface ChartDataPoint {
   day: string;
   completed: number;
-  pending: number;
 }
 
 interface AreaChartProps {
   data: ChartDataPoint[];
   colors?: {
     completed?: string;
-    pending?: string;
   };
 }
 
@@ -41,10 +37,6 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
     completed: {
       label: "Completed",
       color: colors?.completed || "var(--chart-1)",
-    },
-    pending: {
-      label: "Pending",
-      color: colors?.pending || "var(--chart-2)",
     },
   } satisfies ChartConfig
   return (
@@ -90,34 +82,7 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
                   stopOpacity={0.1}
                 />
               </linearGradient>
-              <linearGradient id="fillPending" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={chartConfig.pending.color}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={chartConfig.pending.color}
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
             </defs>
-            <Area
-              dataKey="pending"
-              type="monotone"
-              fill="url(#fillPending)"
-              stroke={chartConfig.pending.color}
-              fillOpacity={1}
-              strokeWidth={2}
-              stackId="1"
-              dot={false}
-              activeDot={{
-                stroke: chartConfig.pending.color,
-                strokeWidth: 2,
-                r: 4,
-              }}
-            />
             <Area
               dataKey="completed"
               type="monotone"
@@ -133,7 +98,6 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
                 r: 4,
               }}
             />
-            <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
@@ -142,10 +106,6 @@ export function ChartAreaGradient({ data, colors }: AreaChartProps) {
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-[var(--chart-1)]"></div>
             <span>Completed: {data.reduce((sum, item) => sum + item.completed, 0)}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-[var(--chart-2)]"></div>
-            <span>Pending: {data.reduce((sum, item) => sum + item.pending, 0)}</span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <TrendingUp className="h-3 w-3" />

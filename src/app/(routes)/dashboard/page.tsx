@@ -8,67 +8,37 @@ import { useFormState } from "@/app/context/FormProvider";
 import { FormikErrors, useFormik } from "formik";
 import { createTaskSchema } from "@/app/schemas/createTaskSchema";
 import {
-  createTaskApi,
-  getProjectsForUser,
-  getUser,
+  createTaskApi,  
   getTasksByUser,
   updateTaskApi,
   getDashboardData,
-} from "@/app/api/api";
-import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
+  getTaskCompletionTrend,
+} from "@/app/api/taskRequests";
+import {getProjectsForUser} from "@/app/api/projectsRequests";
+import { getUser } from "@/app/api/userRequests";
+import { getAccessTokenFromCookies, getWeekRange, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
 import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { Toast } from "@/app/components/toast";
 import { ITask } from "@/app/interface/ITask";
 import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
-import Image from "next/image";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
 import { IDashboardData } from "@/app/interface/IDashboardData";
 import PomodoroModal from "@/app/components/modals/pomodoro";
-
-interface taskFormValues {
-  user_id: string;
-  project_id?: string | null;
-  project_title: string;
-  project_color: string;
-  title: string;
-  description: string;
-  priority: string;
-  status: string;
-  due_date?: Date | null;
-  isRecurring: boolean;
-  repeat_every: string;
-  repeat_days: string[];
-  start_date: Date | null;
-  end_date: Date | null;
-  project: string;
-  task_id?: string;
-}
-interface FormErrors {
-  title?: string;
-  description?: string;
-  priority?: string;
-  project?: string;
-  project_id?: string;
-  project_title?: string;
-  project_color?: string;
-  status?: string;
-  due_date?: string;
-  isRecurring?: string;
-  repeat_every?: string;
-  repeat_days?: string[] | string;
-  start_date?: string;
-  end_date?: string;
-  user_id?: string;
-}
+import { ITaskCompletionTrendData } from "@/app/interface/ITaskCompletionTrendData";
+import { TaskItem } from "@/app/components/taskItem";
+import { ITaskFormErrors } from "@/app/interface/forms/ITaskFormErrors";
+import { ITaskFormValues } from "@/app/interface/forms/ITaskFormValues";
 
 export default function DashboardPage() {
   const { selectedTaskData } = useFormState();
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({
@@ -86,6 +56,7 @@ export default function DashboardPage() {
   const [pageLoading, setIsPageLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
   const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
+  const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -124,7 +95,6 @@ export default function DashboardPage() {
     handleSubmit,
     handleChange,
     setSubmitting,
-    setErrors,
     resetForm,
   } = useFormik({
     initialValues,
@@ -143,7 +113,7 @@ export default function DashboardPage() {
     },
   });
 
-  const handleSubmitForm = async (values: taskFormValues) => {
+  const handleSubmitForm = async (values: ITaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
@@ -152,7 +122,7 @@ export default function DashboardPage() {
     setSubmitting(false);
   };
 
-  const createTask = async (values: taskFormValues) => {
+  const createTask = async (values: ITaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -284,9 +254,12 @@ export default function DashboardPage() {
       const endDate = new Date(
         new Date().setDate(new Date().getDate() + 1)
       ).toISOString();
-  
+
+      const range = getWeekRange(new Date().toISOString());
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
+      const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
+
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {
@@ -297,6 +270,12 @@ export default function DashboardPage() {
         setDashboardData(fetchedDashboardData.data)
       }else{
         setDashboardData(undefined)
+      }
+
+      if(fetchedTaskTrendData.status === "success"){
+        setTaskCompletionData(fetchedTaskTrendData.data)
+      }else{
+        setTaskCompletionData([])
       }
 
       if (isFirstLoad.current) {
@@ -319,7 +298,7 @@ export default function DashboardPage() {
   }
 }, [isTaskModalOpen, isUpdateTask, initialValues, resetForm]);
 
-  const handleUpdateTask = async (values: taskFormValues) => {
+  const handleUpdateTask = async (values: ITaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await updateTask(values);
@@ -327,7 +306,7 @@ export default function DashboardPage() {
     setSubmitting(false);
   };
 
-  const updateTask = async (values: taskFormValues) => {
+  const updateTask = async (values: ITaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -346,7 +325,7 @@ export default function DashboardPage() {
       if (response.status === "success") {
         setIsLoading(false);
         setUpdateTaskDashboard(!updateTaskDashboard);
-        clearValueAndErrors();
+        clearAllData();
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Updated",
@@ -366,7 +345,7 @@ export default function DashboardPage() {
         }, 10000); // Toast display duration
       } else {
         setIsLoading(false);
-        clearValueAndErrors();
+        clearAllData();
         setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
@@ -408,15 +387,6 @@ export default function DashboardPage() {
         }, 400); // Must match the toastOut animation duration
       }, 10000); // Toast display duration
     }
-  };
-
-  const clearValueAndErrors = () => {
-    setErrors({});
-    setFieldValue("title", "");
-    setFieldValue("description", "");
-    setFieldValue("status", "");
-    setFieldValue("priority", "");
-    setFieldValue("due_date", "");
   };
 
   useEffect(() => {
@@ -484,7 +454,7 @@ export default function DashboardPage() {
           <Toast {...toastMessage} onClose={handleToastClose} />
         </div>
       )}
-      <div className="main flex justify-center w-full gap-5  h-full">
+      <div className="main flex justify-center w-full h-full">
         {/* Main Page */}
         <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
 
@@ -498,147 +468,284 @@ export default function DashboardPage() {
          <>
          
           {/* Header */}
-          <div className="flex justify-between">
+          <div className="relative flex flex-col md:flex-row justify-between gap-4 mb-2">
             {/* Left header */}
-            <div className="flex flex-col">
-              <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
-                Dashboard
-              </h1>
-              <p className="font-lato text-[13px] text-text fade-in-delay select-none">
-                Track your tasks and monitor your progress
-              </p>
+            <div className="relative z-10 flex flex-col group">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 bg-gradient-to-b from-primary-default to-primary-200 rounded-full transform transition-transform duration-300 group-hover:scale-y-110"></div>
+                <div className="space-y-0.5">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    Dashboard
+                  </h1>
+                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none transition-all duration-300 group-hover:text-gray-600">
+                    Track your tasks and monitor your progress
+                  </p>
+                </div>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -left-2 -top-2 w-24 h-24 bg-primary-50 rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
             {/* Right header */}
-            <div className="flex flex-row gap-[10px] items-end">
-              <button
-                className="text-text text-[13px] px-5 bg-white rounded-[10px] h-[35px] flex flex-row items-center 
-              hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-              onClick={() => setIsPomodoroModalOpen(true)}
-              >
-                Start Pomodoro
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div className="flex flex-col lg:flex-row gap-[10px] md:items-end items-start">
+              {/* Enhanced Expandable Search */}
+              <div className="relative flex justify-end">
+                <div 
+                  className={`relative flex items-center bg-white rounded-xl overflow-hidden h-[44px] transition-all duration-300 ease-out ${
+                    isSearchExpanded 
+                      ? 'shadow-md ring-1 ring-gray-200' 
+                      : 'w-[44px] hover:bg-gray-50 transition-colors duration-200'
+                  }`}
+                  style={{
+                    width: isSearchExpanded ? '280px' : '44px',
+                    transitionProperty: 'width, box-shadow, border-color',
+                    transitionDuration: '300ms',
+                    transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
                 >
-                  <path
-                    d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054"
-                    stroke="#FEAD03"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                  <input
+                    type="text"
+                    placeholder={isSearchExpanded ? 'Search tasks...' : ''}
+                    className={`bg-transparent border-0 focus:ring-0 focus:outline-none h-full pl-4 pr-10 text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                      isSearchExpanded ? 'w-full opacity-100' : 'w-0 opacity-0'
+                    }`}
+                    onBlur={(e) => {
+                      // Only collapse if clicking outside the search container
+                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node) && !searchQuery) {
+                        setIsSearchExpanded(false);
+                      }
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.currentTarget.blur();
+                        if (!searchQuery) {
+                          setIsSearchExpanded(false);
+                        }
+                      }
+                    }}
+                    autoFocus={isSearchExpanded}
                   />
-                  <path
-                    d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z"
-                    fill="#666666"
-                    stroke="#FEAD03"
-                    stroke-width="2"
-                  />
-                </svg>
-              </button>
+                  <button 
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-200 ${
+                      isSearchExpanded && searchQuery 
+                        ? 'text-gray-500 hover:bg-gray-100' 
+                        : 'text-gray-400 hover:text-gray-600 right-[4px]'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isSearchExpanded && searchQuery) {
+                        setSearchQuery('');
+                        // Keep focus on input after clearing
+                        const input = e.currentTarget.parentElement?.querySelector('input');
+                        input?.focus();
+                      } else {
+                        setIsSearchExpanded(!isSearchExpanded);
+                      }
+                    }}
+                    aria-label={isSearchExpanded && searchQuery ? 'Clear search' : 'Search'}
+                  >
+                    {isSearchExpanded && searchQuery ? (
+                      <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 20 20" 
+                        fill="currentColor"
+                        className="transition-transform duration-200 hover:scale-110"
+                      >
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 15 15" 
+                        fill="currentColor"
+                        className="transition-transform duration-200 hover:scale-110"
+                      >
+                        <path d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
 
               <button
-                className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
-              transition-all duration-300 justify-center items-center"
+                className="relative px-5 py-2 flex flex-row gap-2 items-center justify-center rounded-xl h-[44px] font-lato font-medium text-white 
+                  bg-gradient-to-r from-amber-300 to-amber-500 shadow-md hover:shadow-lg
+                  transform transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0 active:scale-95 overflow-hidden group
+                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-amber-400 before:to-amber-600 
+                  before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                onClick={() => setIsPomodoroModalOpen(true)}
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z"
-                    fill="#666666"
-                  />
-                </svg>
+                {/* Animated shine effect */}
+                <span className="absolute inset-0 rounded-xl overflow-hidden">
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                </span>
+                
+                {/* Timer icon with subtle animation */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 30 30"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-300 group-hover:rotate-12"
+                  >
+                    <path
+                      d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-amber-800"
+                    />
+                    <path
+                      d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-amber-800"
+                    />
+                  </svg>
+                </div>
+                
+                {/* Button text */}
+                <span className="relative z-10 text-base font-medium tracking-wide text-white">Start Pomodoro</span>
+                
+                {/* Subtle pulse effect */}
+                <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
               </button>
+
+
             </div>
           </div>
 
           {/* first row cards */}
-          <div className="grid sm:grid-cols md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
-            <StatsCard
-              icon="/svgs/list-outline.svg"
-              header="All Tasks"
-              content={String(dashboardData ? dashboardData.all_tasks : 0)}
-              delay="fade-in-left-delay-1"
-            />
-            <StatsCard
-              icon="/svgs/timer-outline.svg"
-              header="To Do"
-              content={String(dashboardData ? dashboardData.pending_tasks : 0)}
-              delay="fade-in-left-delay-2"
-            />
-            <StatsCard
-              icon="/svgs/folder-open-outline.svg"
-              header="All Projects"
-              content={String(dashboardData ? dashboardData.all_projects : 0)}
-              delay="fade-in-left-delay-3"
-            />
-            <StatsCard
-              icon="/svgs/checkbox-outline.svg"
-              header="Complete"
-              content={String(dashboardData ? dashboardData.complete_tasks : 0)}
-              delay="fade-in-left-delay-4"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2 group/cards">
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-100/30">
+              <StatsCard
+                icon="/svgs/list-outline.svg"
+                header="All Tasks"
+                content={String(dashboardData ? dashboardData.all_tasks : 0)}
+                delay="fade-in-left-delay-1"
+                className="h-full hover:bg-gradient-to-br from-white to-gray-50 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/30">
+              <StatsCard
+                icon="/svgs/timer-outline.svg"
+                header="To Do"
+                content={String(dashboardData ? dashboardData.pending_tasks : 0)}
+                delay="fade-in-left-delay-2"
+                className="h-full hover:bg-gradient-to-br from-white to-amber-50/30 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-100/30">
+              <StatsCard
+                icon="/svgs/folder-open-outline.svg"
+                header="All Projects"
+                content={String(dashboardData ? dashboardData.all_projects : 0)}
+                delay="fade-in-left-delay-3"
+                className="h-full hover:bg-gradient-to-br from-white to-blue-50/30 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-100/30">
+              <StatsCard
+                icon="/svgs/checkbox-outline.svg"
+                header="Complete"
+                content={String(dashboardData ? dashboardData.complete_tasks : 0)}
+                delay="fade-in-left-delay-4"
+                className="h-full hover:bg-gradient-to-br from-white to-green-50/30 transition-all duration-300"
+              />
+            </div>
           </div>
 
           {/* Chart cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
-            <ChartCard 
-              header="Task Completion Trend" 
-              delay="fade-in-left-delay-1" 
-            />
-            <ChartCard 
-              header="Task Distribution by project" 
-              delay="fade-in-left-delay-2" 
-            />
-            <ChartCard 
-              header="Productivity Streak" 
-              delay="fade-in-left-delay-3"
-              streakCount={dashboardData?.streak_count || 10}
-            />
-            <ChartCard 
-              header="Calendar Heat map" 
-              delay="fade-in-left-delay-4"
-            />
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary-100/20">
+              <ChartCard
+                header="Task Completion Trend"
+                delay="fade-in-left-delay-1"
+                taskCompletionData={taskCompletionData}
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-amber-100/20">
+              <ChartCard
+                header="Task Distribution by project"
+                delay="fade-in-left-delay-2"
+                streakCount={dashboardData?.streak_count || 0}
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100/20">
+              <ChartCard
+                header="Productivity Streak"
+                delay="fade-in-left-delay-3"
+                streakCount={dashboardData?.streak_count || 10}
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-green-100/20">
+              <ChartCard
+                header="Calendar Heat map"
+                delay="fade-in-left-delay-4"
+                streakCount={dashboardData?.streak_count || 0}
+              />
+            </div>
           </div>
 
-          <div className="w-full p-5 flex flex-col bg-white rounded-[10px] fade-in-delay-2 flex-grow">
+          <div className="w-full p-6 flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 fade-in-delay-2 flex-grow border border-gray-100">
             {/* Header - Fixed */}
-            <div className="flex flex-row justify-between">
-              <h1 className="text-2xl font-lato font-bold text-primary-default">
-                Recent Tasks
-              </h1>
+            <div className="flex flex-col sm:flex-row justify-between gap-4 pb-4 border-b border-gray-100">
+              <div>
+                <h1 className="text-xl font-lato font-bold text-gray-800">
+                  Recent Tasks
+                </h1>
+                <p className="text-sm text-gray-500 mt-1">Your most recent activities and tasks</p>
+              </div>
               <button
-                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] 
-                  hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
+                className="relative px-6 py-2.5 flex flex-row gap-2 items-center justify-center rounded-xl h-[44px] font-lato font-medium text-white 
+                  bg-gradient-to-r from-primary-default to-primary-200 shadow-md hover:shadow-lg
+                  transform transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0 active:scale-95 overflow-hidden group
+                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary-200 before:to-primary-default
+                  before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
                 onClick={() => {
                   setIsTaskModalOpen(true);
                   clearAllData();
                   setIsUpdateTask(false);
                 }}
               >
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
-                    stroke="white"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                New Task
+                {/* Animated ring effect */}
+                <span className="absolute inset-0 rounded-xl overflow-hidden">
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                </span>
+                
+                {/* Plus icon with subtle animation */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 25 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-300 group-hover:rotate-90"
+                  >
+                    <path
+                      d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                    />
+                  </svg>
+                </div>
+                
+                {/* Button text with subtle tracking */}
+                <span className="relative z-10 text-base font-medium tracking-wide">New Task</span>
+                
+                {/* Subtle shine effect on hover */}
+                <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
               </button>
             </div>
 
@@ -663,8 +770,8 @@ export default function DashboardPage() {
 
         {(tasks.length === 0 && !pageLoading) &&(
           <>
-            <div className="w-full h-full flex items-start justify-center mt-12">
-              <div className="flex flex-col gap-5 items-center max-w-[352px] justify-start">
+            <div className="w-full h-full flex items-center justify-center py-16 px-4">
+              <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
                 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
                 <path d="M87.5 50.0093C87.5 29.3062 70.7031 12.5093 50 12.5093C29.2969 12.5093 12.5 29.3062 12.5 50.0093C12.5 70.7124 29.2969 87.5093 50 87.5093C70.7031 87.5093 87.5 70.7124 87.5 50.0093Z" stroke="#FEAD03" stroke-width="7" stroke-miterlimit="10"/>
                 <g filter="url(#filter0_d_1156_894)">
@@ -683,16 +790,19 @@ export default function DashboardPage() {
                 </filter>
                 </defs>
                 </svg>
-                <h1 className="font-lato text-2xl text-primary-default font-bold fade-in-delay text-center">
-                  Welcome to Your Dashboard ✨
-                </h1>
-                <span className="font-lato text-base text-text text-center fade-in-delay-2">
-                  Start organizing your life by creating your first task
-                  Every great journey begins with a single step!
-                </span>
+                <div className="space-y-2">
+                  <h1 className="font-lato text-2xl md:text-3xl text-gray-800 font-bold fade-in-delay bg-gradient-to-r from-primary-default to-yellow-400 bg-clip-text text-transparent">
+                    Welcome to Your Dashboard ✨
+                  </h1>
+                  <p className="font-lato text-gray-600 fade-in-delay-2 max-w-md leading-relaxed">
+                    Start organizing your life by creating your first task.
+                    <br />
+                    Every great journey begins with a single step!
+                  </p>
+                </div>
                 <button
-                  className="px-5 py-[5px] w-full flex flex-row gap-[5px] items-center justify-center text-white font-lato bg-primary-default rounded-[10px] 
-                    hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 fade-in-delay-3"
+                  className="px-6 py-3 w-full flex flex-row gap-2 items-center justify-center text-white font-lato bg-gradient-to-r from-primary-default to-yellow-400 rounded-xl 
+                    hover:shadow-lg hover:shadow-primary-default/20 transition-all duration-300 fade-in-delay-3 transform hover:-translate-y-0.5"
                   onClick={() => {
                     setIsTaskModalOpen(true);
                     clearAllData();
@@ -729,7 +839,7 @@ export default function DashboardPage() {
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
             values: values,
-            errors: errors as FormErrors,
+            errors: errors as ITaskFormErrors,
             handleChange,
             setFieldValue,
             setFieldError,
@@ -737,7 +847,7 @@ export default function DashboardPage() {
           handleCreateTask={() => handleSubmit()}
           project={projectOptions}
           isUpdate={isUpdateTask}
-          handleUpdateTask={() => handleUpdateTask(values as taskFormValues)}
+          handleUpdateTask={() => handleUpdateTask(values as ITaskFormValues)}
           isLoading={isLoading}
         />
       )}
@@ -749,87 +859,4 @@ export default function DashboardPage() {
   );
 }
 
-function TaskItem({
-  task,
-  handleUpdateTask,
-  handleTaskStatus,
-}: {
-  task: ITask;
-  handleUpdateTask: () => void;
-  handleTaskStatus: (task: ITask) => void;
-}) {
-  const { setSelectedTaskData } = useFormState();
 
-  const handleCheckToggle = () => {
-    const audio = new Audio('/soundfx/3.mp3'); // path to your mp3 file
-    audio.play();
-    const updatedTask = {
-      ...task,
-      status: task.status === "Complete" ? "Pending" : "Complete",
-    };
-    handleTaskStatus(updatedTask);
-  };
-
-  return (
-    <div className="flex flex-row w-full h-[42px] items-center justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
-      <div className="flex flex-row gap-5 items-center">
-        <div className="group w-6 h-6 relative">
-          <input
-            id="checkTask"
-            type="checkbox"
-            checked={task.status === "Complete"}
-            readOnly
-            onClick={handleCheckToggle}
-            className="peer appearance-none w-full h-full cursor-pointer"
-          />
-          <div
-            className="absolute inset-0 rounded-full border-[2px] border-solid border-gray-300
-                      peer-checked:border-0 group-hover:border-0 pointer-events-none"
-          ></div>
-          <div
-            className="absolute inset-0 flex items-center justify-center opacity-0 
-                          group-hover:opacity-100 peer-checked:opacity-100 pointer-events-none"
-          >
-            <Image
-              src="/svgs/checkmark-circle-green.svg"
-              alt="Check"
-              width={26}
-              height={26}
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        className="flex flex-row gap-5 items-center flex-grow w-full justify-end"
-        onClick={() => {
-          setSelectedTaskData(task);
-          handleUpdateTask();
-        }}
-      >
-        <div className="flex flex-row justify-between w-full">
-          <span
-            className={`font-lato text-4 text-text ${
-              task.status === "Complete" ? "line-through" : ""
-            }`}
-          >
-            {task.title}
-          </span>
-          <div className="flex flex-row gap-2 items-center">
-            <div
-              className={`flex ${
-                task.project_title != null ? "bg-[#D4D4D4]" : "bg-[#ffffff]"
-              } font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center`}
-            >
-              {task.project_title}
-            </div>
-            <div
-              className={`rounded-[10px] w-[10px] h-[10px] ${
-                task.status === "Complete" ? "bg-green-600" : "bg-[#FFC107]"
-              }`}
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

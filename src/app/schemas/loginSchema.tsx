@@ -3,9 +3,6 @@ import * as yup from "yup";
 export const loginSchema = yup.object().shape({
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters long")
-    .max(20, "Password must be at most 20 characters long")
-    .matches(/[0-9]/, "Password must contain at least one number")
     .required("Password is required"),
 
   usernameOrEmail: yup

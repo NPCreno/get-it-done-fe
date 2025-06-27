@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
-import { createUser, loginEmail } from "../api/api";
+import { createUser, loginEmail } from "../api/userRequests";
 import InputBox from "./inputBox";
 
 interface SignupFormValues {

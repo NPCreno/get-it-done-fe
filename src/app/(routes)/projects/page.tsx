@@ -4,15 +4,17 @@ import ProjectCard from "../../components/projectCard";
 import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
 import { useFormState } from "@/app/context/FormProvider";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getUser } from "@/app/api/userRequests";
 import {
-  createProject,
-  getProjectsForUser,
-  getUser,
   getTasksByProject,
   createTaskApi,
   updateTaskApi,
   deleteTaskApi,
-} from "@/app/api/api";
+} from "@/app/api/taskRequests";
+import {
+  getProjectsForUser,
+  createProject,
+} from "@/app/api/projectsRequests";
 import AddProjectModal from "@/app/components/modals/addProjectModal";
 import { FormikErrors, useFormik } from "formik";
 import { createProjectSchema } from "@/app/schemas/createProjectSchema";
@@ -29,45 +31,8 @@ import { UpdateTaskDto } from "@/app/interface/dto/update-task-dto";
 import { ITaskResponse } from "@/app/interface/responses/ITaskResponse";
 import { IUser } from "@/app/interface/IUser";
 import LoadingPage from "@/app/components/loader";
-
-interface projectOrTaskFormValues {
-  title: string;
-  description: string;
-  due_date: Date | null;
-  colorLabel: string;
-  color: string;
-  user_id: string;
-  project_id: string;
-  project_title: string;
-  project_color: string;
-  priority: string;
-  status: string;
-  isRecurring: boolean;
-  repeat_every: string;
-  repeat_days: string[];
-  start_date: Date | null;
-  end_date: Date | null;
-  project: string;
-  task_id?: string;
-}
-
-interface FormErrors {
-  title?: string;
-  description?: string;
-  priority?: string;
-  project?: string;
-  project_id?: string;
-  project_title?: string;
-  project_color?: string;
-  status?: string;
-  due_date?: string;
-  isRecurring?: string;
-  repeat_every?: string;
-  repeat_days?: string[] | string;
-  start_date?: string;
-  end_date?: string;
-  user_id?: string;
-}
+import { IProjectOrTaskFormValues } from "@/app/interface/forms/IProjectorTaskFormValues";
+import { IProjectFormErrors } from "@/app/interface/forms/IProjectFormErrors";
 
 export default function ProjectsPage() {
   const [user, setUser] = useState<IUser | null>(null);
@@ -147,11 +112,11 @@ export default function ProjectsPage() {
         user_id: user.user_id,
         due_date: values.due_date || null,
       };
-      handleSubmitForm(withUser as projectOrTaskFormValues);
+      handleSubmitForm(withUser as IProjectOrTaskFormValues);
     },
   });
 
-  const handleSubmitForm = async (values: projectOrTaskFormValues) => {
+  const handleSubmitForm = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     console.log("validationErrors: ", validationErrors);
     if (Object.keys(validationErrors).length === 0) {
@@ -160,7 +125,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const createProj = async (values: projectOrTaskFormValues) => {
+  const createProj = async (values: IProjectOrTaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -308,7 +273,7 @@ export default function ProjectsPage() {
     }
   }, [isViewProjectModalOpen, isTaskModalOpen]);
 
-  const handleCreateTask = async (values: projectOrTaskFormValues) => {
+  const handleCreateTask = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await createTask(values);
@@ -316,7 +281,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const handleUpdateTask = async (values: projectOrTaskFormValues) => {
+  const handleUpdateTask = async (values: IProjectOrTaskFormValues) => {
     const validationErrors: FormikErrors<typeof values> = await validateForm();
     if (Object.keys(validationErrors).length === 0) {
       await updateTask(values);
@@ -324,7 +289,7 @@ export default function ProjectsPage() {
     setSubmitting(false);
   };
 
-  const createTask = async (values: projectOrTaskFormValues) => {
+  const createTask = async (values: IProjectOrTaskFormValues) => {
     try {
       if (!user) {
         console.error("No User data found");
@@ -411,7 +376,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const updateTask = async (values: projectOrTaskFormValues) => {
+  const updateTask = async (values: IProjectOrTaskFormValues) => {
     try {
       setIsLoading(true);
       if (!user) {
@@ -573,7 +538,7 @@ export default function ProjectsPage() {
   }, [selectedTaskData, setFieldValue]);
 
   const handleTaskStatus = async (task: ITask) => {
-    const mappedTask: projectOrTaskFormValues = {
+    const mappedTask: IProjectOrTaskFormValues = {
       title: task.title,
       description: task.description,
       due_date: task.due_date ?? null,
@@ -674,13 +639,18 @@ export default function ProjectsPage() {
             <div className="flex justify-between">
               {/* Left header */}
               <div className="flex flex-col">
-                <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 bg-primary-default rounded-full"></div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none">
                   Projects
-                </h1>
-                <p className="font-lato text-[13px] text-text fade-in-delay select-none">
+                  </h1>
+                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none mt-1">
                   Organize your tasks into projects
-                </p>
+                  </p>
+                </div>
               </div>
+            </div>
 
               <div className="flex flex-row gap-[10px] items-end">
                 <button
@@ -706,20 +676,24 @@ export default function ProjectsPage() {
 
             <div className="grid gap-5 lg:grid-cols-4 md:grid-cols-2">
               {projectData.length > 0 ? (
-                projectData.map((project, index) => (
-                  <ProjectCard
-                    key={index}
-                    project={project}
-                    onClick={() => {
-                      setSelectedProject(project);
-                      setIsViewProjectModalOpen(true);
-                    }}
-                    onAddTaskClick={() => {
-                      setSelectedProject(project);
-                      setIsTaskModalOpen(true);
-                    }}
-                  />
-                ))
+                projectData.map((project, index) => {
+                  const animationClass = `fade-in${index > 0 ? `-delay-${Math.min(index, 4)}` : ''}`;
+                  return (
+                    <div key={index} className={animationClass}>
+                      <ProjectCard
+                        project={project}
+                        onClick={() => {
+                          setSelectedProject(project);
+                          setIsViewProjectModalOpen(true);
+                        }}
+                        onAddTaskClick={() => {
+                          setSelectedProject(project);
+                          setIsTaskModalOpen(true);
+                        }}
+                      />
+                    </div>
+                  );
+                })
               ) : (
                 <div className="flex justify-center items-center h-full">
                   <p className="text-text text-[13px] font-lato">
@@ -815,20 +789,20 @@ export default function ProjectsPage() {
         <TaskModal
           onClose={() => setIsTaskModalOpen(false)}
           formik={{
-            values: values as projectOrTaskFormValues,
-            errors: errors as FormErrors,
+            values: values as IProjectOrTaskFormValues,
+            errors: errors as IProjectFormErrors,
             handleChange,
             setFieldValue,
             setFieldError,
           }}
           handleCreateTask={() =>
-            handleCreateTask(values as projectOrTaskFormValues)
+            handleCreateTask(values as IProjectOrTaskFormValues)
           }
           project={projectOptions}
           preselectedProject={selectedProject}
           isUpdate={isUpdateTask}
           handleUpdateTask={() =>
-            handleUpdateTask(values as projectOrTaskFormValues)
+            handleUpdateTask(values as IProjectOrTaskFormValues)
           }
           isLoading={isLoading}
         />

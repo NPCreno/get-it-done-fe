@@ -1,5 +1,5 @@
 "use client";
-import { getUser, updateUser } from "@/app/api/api";
+import { getUser, updateUser } from "@/app/api/userRequests";
 import MainLayout from "@/app/components/MainLayout";
 import ToggleSwitch from "@/app/components/toggleSwitch";
 import { updateUserSchema } from "@/app/schemas/updateUserSchema";
@@ -190,12 +190,17 @@ export default function ProfileSettingsPage() {
           <div className="flex justify-between">
             {/* Left header */}
             <div className="flex flex-col">
-              <h1 className="text-[28px] font-bold text-primary-default fade-in select-none">
-                Profile Settings
-              </h1>
-              <p className="font-lato text-[13px] text-text fade-in-delay select-none">
-                Manage Your Profile & Preferences
-              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-8 bg-primary-default rounded-full"></div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none">
+                  Profile Settings
+                  </h1>
+                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none mt-1">
+                  Manage Your Profile & Preferences
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
