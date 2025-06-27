@@ -468,20 +468,22 @@ export default function DashboardPage() {
          <>
          
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="relative flex flex-col md:flex-row justify-between gap-4 mb-2">
             {/* Left header */}
-            <div className="flex flex-col">
+            <div className="relative z-10 flex flex-col group">
               <div className="flex items-center gap-3">
-                <div className="w-1 h-8 bg-primary-default rounded-full"></div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none">
+                <div className="w-1 h-8 bg-gradient-to-b from-primary-default to-primary-200 rounded-full transform transition-transform duration-300 group-hover:scale-y-110"></div>
+                <div className="space-y-0.5">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 fade-in select-none bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                     Dashboard
                   </h1>
-                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none mt-1">
+                  <p className="font-lato text-sm text-gray-500 fade-in-delay select-none transition-all duration-300 group-hover:text-gray-600">
                     Track your tasks and monitor your progress
                   </p>
                 </div>
               </div>
+              {/* Decorative elements */}
+              <div className="absolute -left-2 -top-2 w-24 h-24 bg-primary-50 rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             </div>
             {/* Right header */}
             <div className="flex flex-row gap-[10px] items-end">
@@ -619,53 +621,79 @@ export default function DashboardPage() {
           </div>
 
           {/* first row cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
-            <StatsCard
-              icon="/svgs/list-outline.svg"
-              header="All Tasks"
-              content={String(dashboardData ? dashboardData.all_tasks : 0)}
-              delay="fade-in-left-delay-1"
-            />
-            <StatsCard
-              icon="/svgs/timer-outline.svg"
-              header="To Do"
-              content={String(dashboardData ? dashboardData.pending_tasks : 0)}
-              delay="fade-in-left-delay-2"
-            />
-            <StatsCard
-              icon="/svgs/folder-open-outline.svg"
-              header="All Projects"
-              content={String(dashboardData ? dashboardData.all_projects : 0)}
-              delay="fade-in-left-delay-3"
-            />
-            <StatsCard
-              icon="/svgs/checkbox-outline.svg"
-              header="Complete"
-              content={String(dashboardData ? dashboardData.complete_tasks : 0)}
-              delay="fade-in-left-delay-4"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2 group/cards">
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-100/30">
+              <StatsCard
+                icon="/svgs/list-outline.svg"
+                header="All Tasks"
+                content={String(dashboardData ? dashboardData.all_tasks : 0)}
+                delay="fade-in-left-delay-1"
+                className="h-full hover:bg-gradient-to-br from-white to-gray-50 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/30">
+              <StatsCard
+                icon="/svgs/timer-outline.svg"
+                header="To Do"
+                content={String(dashboardData ? dashboardData.pending_tasks : 0)}
+                delay="fade-in-left-delay-2"
+                className="h-full hover:bg-gradient-to-br from-white to-amber-50/30 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-100/30">
+              <StatsCard
+                icon="/svgs/folder-open-outline.svg"
+                header="All Projects"
+                content={String(dashboardData ? dashboardData.all_projects : 0)}
+                delay="fade-in-left-delay-3"
+                className="h-full hover:bg-gradient-to-br from-white to-blue-50/30 transition-all duration-300"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-100/30">
+              <StatsCard
+                icon="/svgs/checkbox-outline.svg"
+                header="Complete"
+                content={String(dashboardData ? dashboardData.complete_tasks : 0)}
+                delay="fade-in-left-delay-4"
+                className="h-full hover:bg-gradient-to-br from-white to-green-50/30 transition-all duration-300"
+              />
+            </div>
           </div>
 
           {/* Chart cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 w-full fade-in-delay-2">
-            <ChartCard 
-              header="Task Completion Trend"  
-              delay="fade-in-left-delay-1" 
-              taskCompletionData={taskCompletionData ? taskCompletionData : []}
-            />
-            <ChartCard 
-              header="Task Distribution by project" 
-              delay="fade-in-left-delay-2" 
-            />
-            <ChartCard 
-              header="Productivity Streak" 
-              delay="fade-in-left-delay-3"
-              streakCount={dashboardData?.streak_count || 10}
-            />
-            <ChartCard 
-              header="Calendar Heat map" 
-              delay="fade-in-left-delay-4"
-            />
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-primary-100/20">
+              <ChartCard
+                header="Task Completion Trend"
+                delay="fade-in-left-delay-1"
+                taskCompletionData={taskCompletionData}
+                className="h-full border border-gray-100/80 hover:border-gray-200/80 transition-colors duration-300 rounded-2xl overflow-hidden"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-amber-100/20">
+              <ChartCard
+                header="Task Distribution by project"
+                delay="fade-in-left-delay-2"
+                streakCount={dashboardData?.streak_count || 0}
+                className="h-full border border-gray-100/80 hover:border-amber-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100/20">
+              <ChartCard
+                header="Productivity Streak"
+                delay="fade-in-left-delay-3"
+                streakCount={dashboardData?.streak_count || 10}
+                className="h-full border border-gray-100/80 hover:border-blue-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
+              />
+            </div>
+            <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-green-100/20">
+              <ChartCard
+                header="Calendar Heat map"
+                delay="fade-in-left-delay-4"
+                streakCount={dashboardData?.streak_count || 0}
+                className="h-full border border-gray-100/80 hover:border-green-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
+              />
+            </div>
           </div>
 
           <div className="w-full p-6 flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 fade-in-delay-2 flex-grow border border-gray-100">

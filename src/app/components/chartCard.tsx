@@ -10,17 +10,21 @@ import { CardTitle } from "./shadcn/card";
 import StreakCounter from "./streakCounter";
 import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
 
-export default function ChartCard({
-  header,
-  delay,
-  streakCount = 0, // Default to 0 if not provided
-  taskCompletionData,
-}: {
+interface ChartCardProps {
   header: string;
   delay: string;
   streakCount?: number;
   taskCompletionData?: ITaskCompletionTrendData[];
-}) {
+  className?: string;
+}
+
+export default function ChartCard({
+  header,
+  delay,
+  streakCount = 0, // Default to 0 if not provided
+  taskCompletionData = [],
+  className = '',
+}: ChartCardProps) {
   // Generate more realistic heatmap data with weekly patterns
   const generateHeatmapData = () => {
     const data = [];
@@ -209,18 +213,25 @@ export default function ChartCard({
   return (
     <div
       className={`relative flex flex-col gap-[10px] justify-start items-start bg-white rounded-[10px] w-full h-full min-h-[300px]
-      hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left ${delay}`}
+      hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left ${delay} group`}
       role="region"
       aria-label={`${header} chart`}
     >
       <div className="w-full h-full bg-background rounded-[10px] overflow-hidden">
-        {renderChart()}
+        {isLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-primary-500"></div>
+          </div>
+        ) : (
+          <div className="h-full transform transition-all duration-300 group-hover:scale-[1.01]">
+            {renderChart()}
+          </div>
+        )}
       </div>
-      {isLoading && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      )}
+      
+      {/* Subtle hover effects */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute top-0 right-0 w-20 h-20 -mr-10 -mt-10 bg-primary-100 rounded-full opacity-0 group-hover:opacity-10 transition-opacity duration-500"></div>
     </div>
   );
 }
