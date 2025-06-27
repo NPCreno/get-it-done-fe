@@ -38,13 +38,13 @@ export default function ChartCard({
 
   // Task completion trend data (hardcoded for now)
   const taskCompletionData = [
-    { day: "Mon", completed: 8, pending: 5 },
-    { day: "Tue", completed: 10, pending: 7 },
-    { day: "Wed", completed: 6, pending: 3 },
-    { day: "Thu", completed: 9, pending: 8 },
-    { day: "Fri", completed: 7, pending: 6 },
-    { day: "Sat", completed: 5, pending: 4 },
-    { day: "Sun", completed: 4, pending: 2 },
+    { day: "Mon", completed: 8 },
+    { day: "Tue", completed: 10 },
+    { day: "Wed", completed: 6 },
+    { day: "Thu", completed: 9 },
+    { day: "Fri", completed: 7 },
+    { day: "Sat", completed: 5 },
+    { day: "Sun", completed: 4 },
   ];
 
   // Sample project data by month with enhanced contrast pastel colors
@@ -109,7 +109,6 @@ export default function ChartCard({
               data={taskCompletionData}
               colors={{
                 completed: "#53D86A",
-                pending: "#FED580"
               }}
             />
           </div>
