@@ -32,3 +32,22 @@ export const getAccessToken = () => {
     ?.split('=')[1];
   return value || null;
 };
+
+export function getWeekRange(startDate: string) {
+  const date = new Date(startDate);
+  const day = date.getDay(); // 0 (Sun) - 6 (Sat)
+
+  // Adjust to Monday (day 1)
+  const diffToMonday = (day === 0 ? -6 : 1) - day;
+  const weekStart = new Date(date);
+  weekStart.setDate(date.getDate() + diffToMonday);
+
+  // End of the week (Sunday)
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  return {
+    start: weekStart.toISOString().split('T')[0],
+    end: weekEnd.toISOString().split('T')[0],
+  };
+}

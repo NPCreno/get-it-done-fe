@@ -12,10 +12,11 @@ import {
   getTasksByUser,
   updateTaskApi,
   getDashboardData,
+  getTaskCompletionTrend,
 } from "@/app/api/taskRequests";
 import {getProjectsForUser} from "@/app/api/projectsRequests";
 import { getUser } from "@/app/api/userRequests";
-import { getAccessTokenFromCookies, parseJwt } from "@/app/utils/utils";
+import { getAccessTokenFromCookies, getWeekRange, parseJwt } from "@/app/utils/utils";
 import { IProject } from "@/app/interface/IProject";
 import { CreateTaskDto } from "@/app/interface/dto/create-task-dto";
 import { Toast } from "@/app/components/toast";
@@ -252,9 +253,12 @@ export default function DashboardPage() {
       const endDate = new Date(
         new Date().setDate(new Date().getDate() + 1)
       ).toISOString();
-  
+
+      const range = getWeekRange(new Date().toISOString());
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
+      const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
+      
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {
@@ -265,6 +269,12 @@ export default function DashboardPage() {
         setDashboardData(fetchedDashboardData.data)
       }else{
         setDashboardData(undefined)
+      }
+
+      if(fetchedTaskTrendData.status === "success"){
+        setTaskCompletionData(fetchedTaskTrendData.data)
+      }else{
+        setTaskCompletionData([])
       }
 
       if (isFirstLoad.current) {

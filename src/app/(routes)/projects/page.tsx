@@ -714,10 +714,7 @@ export default function ProjectsPage() {
             <div className="grid gap-5 lg:grid-cols-4 md:grid-cols-2">
               {projectData.length > 0 ? (
                 projectData.map((project, index) => {
-                  // Calculate animation delay based on index (staggered effect)
-                  const delay = Math.min(index * 0.1, 0.5); // Cap at 0.5s max delay
                   const animationClass = `fade-in${index > 0 ? `-delay-${Math.min(index, 4)}` : ''}`;
-                  
                   return (
                     <div key={index} className={animationClass}>
                       <ProjectCard
