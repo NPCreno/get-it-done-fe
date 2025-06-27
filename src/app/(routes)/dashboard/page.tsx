@@ -37,6 +37,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({
@@ -483,52 +485,136 @@ export default function DashboardPage() {
             </div>
             {/* Right header */}
             <div className="flex flex-row gap-[10px] items-end">
-              <button
-                className="text-text text-[13px] px-5 bg-white rounded-[10px] h-[35px] flex flex-row items-center 
-              hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300"
-              onClick={() => setIsPomodoroModalOpen(true)}
-              >
-                Start Pomodoro
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 30 30"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+              {/* Enhanced Expandable Search */}
+              <div className="relative flex justify-end">
+                <div 
+                  className={`relative flex items-center bg-white rounded-xl overflow-hidden h-[44px] transition-all duration-300 ease-out ${
+                    isSearchExpanded 
+                      ? 'shadow-md ring-1 ring-gray-200' 
+                      : 'w-[44px] hover:bg-gray-50 transition-colors duration-200'
+                  }`}
+                  style={{
+                    width: isSearchExpanded ? '280px' : '44px',
+                    transitionProperty: 'width, box-shadow, border-color',
+                    transitionDuration: '300ms',
+                    transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
                 >
-                  <path
-                    d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054"
-                    stroke="#FEAD03"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
+                  <input
+                    type="text"
+                    placeholder={isSearchExpanded ? 'Search tasks...' : ''}
+                    className={`bg-transparent border-0 focus:ring-0 focus:outline-none h-full pl-4 pr-10 text-gray-700 placeholder-gray-400 transition-all duration-200 ${
+                      isSearchExpanded ? 'w-full opacity-100' : 'w-0 opacity-0'
+                    }`}
+                    onBlur={(e) => {
+                      // Only collapse if clicking outside the search container
+                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+                        !searchQuery && setIsSearchExpanded(false);
+                      }
+                    }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') {
+                        e.currentTarget.blur();
+                        !searchQuery && setIsSearchExpanded(false);
+                      }
+                    }}
+                    autoFocus={isSearchExpanded}
                   />
-                  <path
-                    d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z"
-                    fill="#666666"
-                    stroke="#FEAD03"
-                    stroke-width="2"
-                  />
-                </svg>
-              </button>
+                  <button 
+                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full transition-all duration-200 ${
+                      isSearchExpanded && searchQuery 
+                        ? 'text-gray-500 hover:bg-gray-100' 
+                        : 'text-gray-400 hover:text-gray-600 right-[4px]'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isSearchExpanded && searchQuery) {
+                        setSearchQuery('');
+                        // Keep focus on input after clearing
+                        const input = e.currentTarget.parentElement?.querySelector('input');
+                        input?.focus();
+                      } else {
+                        setIsSearchExpanded(!isSearchExpanded);
+                      }
+                    }}
+                    aria-label={isSearchExpanded && searchQuery ? 'Clear search' : 'Search'}
+                  >
+                    {isSearchExpanded && searchQuery ? (
+                      <svg 
+                        width="16" 
+                        height="16" 
+                        viewBox="0 0 20 20" 
+                        fill="currentColor"
+                        className="transition-transform duration-200 hover:scale-110"
+                      >
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg 
+                        width="20" 
+                        height="20" 
+                        viewBox="0 0 15 15" 
+                        fill="currentColor"
+                        className="transition-transform duration-200 hover:scale-110"
+                      >
+                        <path d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
 
               <button
-                className="flex h-[35px] w-[35px] bg-white rounded-[10px] hover:shadow-[0px_2px_10.9px_0px_rgba(0,_0,_0,_0.25)] 
-              transition-all duration-300 justify-center items-center"
+                className="relative px-5 py-2 flex flex-row gap-2 items-center justify-center rounded-xl h-[44px] font-lato font-medium text-white 
+                  bg-gradient-to-r from-amber-300 to-amber-500 shadow-md hover:shadow-lg
+                  transform transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0 active:scale-95 overflow-hidden group
+                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-amber-400 before:to-amber-600 
+                  before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+                onClick={() => setIsPomodoroModalOpen(true)}
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 15 15"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M13.5937 12.5381L9.95859 8.90234C10.5444 8.0973 10.8596 7.12707 10.8586 6.13144C10.8586 3.52549 8.73838 1.40527 6.13242 1.40527C3.52646 1.40527 1.40625 3.52549 1.40625 6.13144C1.40625 8.7374 3.52646 10.8576 6.13242 10.8576C7.12805 10.8586 8.09828 10.5434 8.90332 9.95762L12.5391 13.5928L13.5937 12.5381ZM6.13242 9.36494C5.49281 9.365 4.86755 9.17538 4.33571 8.82007C3.80388 8.46476 3.38935 7.95971 3.14455 7.3688C2.89976 6.77789 2.83569 6.12766 2.96046 5.50034C3.08523 4.87302 3.39322 4.29679 3.84549 3.84452C4.29777 3.39225 4.874 3.08425 5.50132 2.95949C6.12864 2.83472 6.77887 2.89878 7.36978 3.14358C7.96069 3.38837 8.46574 3.8029 8.82105 4.33474C9.17636 4.86658 9.36597 5.49184 9.36592 6.13144C9.36491 6.98871 9.02391 7.81058 8.41773 8.41676C7.81156 9.02294 6.98969 9.36393 6.13242 9.36494V9.36494Z"
-                    fill="#666666"
-                  />
-                </svg>
+                {/* Animated shine effect */}
+                <span className="absolute inset-0 rounded-xl overflow-hidden">
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                </span>
+                
+                {/* Timer icon with subtle animation */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 30 30"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-300 group-hover:rotate-12"
+                  >
+                    <path
+                      d="M6.6156 7.49915C4.79638 9.53097 3.77785 12.1549 3.74978 14.882C3.68064 21.1134 8.76834 26.2374 14.9998 26.2492C21.2224 26.2609 26.2498 21.2201 26.2498 14.9992C26.2498 8.87376 21.3543 3.88919 15.2635 3.74916C15.2292 3.74805 15.195 3.75387 15.163 3.76625C15.131 3.77863 15.1019 3.79733 15.0773 3.82122C15.0527 3.84512 15.0331 3.87372 15.0198 3.90533C15.0065 3.93694 14.9997 3.97091 14.9998 4.00521V8.9054"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-amber-800"
+                    />
+                    <path
+                      d="M15.745 14.481H15.746C15.9144 14.6024 16.0355 14.7775 16.0897 14.9761L16.1083 15.063C16.1431 15.2679 16.1067 15.478 16.0057 15.6577L15.9579 15.7329C15.8386 15.9033 15.6649 16.0266 15.4667 16.0835L15.3807 16.104C15.1479 16.1469 14.908 16.0958 14.7118 15.9634C14.6695 15.9336 14.6294 15.9009 14.5927 15.8647L14.4872 15.7417L11.5594 11.5542L15.745 14.481Z"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-amber-800"
+                    />
+                  </svg>
+                </div>
+                
+                {/* Button text */}
+                <span className="relative z-10 text-base font-medium tracking-wide text-white">Start Pomodoro</span>
+                
+                {/* Subtle pulse effect */}
+                <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
               </button>
+
+
             </div>
           </div>
 
@@ -592,30 +678,48 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-500 mt-1">Your most recent activities and tasks</p>
               </div>
               <button
-                className="px-5 py-[5px] flex flex-row gap-[5px] text-white font-lato bg-primary-default rounded-[10px] h-[40px] 
-                  hover:shadow-[0px_4px_10.9px_0px_rgba(0,_0,_0,_0.25)] transition-all duration-300 items-center justify-center"
+                className="relative px-6 py-2.5 flex flex-row gap-2 items-center justify-center rounded-xl h-[44px] font-lato font-medium text-white 
+                  bg-gradient-to-r from-primary-default to-primary-200 shadow-md hover:shadow-lg
+                  transform transition-all duration-300 hover:translate-y-[-1px] active:translate-y-0 active:scale-95 overflow-hidden group
+                  before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary-200 before:to-primary-default
+                  before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
                 onClick={() => {
                   setIsTaskModalOpen(true);
                   clearAllData();
                   setIsUpdateTask(false);
                 }}
               >
-                <svg
-                  width="25"
-                  height="25"
-                  viewBox="0 0 25 25"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249V5.74902Z"
-                    stroke="white"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-                New Task
+                {/* Animated ring effect */}
+                <span className="absolute inset-0 rounded-xl overflow-hidden">
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                </span>
+                
+                {/* Plus icon with subtle animation */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 25 25"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-300 group-hover:rotate-90"
+                  >
+                    <path
+                      d="M18.7501 12.499H5.25012M12.0001 5.74902V19.249"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-white"
+                    />
+                  </svg>
+                </div>
+                
+                {/* Button text with subtle tracking */}
+                <span className="relative z-10 text-base font-medium tracking-wide">New Task</span>
+                
+                {/* Subtle shine effect on hover */}
+                <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
               </button>
             </div>
 

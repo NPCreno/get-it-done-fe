@@ -23,7 +23,7 @@ export function TaskItem({
     };
   
     return (
-      <div className="flex flex-row w-full h-[42px] items-center justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5">
+      <div className="flex flex-row w-full h-[42px] items-center justify-between rounded-[10px] hover:bg-[#FAFAFA] cursor-pointer gap-5 pr-5 pl-5">
         <div className="flex flex-row gap-5 items-center">
           <div className="group w-6 h-6 relative">
             <input
