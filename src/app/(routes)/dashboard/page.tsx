@@ -258,7 +258,7 @@ export default function DashboardPage() {
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
       const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
-      
+
       if (fetchedTasks) {
         setTasks(fetchedTasks);
       } else {
@@ -324,7 +324,7 @@ export default function DashboardPage() {
       if (response.status === "success") {
         setIsLoading(false);
         setUpdateTaskDashboard(!updateTaskDashboard);
-        clearValueAndErrors();
+        clearAllData();
         setIsTaskModalOpen(false);
         setToastMessage({
           title: "Task Updated",
@@ -344,7 +344,7 @@ export default function DashboardPage() {
         }, 10000); // Toast display duration
       } else {
         setIsLoading(false);
-        clearValueAndErrors();
+        clearAllData();
         setIsTaskModalOpen(false);
         setToastMessage({
           title: response.message,
@@ -386,15 +386,6 @@ export default function DashboardPage() {
         }, 400); // Must match the toastOut animation duration
       }, 10000); // Toast display duration
     }
-  };
-
-  const clearValueAndErrors = () => {
-    setErrors({});
-    setFieldValue("title", "");
-    setFieldValue("description", "");
-    setFieldValue("status", "");
-    setFieldValue("priority", "");
-    setFieldValue("due_date", "");
   };
 
   useEffect(() => {
