@@ -15,7 +15,6 @@ interface ChartCardProps {
   delay: string;
   streakCount?: number;
   taskCompletionData?: ITaskCompletionTrendData[];
-  className?: string;
 }
 
 export default function ChartCard({
@@ -23,7 +22,6 @@ export default function ChartCard({
   delay,
   streakCount = 0, // Default to 0 if not provided
   taskCompletionData = [],
-  className = '',
 }: ChartCardProps) {
   // Generate more realistic heatmap data with weekly patterns
   const generateHeatmapData = () => {

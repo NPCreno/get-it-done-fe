@@ -510,8 +510,8 @@ export default function DashboardPage() {
                     }`}
                     onBlur={(e) => {
                       // Only collapse if clicking outside the search container
-                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
-                        !searchQuery && setIsSearchExpanded(false);
+                      if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node) && !searchQuery) {
+                        setIsSearchExpanded(false);
                       }
                     }}
                     value={searchQuery}
@@ -519,7 +519,9 @@ export default function DashboardPage() {
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') {
                         e.currentTarget.blur();
-                        !searchQuery && setIsSearchExpanded(false);
+                        if (!searchQuery) {
+                          setIsSearchExpanded(false);
+                        }
                       }
                     }}
                     autoFocus={isSearchExpanded}
@@ -667,7 +669,6 @@ export default function DashboardPage() {
                 header="Task Completion Trend"
                 delay="fade-in-left-delay-1"
                 taskCompletionData={taskCompletionData}
-                className="h-full border border-gray-100/80 hover:border-gray-200/80 transition-colors duration-300 rounded-2xl overflow-hidden"
               />
             </div>
             <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-amber-100/20">
@@ -675,7 +676,6 @@ export default function DashboardPage() {
                 header="Task Distribution by project"
                 delay="fade-in-left-delay-2"
                 streakCount={dashboardData?.streak_count || 0}
-                className="h-full border border-gray-100/80 hover:border-amber-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
               />
             </div>
             <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100/20">
@@ -683,7 +683,6 @@ export default function DashboardPage() {
                 header="Productivity Streak"
                 delay="fade-in-left-delay-3"
                 streakCount={dashboardData?.streak_count || 10}
-                className="h-full border border-gray-100/80 hover:border-blue-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
               />
             </div>
             <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-green-100/20">
@@ -691,7 +690,6 @@ export default function DashboardPage() {
                 header="Calendar Heat map"
                 delay="fade-in-left-delay-4"
                 streakCount={dashboardData?.streak_count || 0}
-                className="h-full border border-gray-100/80 hover:border-green-100/80 transition-colors duration-300 rounded-2xl overflow-hidden"
               />
             </div>
           </div>
