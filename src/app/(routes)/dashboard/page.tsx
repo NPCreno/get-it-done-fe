@@ -454,7 +454,7 @@ export default function DashboardPage() {
       )}
       <div className="main flex justify-center w-full h-full">
         {/* Main Page */}
-        <div className="inside max-w-[1440px] w-full mx-auto gap-6 md:gap-8 flex flex-col">
+        <div className="inside max-w-[1440px] w-full mx-auto gap-5 flex flex-col">
 
         {showLoader && (
           <div className={`transition-opacity duration-500 ${!pageLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
