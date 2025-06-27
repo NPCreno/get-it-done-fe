@@ -7,4 +7,6 @@ export interface IProject {
     color?: string;
     task_count?: number;
     completed_tasks?: number;
+    updatedAt?: string;
+    createdAt?: string;
   }
