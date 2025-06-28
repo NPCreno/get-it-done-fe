@@ -57,9 +57,7 @@ export default function ProjectCard({
   today.setHours(0, 0, 0, 0);
   
   const daysUntilDue = dueDate ? Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
-  const isDueSoon = dueDate && daysUntilDue !== null && daysUntilDue <= 3 && daysUntilDue >= 0;
   const isOverdue = dueDate && daysUntilDue !== null && daysUntilDue < 0;
-  const hasDueDate = dueDate && !isOverdue;
   const priority = project.priority || 'none';
   
   // Mock team members - replace with actual data
