@@ -49,7 +49,7 @@ export default function ProjectCard({
   const gradientClass = getGradientClass(projectColor);
   const textColor = getTextColor(projectColor);
   const progress = project.task_count 
-    ? Math.round(((project.completed_tasks ?? 0) / project.task_count) * 100) 
+    ? Math.round(((project.task_completed ?? 0) / project.task_count) * 100) 
     : 0;
   
   const hasDueDate = project.due_date && new Date(project.due_date) > new Date();
@@ -161,26 +161,56 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="mb-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Progress</span>
-          <span className="font-medium">{progress}%</span>
+      {/* Enhanced Progress Section */}
+      <div className="mb-5 relative">
+        {/* Enhanced Progress Bar */}
+        <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden shadow-inner">
+          <motion.div 
+            className={`h-full rounded-full relative overflow-hidden`}
+            style={{ 
+              width: `${progress}%`,
+              background: `linear-gradient(90deg, 
+                ${getComputedStyle(document.documentElement).getPropertyValue('--color-success-500') || '#10B981'}, 
+                ${getComputedStyle(document.documentElement).getPropertyValue('--color-success-400') || '#34D399'})`,
+              boxShadow: `0 0 15px ${getComputedStyle(document.documentElement).getPropertyValue('--color-success-400') || 'rgba(52, 211, 153, 0.7)'}`,
+              transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+          >
+            {/* Animated shine effect - only show when not complete */}
+            {progress < 100 && (
+              <motion.div 
+                className="absolute inset-0 bg-white/40"
+                initial={{ x: '-100%' }}
+                animate={{ x: '100%' }}
+                transition={{ 
+                  duration: 1.5, 
+                  repeat: Infinity, 
+                  repeatType: "loop",
+                  ease: "easeInOut"
+                }}
+              />
+            )}
+          </motion.div>
+          {/* Progress percentage text */}
+          <div className="absolute inset-0 flex items-center justify-end pr-2">
+            <span className="text-xs font-bold text-gray-800 dark:text-white mix-blend-overlay">
+              {progress}%
+            </span>
+          </div>
         </div>
-        <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden">
-          <div 
-            className={`h-full rounded-full ${textColor} bg-opacity-30`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-xs text-gray-500">
-            {project.completed_tasks ?? 0} of {project.task_count || 0} tasks
+        
+        <div className="flex justify-between mt-2">
+          <span className="text-xs font-medium text-gray-600">
+            {project.task_completed ?? 0} of {project.task_count || 0} tasks completed
           </span>
           <span className="text-xs text-gray-500">
             {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : ''}
           </span>
         </div>
+        {/* Completion celebration effect */}
       </div>
 
       {/* Footer */}
@@ -235,10 +265,6 @@ export default function ProjectCard({
                      before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary-200 before:to-primary-default
                      before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
           >
-            {/* Animated ring effect */}
-            <span className="absolute inset-0 rounded-xl overflow-hidden">
-              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </span>
             
             {/* Plus icon with subtle animation */}
             <div className="relative z-10 flex items-center justify-center">
