@@ -24,10 +24,11 @@ export default function SignupForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Handle input change to work with InputBox component
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    formik.setFieldValue(name, value);
+  // Handle input change for InputBox component
+  const handleInputChange = (fieldName: string) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    formik.setFieldValue(fieldName, e.target.value);
   };
 
   // Handle form submission
@@ -101,140 +102,87 @@ export default function SignupForm({
       <form className="space-y-4" onSubmit={formik.handleSubmit}>
         <div className="space-y-2">
           <div className="relative">
-            <InputBox
-              label="Username"
-              placeholder="Enter your username"
-              value={{ name: formik.values.username }}
-              onChange={handleInputChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.username ? formik.errors.username : undefined}
-              disabled={isLoading}
-            />
-            <input
-              type="hidden"
-              name="username"
-              value={formik.values.username}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
+              <InputBox
+                label="Username"
+                placeholder="Choose a username"
+                value={{ name: formik.values.username }}
+                onChange={handleInputChange('username')}
+                type="text"
+                onBlur={formik.handleBlur}
+                error={formik.touched.username ? formik.errors.username : undefined}
+                disabled={isLoading}
+                isLabelVisible={true}
+                customClass="w-full"
+              />
           </div>
-          <input
-            type="hidden"
-            name="username"
-            value={formik.values.username}
-            onChange={formik.handleChange}
-          />
         </div>
         
         <div className="space-y-2">
           <div className="relative">
-            <InputBox
-              label="Full Name"
-              placeholder="Enter your full name"
-              value={{ name: formik.values.fullname }}
-              onChange={handleInputChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.fullname ? formik.errors.fullname : undefined}
-              disabled={isLoading}
-            />
-            <input
-              type="hidden"
-              name="fullname"
-              value={formik.values.fullname}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
+              <InputBox
+                label="Full Name"
+                placeholder="Enter your full name"
+                value={{ name: formik.values.fullname }}
+                onChange={handleInputChange('fullname')}
+                type="text"
+                onBlur={formik.handleBlur}
+                error={formik.touched.fullname ? formik.errors.fullname : undefined}
+                disabled={isLoading}
+                isLabelVisible={true}
+                customClass="w-full"
+              />
           </div>
-          <input
-            type="hidden"
-            name="fullname"
-            value={formik.values.fullname}
-            onChange={formik.handleChange}
-          />
         </div>
         
         <div className="space-y-2">
           <div className="relative">
-            <InputBox
-              label="Email"
-              type="email"
-              placeholder="Enter your email"
-              value={{ name: formik.values.email }}
-              onChange={handleInputChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.email ? formik.errors.email : undefined}
-              disabled={isLoading}
-            />
-            <input
-              type="hidden"
-              name="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
+              <InputBox
+                label="Email"
+                placeholder="Enter your email"
+                value={{ name: formik.values.email }}
+                onChange={handleInputChange('email')}
+                type="email"
+                onBlur={formik.handleBlur}
+                error={formik.touched.email ? formik.errors.email : undefined}
+                disabled={isLoading}
+                isLabelVisible={true}
+                customClass="w-full"
+              />
           </div>
-          <input
-            type="hidden"
-            name="email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-          />
         </div>
         
         <div className="space-y-2">
           <div className="relative">
-            <InputBox
-              label="Password"
-              type="password"
-              placeholder="Create a password"
-              value={{ name: formik.values.password }}
-              onChange={handleInputChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.password ? formik.errors.password : undefined}
-              disabled={isLoading}
-            />
-            <input
-              type="hidden"
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
+              <InputBox
+                label="Password"
+                placeholder="Create a password"
+                value={{ name: formik.values.password }}
+                onChange={handleInputChange('password')}
+                type="password"
+                onBlur={formik.handleBlur}
+                error={formik.touched.password ? formik.errors.password : undefined}
+                disabled={isLoading}
+                isLabelVisible={true}
+                customClass="w-full"
+              />
           </div>
-          <input
-            type="hidden"
-            name="password"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-          />
         </div>
         
         <div className="space-y-2">
           <div className="relative">
-            <InputBox
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              value={{ name: formik.values.confirmPassword }}
-              onChange={handleInputChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}
-              disabled={isLoading}
-            />
-            <input
-              type="hidden"
-              name="confirmPassword"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
+              <InputBox
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                value={{ name: formik.values.confirmPassword }}
+                onChange={handleInputChange('confirmPassword')}
+                type="password"
+                onBlur={formik.handleBlur}
+                error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}
+                disabled={isLoading}
+                isLabelVisible={true}
+                customClass="w-full"
+              />
           </div>
-          <input
-            type="hidden"
-            name="confirmPassword"
-            value={formik.values.confirmPassword}
-            onChange={formik.handleChange}
-          />
         </div>
         
         <div className="grid gap-2">

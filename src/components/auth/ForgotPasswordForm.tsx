@@ -26,11 +26,16 @@ export default function ForgotPasswordForm({
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  // Handle input change to work with InputBox component
+  // Handle input change for InputBox component
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     formik.setFieldValue(name, value);
   };
+
+  // Create value object for InputBox
+  const getInputValue = (fieldName: string) => ({
+    name: formik.values[fieldName as keyof ForgotPasswordFormValues] as string,
+  });
 
   // Handle OTP change from OTPInput component
   const handleOtpComplete = (otp: string) => {
@@ -109,7 +114,7 @@ export default function ForgotPasswordForm({
                 label="Email Address"
                 type="email"
                 placeholder="Enter your email"
-                value={{ name: formik.values.email }}
+                value={getInputValue('email')}
                 onChange={handleInputChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched.email ? formik.errors.email : undefined}
@@ -159,7 +164,7 @@ export default function ForgotPasswordForm({
                 label="New Password"
                 type="password"
                 placeholder="Enter new password"
-                value={{ name: formik.values.newPassword }}
+                value={getInputValue('newPassword')}
                 onChange={handleInputChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched.newPassword ? formik.errors.newPassword : undefined}
@@ -179,7 +184,7 @@ export default function ForgotPasswordForm({
                 label="Confirm New Password"
                 type="password"
                 placeholder="Confirm new password"
-                value={{ name: formik.values.confirmPassword }}
+                value={getInputValue('confirmPassword')}
                 onChange={handleInputChange}
                 onBlur={formik.handleBlur}
                 error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}

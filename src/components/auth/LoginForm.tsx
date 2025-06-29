@@ -7,6 +7,7 @@ import { loginEmail, loginUsername } from "@/app/api/userRequests";
 import { Button } from "@/app/components/shadcn/button";
 import { Loader2 } from "lucide-react";
 import InputBox from "@/app/components/inputBox";
+import Cookies from 'js-cookie';
 
 interface LoginFormValues {
   usernameOrEmail: string;
@@ -31,41 +32,62 @@ export default function LoginForm({
     },
     validationSchema: loginSchema,
     onSubmit: async (values) => {
-      setIsLoading(true);
-      setError("");
-      
       try {
+        setIsLoading(true);
+        setError('');
+
         let response;
-        if (values.usernameOrEmail.includes("@")) {
-          response = await loginEmail(
-            values.usernameOrEmail,
-            values.password
-          );
+        if (values.usernameOrEmail.includes('@')) {
+          response = await loginEmail(values.usernameOrEmail, values.password);
         } else {
-          response = await loginUsername(
-            values.usernameOrEmail,
-            values.password
-          );
+          response = await loginUsername(values.usernameOrEmail, values.password);
         }
 
+        // The API returns { data, error } format
         if (response.error) {
-          setError(response.error.message || "An error occurred during login.");
-        } else {
-          router.push("/dashboard");
+          throw new Error(response.error || 'Login failed');
         }
-      } catch (error) {
-        setError("An unexpected error occurred. Please try again.");
-        console.error("Login error:", error);
+
+        // Store the access token in a cookie
+        if (response.data?.access_token) {
+          const cookieOptions = {
+            expires: values.rememberMe ? 30 : 1, // 30 days if remember me is checked, otherwise 1 day
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict' as const,
+            path: '/',
+          };
+          
+          Cookies.set('access_token', response.data.access_token, cookieOptions);
+          // Store the remember me preference
+          if (values.rememberMe) {
+            localStorage.setItem('rememberMe', 'true');
+          } else {
+            localStorage.removeItem('rememberMe');
+          }
+        }
+
+        // Redirect to dashboard
+        router.push('/dashboard');
+        router.refresh(); // Ensure the layout updates with the new auth state
+      } catch (error: any) {
+        setError(error.message || 'An error occurred during login');
+        console.error('Login error:', error);
       } finally {
         setIsLoading(false);
       }
     },
   });
 
-  // Handle input change to work with InputBox component
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    formik.setFieldValue(name, value);
+  // Handle input change for InputBox component
+  const handleInputChange = (fieldName: string) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    formik.setFieldValue(fieldName, e.target.value);
+  };
+  
+  // Handle checkbox change
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    formik.setFieldValue('rememberMe', e.target.checked);
   };
 
   return (
@@ -90,19 +112,13 @@ export default function LoginForm({
               label="Username or Email"
               placeholder="Enter your username or email"
               value={{ name: formik.values.usernameOrEmail }}
-              onChange={handleInputChange}
+              onChange={handleInputChange('usernameOrEmail')}
               type="text"
               onBlur={formik.handleBlur}
               error={formik.touched.usernameOrEmail ? formik.errors.usernameOrEmail : undefined}
               disabled={isLoading}
               isLabelVisible={true}
               customClass="w-full"
-            />
-            <input
-              type="hidden"
-              name="usernameOrEmail"
-              value={formik.values.usernameOrEmail}
-              onChange={formik.handleChange}
             />
           </div>
         </div>
@@ -128,19 +144,13 @@ export default function LoginForm({
               label="Password"
               placeholder="Enter your password"
               value={{ name: formik.values.password }}
-              onChange={handleInputChange}
+              onChange={handleInputChange('password')}
               type="password"
               onBlur={formik.handleBlur}
               error={formik.touched.password ? formik.errors.password : undefined}
               disabled={isLoading}
               isLabelVisible={false}
               customClass="w-full"
-            />
-            <input
-              type="hidden"
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
             />
           </div>
           
@@ -150,9 +160,9 @@ export default function LoginForm({
               id="rememberMe"
               name="rememberMe"
               checked={formik.values.rememberMe}
-              onChange={(e) => formik.setFieldValue("rememberMe", e.target.checked)}
+              onChange={handleCheckboxChange}
               disabled={isLoading}
-              className="h-4 w-4 rounded border-gray-300 text-primary-default focus:ring-primary-default"
+              className="h-4 w-4 text-primary-default focus:ring-primary-default border-gray-300 rounded"
             />
             <label
               htmlFor="rememberMe"

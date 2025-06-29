@@ -716,7 +716,7 @@ export default function DashboardPage() {
 
           <div className="w-full p-6 flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 fade-in-delay-2 flex-grow border border-gray-100">
             {/* Header - Fixed */}
-            <div className="flex flex-col sm:flex-row justify-between gap-4 pb-4 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between gap-4 border-gray-100">
               <div>
                 <h1 className="text-xl font-lato font-bold text-gray-800">
                   Recent Tasks
