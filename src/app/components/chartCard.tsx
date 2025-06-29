@@ -109,7 +109,7 @@ export default function ChartCard({
           return renderNoDataState();
         }
         return (
-          <div className="w-full h-full p-4">
+          <div className="w-full h-full">
             <ChartPieInteractive 
               data={taskDistributionData}
               title="Task Distribution"
