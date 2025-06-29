@@ -93,15 +93,13 @@ export default function ChartCard({
           </div>
         );
       case "Task Distribution by project":
-        if (!taskDistributionData || taskDistributionData.length === 0 || taskDistributionData.every(task => task.value === 0)) {
-          return renderNoDataState();
-        }
         return (
           <div className="w-full h-full">
             <ChartPieInteractive 
               data={taskDistributionData}
               title="Task Distribution"
               description="Completed tasks by project"
+              noData={!taskDistributionData || taskDistributionData.length === 0 || taskDistributionData.every(task => task.value === 0)}
             />
           </div>
         );

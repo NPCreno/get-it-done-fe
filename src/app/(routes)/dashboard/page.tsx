@@ -299,7 +299,7 @@ export default function DashboardPage() {
     };
   
     fetchTasks();
-  }, [user, updateTaskDashboard, showToast]);
+  }, [user, updateTaskDashboard, showToast, selectedMonth]);
 
   useEffect(() => {
   if (isTaskModalOpen && !isUpdateTask) {
