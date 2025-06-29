@@ -53,8 +53,8 @@ export default function ForgotPassword({
       {/* Header */}
       <div className="flex flex-col items-center gap-2">
         <h1 className="font-lato text-[40px] text-primary-default text-center font-bold">
-          {step === 1 && "Forgot Password"}
-          {step === 2 && "OTP Verification"}
+          {step === 1 && "Reset your password"}
+          {step === 2 && "Verify OTP"}
         </h1>
         <span className="font-lato text-lg text-primary-default text-center font-normal">
           {step === 1 && "Please enter your email to continue"}

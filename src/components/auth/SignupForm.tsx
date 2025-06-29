@@ -1,0 +1,264 @@
+"use client";
+import React, { useState } from "react";
+import { useFormik } from "formik";
+import { signUpSchema } from "@/app/schemas/signUpSchema";
+import { createUser, loginEmail } from "@/app/api/userRequests";
+import InputBox from "@/app/components/inputBox";
+import { useRouter } from "next/navigation";
+
+interface SignupFormValues {
+  username: string;
+  fullname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  tier: string;
+}
+
+export default function SignupForm({
+  onChangeView,
+}: {
+  onChangeView: (view: "login" | "signedUp") => void;
+}) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Handle input change to work with InputBox component
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    formik.setFieldValue(name, value);
+  };
+
+  // Handle form submission
+  const handleSubmit = async (values: SignupFormValues) => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      // Create user payload
+      const userPayload = {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        full_name: values.fullname
+      };
+
+      // Create user
+      const signupResponse = await createUser(userPayload);
+
+      if (signupResponse.error) {
+        throw new Error(signupResponse.error.message || "Failed to create account");
+      }
+
+      // Log in the user
+      const loginResponse = await loginEmail(values.email, values.password);
+      
+      if (loginResponse.error) {
+        // User created but login failed - redirect to login page
+        onChangeView("login");
+        return;
+      }
+
+      // Redirect to dashboard on successful signup and login
+      router.push("/dashboard");
+    } catch (error: any) {
+      setError(error.message || "An error occurred during signup. Please try again.");
+      console.error("Signup error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formik = useFormik<SignupFormValues>({
+    initialValues: {
+      username: "",
+      fullname: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      tier: "free",
+    },
+    validationSchema: signUpSchema,
+    onSubmit: handleSubmit,
+  });
+
+  return (
+    <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+      <div className="space-y-2 text-center">
+        <h2 className="text-3xl font-bold text-primary-default">Create an account</h2>
+        <p className="text-gray-600">
+          Enter your information to create an account
+        </p>
+      </div>
+      
+      {error && (
+        <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+          {error}
+        </div>
+      )}
+      
+      <form className="space-y-4" onSubmit={formik.handleSubmit}>
+        <div className="space-y-2">
+          <div className="relative">
+            <InputBox
+              label="Username"
+              placeholder="Enter your username"
+              value={{ name: formik.values.username }}
+              onChange={handleInputChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.username ? formik.errors.username : undefined}
+              disabled={isLoading}
+            />
+            <input
+              type="hidden"
+              name="username"
+              value={formik.values.username}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </div>
+          <input
+            type="hidden"
+            name="username"
+            value={formik.values.username}
+            onChange={formik.handleChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="relative">
+            <InputBox
+              label="Full Name"
+              placeholder="Enter your full name"
+              value={{ name: formik.values.fullname }}
+              onChange={handleInputChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.fullname ? formik.errors.fullname : undefined}
+              disabled={isLoading}
+            />
+            <input
+              type="hidden"
+              name="fullname"
+              value={formik.values.fullname}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </div>
+          <input
+            type="hidden"
+            name="fullname"
+            value={formik.values.fullname}
+            onChange={formik.handleChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="relative">
+            <InputBox
+              label="Email"
+              type="email"
+              placeholder="Enter your email"
+              value={{ name: formik.values.email }}
+              onChange={handleInputChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email ? formik.errors.email : undefined}
+              disabled={isLoading}
+            />
+            <input
+              type="hidden"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </div>
+          <input
+            type="hidden"
+            name="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="relative">
+            <InputBox
+              label="Password"
+              type="password"
+              placeholder="Create a password"
+              value={{ name: formik.values.password }}
+              onChange={handleInputChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password ? formik.errors.password : undefined}
+              disabled={isLoading}
+            />
+            <input
+              type="hidden"
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </div>
+          <input
+            type="hidden"
+            name="password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <div className="relative">
+            <InputBox
+              label="Confirm Password"
+              type="password"
+              placeholder="Confirm your password"
+              value={{ name: formik.values.confirmPassword }}
+              onChange={handleInputChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.confirmPassword ? formik.errors.confirmPassword : undefined}
+              disabled={isLoading}
+            />
+            <input
+              type="hidden"
+              name="confirmPassword"
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </div>
+          <input
+            type="hidden"
+            name="confirmPassword"
+            value={formik.values.confirmPassword}
+            onChange={formik.handleChange}
+          />
+        </div>
+        
+        <div className="grid gap-2">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-default hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-default/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? "Creating account..." : "Create account"}
+          </button>
+        </div>
+      </form>
+      
+      <div className="text-sm text-center text-gray-600 dark:text-gray-400">
+        Already have an account?{" "}
+        <button
+          type="button"
+          onClick={() => onChangeView("login")}
+          className="font-medium text-primary-default hover:text-primary-hover transition-colors"
+          disabled={isLoading}
+        >
+          Sign in
+        </button>
+      </div>
+    </div>
+  );
+}
