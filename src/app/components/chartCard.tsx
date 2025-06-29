@@ -55,16 +55,6 @@ export default function ChartCard({
 
   const heatmapData = generateHeatmapData();
 
-  const [isLoading, setIsLoading] = React.useState(false);
-  
-  const renderLoadingState = () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="w-16 h-4 bg-gray-200 rounded mb-2"></div>
-        <div className="w-24 h-4 bg-gray-200 rounded"></div>
-      </div>
-    </div>
-  );
 
   const renderNoDataState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
@@ -74,7 +64,6 @@ export default function ChartCard({
   );
 
   const renderChart = () => {
-    if (isLoading) return renderLoadingState();
     
     switch (header) {
       case "Task Completion Trend":
@@ -145,15 +134,9 @@ export default function ChartCard({
       aria-label={`${header} chart`}
     >
       <div className="w-full h-full bg-background rounded-[10px] overflow-hidden">
-        {isLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-primary-500"></div>
-          </div>
-        ) : (
-          <div className="h-full transform transition-all duration-300 group-hover:scale-[1.01]">
-            {renderChart()}
-          </div>
-        )}
+        <div className="h-full transform transition-all duration-300 group-hover:scale-[1.01]">
+          {renderChart()}
+        </div>
       </div>
       
       {/* Subtle hover effects */}
