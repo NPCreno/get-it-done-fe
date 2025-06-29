@@ -10,6 +10,7 @@ import { CardTitle } from "./shadcn/card";
 import StreakCounter from "./streakCounter";
 import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
 import { ITaskDistribution } from "../interface/ITaskDistribution";
+import { Database } from 'lucide-react';
 
 interface ChartCardProps {
   header: string;
@@ -26,7 +27,6 @@ export default function ChartCard({
   taskCompletionData = [],
   taskDistributionData = [],
 }: ChartCardProps) {
-  // debugger
   // Generate more realistic heatmap data with weekly patterns
   const generateHeatmapData = () => {
     const data = [];
@@ -55,12 +55,6 @@ export default function ChartCard({
 
   const heatmapData = generateHeatmapData();
 
-  // // Task completion trend data (hardcoded for now)
-  // const taskCompletionData = [
-  //   { day: "Mon", completed: 8 },
-  //   { day: "Tue", completed: 10 },
-  //   { day: "Wed", completed: 6 },
-  const [selectedMonth, setSelectedMonth] = React.useState('june'); // Default to current month
   const [isLoading, setIsLoading] = React.useState(false);
   
   const renderLoadingState = () => (
@@ -73,14 +67,8 @@ export default function ChartCard({
   );
 
   const renderNoDataState = () => (
-    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center">
-      <Image
-        src={"/svgs/no-data.svg"}
-        height={80}
-        width={80}
-        alt="No data available"
-        className="opacity-50 mb-2"
-      />
+    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
+      <Database className="h-16 w-16 text-gray-400 mb-2" />
       <p className="text-gray-500 text-sm">No data available</p>
     </div>
   );
@@ -105,7 +93,7 @@ export default function ChartCard({
           </div>
         );
       case "Task Distribution by project":
-        if (!taskDistributionData || taskDistributionData.length === 0) {
+        if (!taskDistributionData || taskDistributionData.length === 0 || taskDistributionData.every(task => task.value === 0)) {
           return renderNoDataState();
         }
         return (
