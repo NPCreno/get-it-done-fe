@@ -9,12 +9,14 @@ import { subDays, format } from 'date-fns';
 import { CardTitle } from "./shadcn/card";
 import StreakCounter from "./streakCounter";
 import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
+import { ITaskDistribution } from "../interface/ITaskDistribution";
 
 interface ChartCardProps {
   header: string;
   delay: string;
   streakCount?: number;
   taskCompletionData?: ITaskCompletionTrendData[];
+  taskDistributionData?: ITaskDistribution[];
 }
 
 export default function ChartCard({
@@ -22,7 +24,9 @@ export default function ChartCard({
   delay,
   streakCount = 0, // Default to 0 if not provided
   taskCompletionData = [],
+  taskDistributionData = [],
 }: ChartCardProps) {
+  // debugger
   // Generate more realistic heatmap data with weekly patterns
   const generateHeatmapData = () => {
     const data = [];
@@ -56,71 +60,9 @@ export default function ChartCard({
   //   { day: "Mon", completed: 8 },
   //   { day: "Tue", completed: 10 },
   //   { day: "Wed", completed: 6 },
-  //   { day: "Thu", completed: 9 },
-  //   { day: "Fri", completed: 7 },
-  //   { day: "Sat", completed: 5 },
-  //   { day: "Sun", completed: 4 },
-  // ];
-
-  // Sample project data by month with enhanced contrast pastel colors
-  const projectDataByMonth: Record<string, Array<{ title: string; value: number; fill: string }>> = {
-    january: [
-      { title: "Project Alpha", value: 20, fill: "#8CD9C2" }, // Darker mint green
-      { title: "Project Beta", value: 30, fill: "#A5B3E6" },  // Darker periwinkle
-      { title: "Project Gamma", value: 15, fill: "#FFC6A5" }, // Darker peach
-      { title: "Project Delta", value: 35, fill: "#C6E0A5" }  // Darker tea green
-    ],
-    february: [
-      { title: "Project Alpha", value: 25, fill: "#FF9E9A" }, // Darker melon
-      { title: "Project Beta", value: 35, fill: "#8CD9C2" },  // Darker mint green
-      { title: "Project Gamma", value: 20, fill: "#A5B3E6" }, // Darker periwinkle
-      { title: "Project Delta", value: 40, fill: "#FFC6A5" }  // Darker peach
-    ],
-    march: [
-      { title: "Project Alpha", value: 30, fill: "#C6E0A5" }, // Darker tea green
-      { title: "Project Beta", value: 25, fill: "#FF9E9A" },  // Darker melon
-      { title: "Project Gamma", value: 25, fill: "#8CD9C2" }, // Darker mint green
-      { title: "Project Delta", value: 20, fill: "#A5B3E6" }  // Darker periwinkle
-    ],
-    april: [
-      { title: "Project Alpha", value: 15, fill: "#FFC6A5" }, // Darker peach
-      { title: "Project Beta", value: 40, fill: "#C6E0A5" },  // Darker tea green
-      { title: "Project Gamma", value: 30, fill: "#FF9E9A" }, // Darker melon
-      { title: "Project Delta", value: 25, fill: "#8CD9C2" }  // Darker mint green
-    ],
-    may: [
-      { title: "Project Alpha", value: 20, fill: "#A5B3E6" }, // Darker periwinkle
-      { title: "Project Beta", value: 25, fill: "#FFC6A5" },  // Darker peach
-      { title: "Project Gamma", value: 35, fill: "#C6E0A5" }, // Darker tea green
-      { title: "Project Delta", value: 30, fill: "#FF9E9A" }  // Darker melon
-    ],
-    june: [
-      { title: "Project Alpha", value: 20, fill: "#8CD9C2" }, // Darker mint green
-      { title: "Project Beta", value: 25, fill: "#A5B3E6" },  // Darker periwinkle
-      { title: "Project Gamma", value: 35, fill: "#FFC6A5" }, // Darker peach
-      { title: "Project Delta", value: 30, fill: "#C6E0A5" }  // Darker tea green
-    ]
-  };
-
   const [selectedMonth, setSelectedMonth] = React.useState('june'); // Default to current month
   const [isLoading, setIsLoading] = React.useState(false);
   
-  const handleMonthChange = (month: string) => {
-    setIsLoading(true);
-    // Simulate data loading
-    setTimeout(() => {
-      setSelectedMonth(month);
-      setIsLoading(false);
-    }, 300);
-  };
-
-  const taskDistributionData = {
-    data: projectDataByMonth[selectedMonth] || [],
-    title: "Task Distribution",
-    description: `Completed Tasks by project (${selectedMonth.charAt(0).toUpperCase() + selectedMonth.slice(1)})`
-  };
-
-
   const renderLoadingState = () => (
     <div className="w-full h-full flex items-center justify-center">
       <div className="animate-pulse flex flex-col items-center">
@@ -163,14 +105,15 @@ export default function ChartCard({
           </div>
         );
       case "Task Distribution by project":
+        if (!taskDistributionData || taskDistributionData.length === 0) {
+          return renderNoDataState();
+        }
         return (
-          <div className="w-full h-full">
+          <div className="w-full h-full p-4">
             <ChartPieInteractive 
-              data={taskDistributionData.data}
-              title={taskDistributionData.title}
-              description={taskDistributionData.description}
-              selectedMonth={selectedMonth}
-              onMonthChange={handleMonthChange}
+              data={taskDistributionData}
+              title="Task Distribution"
+              description="Completed tasks by project"
             />
           </div>
         );

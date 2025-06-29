@@ -13,6 +13,7 @@ import {
   updateTaskApi,
   getDashboardData,
   getTaskCompletionTrend,
+  getTaskDistributionData,
 } from "@/app/api/taskRequests";
 import {getProjectsForUser} from "@/app/api/projectsRequests";
 import { getUser } from "@/app/api/userRequests";
@@ -31,9 +32,14 @@ import { ITaskCompletionTrendData } from "@/app/interface/ITaskCompletionTrendDa
 import { TaskItem } from "@/app/components/taskItem";
 import { ITaskFormErrors } from "@/app/interface/forms/ITaskFormErrors";
 import { ITaskFormValues } from "@/app/interface/forms/ITaskFormValues";
+import { ITaskDistribution } from "@/app/interface/ITaskDistribution";
 
 export default function DashboardPage() {
-  const { selectedTaskData } = useFormState();
+  const { 
+    selectedTaskData, 
+    selectedMonth, 
+    selectedYear, 
+  } = useFormState();
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
@@ -57,6 +63,7 @@ export default function DashboardPage() {
   const [showLoader, setShowLoader] = useState(true);
   const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
   const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
+  const [taskDistributionData, setTaskDistributionData] = useState<ITaskDistribution[]>([]);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -259,6 +266,7 @@ export default function DashboardPage() {
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
       const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
+      const fetchedTaskDistributionData = await getTaskDistributionData(user.user_id, selectedMonth, selectedYear);
 
       if (fetchedTasks) {
         setTasks(fetchedTasks);
@@ -276,6 +284,12 @@ export default function DashboardPage() {
         setTaskCompletionData(fetchedTaskTrendData.data)
       }else{
         setTaskCompletionData([])
+      }
+
+      if(fetchedTaskDistributionData.status === "success"){
+        setTaskDistributionData(fetchedTaskDistributionData.data)
+      }else{
+        setTaskDistributionData([])
       }
 
       if (isFirstLoad.current) {
@@ -675,7 +689,7 @@ export default function DashboardPage() {
               <ChartCard
                 header="Task Distribution by project"
                 delay="fade-in-left-delay-2"
-                streakCount={dashboardData?.streak_count || 0}
+                taskDistributionData={taskDistributionData}
               />
             </div>
             <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100/20">

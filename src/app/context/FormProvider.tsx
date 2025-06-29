@@ -25,6 +25,10 @@ type UniversalStateType = {
   setSidebarWidth: React.Dispatch<React.SetStateAction<number>>;
   selectedTaskData: ITask | null;
   setSelectedTaskData: React.Dispatch<React.SetStateAction<ITask | null>>;
+  selectedMonth: string;
+  setSelectedMonth: React.Dispatch<React.SetStateAction<string>>;
+  selectedYear: string;
+  setSelectedYear: React.Dispatch<React.SetStateAction<string>>;
 };
 
 // Create the context
@@ -44,6 +48,9 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(60);
   const [selectedTaskData, setSelectedTaskData] = useState<ITask | null>(null);
+  // Initialize with current month (1-12) and year (e.g., 2025)
+  const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
 
   // Mobile sidebar actions
   const toggleMobileSidebar = () => {
@@ -71,6 +78,10 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setSidebarWidth,
         selectedTaskData,
         setSelectedTaskData,
+        selectedMonth,
+        setSelectedMonth,
+        selectedYear,
+        setSelectedYear,
       }}
     >
       {children}

@@ -186,3 +186,30 @@ export const getTaskCompletionTrend= async (userId: string, startDate: string, e
     throw err;
   }
 };
+
+export const getTaskDistributionData= async (userId: string, month: string, year: string) => {
+  try {
+    const token = getAccessToken();
+    let data;
+    const response = await fetch(`${apiUrl}/tasks/task-distribution/${userId}?month=${month}&year=${year}`, 
+        { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+
+    });
+    if (response.ok) {
+      data = await response.json();
+    }
+    else{
+      data = {}
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching dashboard data:', err);
+    throw err;
+  }
+};
