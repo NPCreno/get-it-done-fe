@@ -98,7 +98,8 @@ export const getTasksByUser= async (userId: string, startDate: string, endDate: 
       data = await response.json();
     }
     else{
-      data = []
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
@@ -150,7 +151,8 @@ export const getDashboardData= async (userId: string, startDate: string, endDate
       data = await response.json();
     }
     else{
-      data = {}
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
@@ -177,7 +179,8 @@ export const getTaskCompletionTrend= async (userId: string, startDate: string, e
       data = await response.json();
     }
     else{
-      data = {}
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
@@ -203,8 +206,9 @@ export const getTaskDistributionData= async (userId: string, month: string, year
     if (response.ok) {
       data = await response.json();
     }
-    else{
-      data = {}
+    else {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
