@@ -791,7 +791,7 @@ export default function DashboardPage() {
         {(tasks.length === 0 && !pageLoading) &&(
           <>
             <div className="w-full h-full flex items-center justify-center py-16 px-4">
-              <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
+            <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
                 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
                 <path d="M87.5 50.0093C87.5 29.3062 70.7031 12.5093 50 12.5093C29.2969 12.5093 12.5 29.3062 12.5 50.0093C12.5 70.7124 29.2969 87.5093 50 87.5093C70.7031 87.5093 87.5 70.7124 87.5 50.0093Z" stroke="#FEAD03" stroke-width="7" stroke-miterlimit="10"/>
                 <g filter="url(#filter0_d_1156_894)">

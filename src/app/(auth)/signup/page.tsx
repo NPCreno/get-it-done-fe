@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import SignupForm from "@/components/auth/SignupForm";
+import SignupForm from "@/app/components/auth/SignupForm";
 import { supabase } from "@/app/lib/supabase";
 
 export default function SignupPage() {
