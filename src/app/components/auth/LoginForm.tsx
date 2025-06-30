@@ -69,9 +69,11 @@ export default function LoginForm({
         // Redirect to dashboard
         router.push('/dashboard');
         router.refresh(); // Ensure the layout updates with the new auth state
-      } catch (error: any) {
-        setError(error.message || 'An error occurred during login');
-        console.error('Login error:', error);
+      } catch (error) {
+        console.error("Login error:", error);
+        if (error instanceof Error) {
+          setError(error.message || "An error occurred during login");
+        } 
       } finally {
         setIsLoading(false);
       }
@@ -190,7 +192,7 @@ export default function LoginForm({
       </form>
       
       <div className="text-sm text-center text-gray-600 dark:text-gray-400">
-        Don't have an account?{" "}
+        Don&apos;t have an account?{" "}
         <button
           type="button"
           onClick={() => onChangeView("signup")}

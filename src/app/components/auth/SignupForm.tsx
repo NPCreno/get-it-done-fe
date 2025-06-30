@@ -4,7 +4,6 @@ import { useFormik } from "formik";
 import { signUpSchema } from "@/app/schemas/signUpSchema";
 import { createUser, loginEmail } from "@/app/api/userRequests";
 import InputBox from "@/app/components/inputBox";
-import { useRouter } from "next/navigation";
 
 interface SignupFormValues {
   username: string;
@@ -20,7 +19,6 @@ export default function SignupForm({
 }: {
   onChangeView: (view: "login" | "signedUp") => void;
 }) {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,10 +58,12 @@ export default function SignupForm({
         onChangeView("signedUp");
       }
       
-    } catch (error: any) {
-      setError(error.message || "An error occurred during signup. Please try again.");
+    } catch (error) {
       console.error("Signup error:", error);
-    } finally {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred during signup. Please try again.");
+      } 
+    }finally {
       setIsLoading(false);
     }
   };
@@ -81,31 +81,6 @@ export default function SignupForm({
     onSubmit: handleSubmit,
   });
 
-    const autoLogin = async () => {
-      const { email, password } = formik.values;
-      const { data } = await loginEmail(email, password);
-  
-      if (data) {
-        document.cookie = `access_token=${data.access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
-        onChangeView("signedUp");
-      }
-    }
-  
-    const signUp = async (values: SignupFormValues) => {
-      try {
-        const { confirmPassword, ...payload } = values; // Remove confirmPassword value in payload
-        console.log("confirmPassword:", confirmPassword) //for linting purposes
-        const response = await createUser(payload);
-        if (response?.error) {
-          console.error("Error:", response.error);
-            } else {
-              await autoLogin();
-            }
-          }
-      catch (error) {
-        console.log("Signup Error:", error);
-      }
-    } 
 
   return (
     <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">

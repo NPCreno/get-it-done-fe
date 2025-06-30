@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import { forgotPasswordSchema } from "@/app/schemas/forgotPasswordSchema";
 import OTPInput from "@/app/components/OTPinput";
-import { useRouter } from "next/navigation";
 import InputBox from "@/app/components/inputBox";
-import { Button } from "@/app/components/shadcn/button";
 import { Loader2 } from "lucide-react";
 
 interface ForgotPasswordFormValues {
@@ -24,7 +22,6 @@ export default function ForgotPasswordForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const router = useRouter();
 
   // Handle input change for InputBox component
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -72,9 +69,11 @@ export default function ForgotPasswordForm({
             onChangeView("login");
           }, 2000);
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error("Forgot password error:", error);
-        setError(error.message || "An error occurred. Please try again.");
+        if (error instanceof Error) {
+          setError(error.message || "An error occurred. Please try again.");
+        } 
       } finally {
         setIsLoading(false);
       }
