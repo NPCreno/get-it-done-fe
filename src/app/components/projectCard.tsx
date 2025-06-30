@@ -49,10 +49,15 @@ export default function ProjectCard({
   const gradientClass = getGradientClass(projectColor);
   const textColor = getTextColor(projectColor);
   const progress = project.task_count 
-    ? Math.round(((project.completed_tasks ?? 0) / project.task_count) * 100) 
+    ? Math.round(((project.task_completed ?? 0) / project.task_count) * 100) 
     : 0;
   
-  const hasDueDate = project.due_date && new Date(project.due_date) > new Date();
+  const dueDate = project.due_date ? new Date(project.due_date) : null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const daysUntilDue = dueDate ? Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
+  const isOverdue = dueDate && daysUntilDue !== null && daysUntilDue < 0;
   const priority = project.priority || 'none';
   
   // Mock team members - replace with actual data
@@ -69,8 +74,34 @@ export default function ProjectCard({
       onClick={onClick}
       className={`group relative p-5 rounded-2xl bg-gradient-to-br ${gradientClass} 
         border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 
-        cursor-pointer overflow-hidden hover:shadow-${projectColor}-100/30`}
+        cursor-pointer overflow-hidden relative ${
+          progress >= 100 
+            ? 'shadow-[0_0_20px_5px_rgba(52,211,153,0.3)]' 
+            : progress >= 80 
+              ? 'shadow-[0_0_15px_3px_rgba(52,211,153,0.2)]' 
+              : ''
+        }`}
     >
+      {/* Glow effect for completed projects */}
+      {progress >= 80 && (
+        <motion.div 
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ 
+            opacity: progress >= 100 ? 0.3 : progress >= 90 ? 0.2 : 0.1,
+            boxShadow: progress >= 100 
+              ? '0 0 40px 20px rgba(52, 211, 153, 0.5)'
+              : progress >= 90 
+                ? '0 0 30px 10px rgba(52, 211, 153, 0.3)'
+                : '0 0 20px 5px rgba(52, 211, 153, 0.2)'
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: progress >= 100 ? Infinity : 0,
+            repeatType: 'reverse'
+          }}
+        />
+      )}
       {/* Animated gradient overlay on hover */}
       <motion.div 
         className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-500"
@@ -161,21 +192,16 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Completion Status */}
       <div className="mb-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Progress</span>
-          <span className="font-medium">{progress}%</span>
-        </div>
-        <div className="w-full bg-white/50 rounded-full h-2 overflow-hidden">
-          <div 
-            className={`h-full rounded-full ${textColor} bg-opacity-30`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-xs text-gray-500">
-            {project.completed_tasks ?? 0} of {project.task_count || 0} tasks
+        <div className="flex justify-between items-center">
+          <span className="text-sm font-medium text-gray-600">
+            {project.task_completed ?? 0} of {project.task_count || 0} tasks completed
+            {progress >= 100 && (
+              <span className="ml-2 px-2 py-0.5 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                Completed!
+              </span>
+            )}
           </span>
           <span className="text-xs text-gray-500">
             {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : ''}
@@ -235,10 +261,6 @@ export default function ProjectCard({
                      before:absolute before:inset-0 before:bg-gradient-to-r before:from-primary-200 before:to-primary-default
                      before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
           >
-            {/* Animated ring effect */}
-            <span className="absolute inset-0 rounded-xl overflow-hidden">
-              <span className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </span>
             
             {/* Plus icon with subtle animation */}
             <div className="relative z-10 flex items-center justify-center">
@@ -268,16 +290,36 @@ export default function ProjectCard({
             <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></span>
           </motion.button>
           
-          {hasDueDate && (
+          {dueDate && (
             <motion.div 
-              className="flex items-center text-xs bg-white/90 px-3 py-1.5 rounded-xl text-gray-800 border border-white/30 shadow-sm"
+              className={`flex items-center text-xs px-3 py-1.5 rounded-xl border shadow-sm ${
+                isOverdue || daysUntilDue === 0
+                  ? 'bg-error-100 text-error-700 border-error-200' 
+                  : daysUntilDue === 1
+                    ? 'bg-error-100 text-error-700 border-error-200'
+                    : daysUntilDue === 3
+                      ? 'bg-accent-100 text-accent-700 border-accent-200'
+                      : 'bg-white/90 text-gray-800 border-white/30'
+              }`}
               whileHover={{ y: -1 }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mr-1.5 text-current" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" 
-                  stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg 
+                width="14" 
+                height="14" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                className="mr-1.5" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" 
+                  stroke="currentColor" 
+                  strokeWidth="1.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
               </svg>
-              {new Date(project.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </motion.div>
           )}
         </motion.div>

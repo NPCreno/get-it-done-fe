@@ -1,5 +1,4 @@
 "use client"
-
 import * as React from "react"
 import { Label, Pie, PieChart, Sector } from "recharts"
 import { PieSectorDataItem } from "recharts/types/polar/Pie"
@@ -25,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/shadcn/select"
+import { useFormState } from "@/app/context/FormProvider"
+import { Database } from "lucide-react"
 
 export interface PieChartData {
   title: string;
@@ -71,29 +72,30 @@ interface ChartPieInteractiveProps {
   selectedMonth?: string;
   onMonthChange?: (month: string) => void;
   months?: {value: string; label: string}[];
+  noData?: boolean;
 }
 
 const getMonthsUntilCurrent = () => {
   const months = [
-    { value: 'january', label: 'January' },
-    { value: 'february', label: 'February' },
-    { value: 'march', label: 'March' },
-    { value: 'april', label: 'April' },
-    { value: 'may', label: 'May' },
-    { value: 'june', label: 'June' },
-    { value: 'july', label: 'July' },
-    { value: 'august', label: 'August' },
-    { value: 'september', label: 'September' },
-    { value: 'october', label: 'October' },
-    { value: 'november', label: 'November' },
-    { value: 'december', label: 'December' }
+    { value: '1', label: 'January' },
+    { value: '2', label: 'February' },
+    { value: '3', label: 'March' },
+    { value: '4', label: 'April' },
+    { value: '5', label: 'May' },
+    { value: '6', label: 'June' },
+    { value: '7', label: 'July' },
+    { value: '8', label: 'August' },
+    { value: '9', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' }
   ];
   
   const currentDate = new Date();
-  const currentMonth = currentDate.toLocaleString('default', { month: 'long' }).toLowerCase();
+  const currentMonth = (currentDate.getMonth() + 1).toString(); // Get current month as 1-12 string
   
   // Include all months up to and including the current month
-  return months.slice(0, months.findIndex(m => m.value === currentMonth) + 1);
+  return months.slice(0, months.findIndex(m => m.value === currentMonth) + 1 || months.length);
 };
 
 const defaultMonths = getMonthsUntilCurrent();
@@ -102,15 +104,27 @@ export function ChartPieInteractive({
   data,
   title = "Project Distribution",
   description = "Tasks by project",
-  selectedMonth = defaultMonths[0].value,
+  selectedMonth: propSelectedMonth,
   onMonthChange,
   months = defaultMonths,
+  noData,
 }: ChartPieInteractiveProps) {
   const id = "pie-interactive";
+  const { selectedMonth: contextMonth, setSelectedMonth } = useFormState();
   
-  const handleMonthChange = (month: string) => {
+  // Use prop if provided, otherwise use context, otherwise default to current month
+  const selectedMonth = propSelectedMonth || contextMonth || (new Date().getMonth() + 1).toString();
+  
+  const handleMonthChange = (newMonth: string) => {
+    const monthNumber = parseInt(newMonth, 10);
+    if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) return;
+    
+    // Update the context
+    setSelectedMonth(newMonth);
+    
+    // Call the parent's onChange if provided
     if (onMonthChange) {
-      onMonthChange(month);
+      onMonthChange(newMonth);
     }
   };
 
@@ -150,6 +164,13 @@ export function ChartPieInteractive({
           </SelectContent>
         </Select>
       </CardHeader>
+      {noData && (
+        <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
+          <Database className="h-16 w-16 text-gray-400 mb-2" />
+          <p className="text-gray-500 text-sm">No data available</p>
+        </div>
+      )}
+      {!noData && (
       <CardContent className="px-4 pt-0 pb-2 flex-1 flex items-center">
         <ChartContainer
           id={id}
@@ -214,7 +235,8 @@ export function ChartPieInteractive({
             </Pie>
           </PieChart>
         </ChartContainer>
-      </CardContent>
+      </CardContent>)}
     </Card>
+    
   )
 }

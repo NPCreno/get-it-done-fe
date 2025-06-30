@@ -98,7 +98,8 @@ export const getTasksByUser= async (userId: string, startDate: string, endDate: 
       data = await response.json();
     }
     else{
-      data = []
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
@@ -150,7 +151,8 @@ export const getDashboardData= async (userId: string, startDate: string, endDate
       data = await response.json();
     }
     else{
-      data = {}
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;
@@ -177,7 +179,36 @@ export const getTaskCompletionTrend= async (userId: string, startDate: string, e
       data = await response.json();
     }
     else{
-      data = {}
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching dashboard data:', err);
+    throw err;
+  }
+};
+
+export const getTaskDistributionData= async (userId: string, month: string, year: string) => {
+  try {
+    const token = getAccessToken();
+    let data;
+    const response = await fetch(`${apiUrl}/tasks/task-distribution/${userId}?month=${month}&year=${year}`, 
+        { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+
+    });
+    if (response.ok) {
+      data = await response.json();
+    }
+    else {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
     }
 
     return data;

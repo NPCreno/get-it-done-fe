@@ -1,53 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { base64UrlDecode } from "./app/utils/utils";
 
+const publicRoutes = ["/login", "/signup", "/forgot-password"];
+const protectedRoutes = ["/dashboard", "/projects", "/notifications", "/profile-settings"];
+
 export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
   const token = req.cookies.get("access_token")?.value;
 
-  const isProtectedRoute = [
-    "/dashboard",
-    "/projects",
-    "/notifications",
-    "/profileSettings",
-  ].some((path) => req.nextUrl.pathname.startsWith(path));
+  // Handle public routes - allow access regardless of auth state
+  if (publicRoutes.some(route => pathname.startsWith(route))) {
+    if (token) {
+      // If user is logged in and tries to access auth pages, redirect to dashboard
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    return NextResponse.next();
+  }
 
-  const isRootRoute = req.nextUrl.pathname === "/";
+  // Handle protected routes
+  if (protectedRoutes.some(route => pathname.startsWith(route)) || pathname === "/") {
+    if (!token) {
+      // Redirect to login if no token
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
 
-  if (token) {
     try {
+      // Verify token is valid
       const [, payload] = token.split(".");
       const decoded = JSON.parse(base64UrlDecode(payload));
       const exp = decoded.exp * 1000;
 
-      console.log("Token exp:", new Date(exp).toISOString());
-      console.log("Now:", new Date().toISOString());
-
       if (Date.now() > exp) {
-        console.warn("Deleting access_token: Token expired");
-        const response = NextResponse.redirect(new URL("/", req.url));
-        response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
+        // Token expired
+        const response = NextResponse.redirect(new URL("/login", req.url));
+        // Clear the access token cookie
+        response.cookies.set("access_token", "", { path: "/", expires: new Date(0) });
         return response;
       }
 
-      if (isRootRoute) {
+      // If root path, redirect to dashboard
+      if (pathname === "/") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
 
       return NextResponse.next();
     } catch (err) {
-      console.error("Deleting access_token: Token decode error", err);
-      const response = NextResponse.redirect(new URL("/", req.url));
-      response.cookies.set("access_token", "", { path: "/", maxAge: -1 });
+      console.error("Token verification failed:", err);
+      const response = NextResponse.redirect(new URL("/login", req.url));
+      // Clear the access token cookie
+      response.cookies.set("access_token", "", { path: "/", expires: new Date(0) });
       return response;
     }
-  } else {
-    if (isProtectedRoute) {
-      console.warn("Deleting access_token: Missing token on protected route");
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-    return NextResponse.next();
   }
+
+  // For all other routes, allow access
+  return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
+};
 
 // import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 // import { NextRequest, NextResponse } from "next/server";

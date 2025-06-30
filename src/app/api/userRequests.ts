@@ -33,24 +33,24 @@ export const loginEmail = async (email: string, password: string) => {
     const payload = {
       email,
       password
-    }
+    };
 
-    const response = await fetch(`${apiUrl}/user/loginEmail`, 
-        { 
+    const response = await fetch(`${apiUrl}/user/loginEmail`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify(payload)
     });
 
+    const data = await response.json();
+    
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create user');
+      throw new Error(data.message || 'Login failed');
     }
 
-    const data = await response.json();
-    return data;
+    return { data, error: null };
   } catch (err) {
     console.error('Error creating user:', err);
     throw err;
@@ -62,23 +62,24 @@ export const loginUsername = async (username: string, password: string) => {
     const payload = {
       username,
       password
-    }
+    };
 
-    const response = await fetch(`${apiUrl}/user/loginUsername`, 
-        { 
+    const response = await fetch(`${apiUrl}/user/loginUsername`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify(payload)
     });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create user');
-    }
 
     const data = await response.json();
-    return data;
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+
+    return { data, error: null };
   } catch (err) {
     console.error('Error creating user:', err);
     throw err;

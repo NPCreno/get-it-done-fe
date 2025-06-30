@@ -13,6 +13,7 @@ import {
   updateTaskApi,
   getDashboardData,
   getTaskCompletionTrend,
+  getTaskDistributionData,
 } from "@/app/api/taskRequests";
 import {getProjectsForUser} from "@/app/api/projectsRequests";
 import { getUser } from "@/app/api/userRequests";
@@ -31,9 +32,14 @@ import { ITaskCompletionTrendData } from "@/app/interface/ITaskCompletionTrendDa
 import { TaskItem } from "@/app/components/taskItem";
 import { ITaskFormErrors } from "@/app/interface/forms/ITaskFormErrors";
 import { ITaskFormValues } from "@/app/interface/forms/ITaskFormValues";
+import { ITaskDistribution } from "@/app/interface/ITaskDistribution";
 
 export default function DashboardPage() {
-  const { selectedTaskData } = useFormState();
+  const { 
+    selectedTaskData, 
+    selectedMonth, 
+    selectedYear, 
+  } = useFormState();
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
@@ -57,6 +63,7 @@ export default function DashboardPage() {
   const [showLoader, setShowLoader] = useState(true);
   const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
   const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
+  const [taskDistributionData, setTaskDistributionData] = useState<ITaskDistribution[]>([]);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -259,9 +266,10 @@ export default function DashboardPage() {
       const fetchedTasks = await getTasksByUser(user.user_id, startDate, endDate);
       const fetchedDashboardData = await getDashboardData(user.user_id, startDate, endDate);
       const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
+      const fetchedTaskDistributionData = await getTaskDistributionData(user.user_id, selectedMonth, selectedYear);
 
-      if (fetchedTasks) {
-        setTasks(fetchedTasks);
+      if (fetchedTasks?.status === "success") {
+        setTasks(fetchedTasks.data);
       } else {
         setTasks([]); // or keep previous state?
       }
@@ -278,6 +286,12 @@ export default function DashboardPage() {
         setTaskCompletionData([])
       }
 
+      if(fetchedTaskDistributionData.status === "success"){
+        setTaskDistributionData(fetchedTaskDistributionData.data)
+      }else{
+        setTaskDistributionData([])
+      }
+
       if (isFirstLoad.current) {
         setIsPageLoading(false);
         isFirstLoad.current = false;
@@ -285,7 +299,13 @@ export default function DashboardPage() {
     };
   
     fetchTasks();
-  }, [user, updateTaskDashboard, showToast]);
+  }, [
+    user, 
+    updateTaskDashboard, 
+    showToast, 
+    selectedMonth, 
+    selectedYear,
+  ]);
 
   useEffect(() => {
   if (isTaskModalOpen && !isUpdateTask) {
@@ -675,7 +695,7 @@ export default function DashboardPage() {
               <ChartCard
                 header="Task Distribution by project"
                 delay="fade-in-left-delay-2"
-                streakCount={dashboardData?.streak_count || 0}
+                taskDistributionData={taskDistributionData}
               />
             </div>
             <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-blue-100/20">
@@ -696,7 +716,7 @@ export default function DashboardPage() {
 
           <div className="w-full p-6 flex flex-col bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 fade-in-delay-2 flex-grow border border-gray-100">
             {/* Header - Fixed */}
-            <div className="flex flex-col sm:flex-row justify-between gap-4 pb-4 border-b border-gray-100">
+            <div className="flex flex-col sm:flex-row justify-between gap-4 border-gray-100">
               <div>
                 <h1 className="text-xl font-lato font-bold text-gray-800">
                   Recent Tasks
@@ -771,7 +791,7 @@ export default function DashboardPage() {
         {(tasks.length === 0 && !pageLoading) &&(
           <>
             <div className="w-full h-full flex items-center justify-center py-16 px-4">
-              <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
+            <div className="flex flex-col gap-6 items-center max-w-md justify-center text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 transform transition-all hover:shadow-md">
                 <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="fade-in">
                 <path d="M87.5 50.0093C87.5 29.3062 70.7031 12.5093 50 12.5093C29.2969 12.5093 12.5 29.3062 12.5 50.0093C12.5 70.7124 29.2969 87.5093 50 87.5093C70.7031 87.5093 87.5 70.7124 87.5 50.0093Z" stroke="#FEAD03" stroke-width="7" stroke-miterlimit="10"/>
                 <g filter="url(#filter0_d_1156_894)">

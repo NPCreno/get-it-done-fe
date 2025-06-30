@@ -74,7 +74,7 @@ export default function MainLayout({
           <HamburgerButton />
         </div>
         
-        <div className="h-full flex flex-col overflow-auto pt-16 md:pt-0">
+        <div className="h-full flex flex-col overflow-y-auto overflow-x-hidden pt-16 md:pt-0 ">
           <div className="p-4 md:p-6 flex-1">
             {children}
           </div>
