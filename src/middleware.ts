@@ -17,8 +17,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle protected routes
-  if (protectedRoutes.some(route => pathname.startsWith(route)) || pathname === "/") {
+  // Handle protected routes - exclude root path from protection
+  if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!token) {
       // Redirect to login if no token
       return NextResponse.redirect(new URL("/login", req.url));
@@ -38,9 +38,9 @@ export async function middleware(req: NextRequest) {
         return response;
       }
 
-      // If root path, redirect to dashboard
+      // Allow access to root path without redirection
       if (pathname === "/") {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.next();
       }
 
       return NextResponse.next();

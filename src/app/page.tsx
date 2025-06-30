@@ -115,7 +115,7 @@ export default function Home() {
               onClick={() => router.push('/signup')} 
               className="bg-primary-default hover:bg-primary-600 px-8 py-6 text-lg font-semibold"
             >
-              Start Your Free Trial
+              Get Started for Free
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
@@ -123,7 +123,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12">
+      <footer className="bg-[#19768D] text-white py-12">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-6 md:mb-0">
