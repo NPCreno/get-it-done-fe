@@ -53,16 +53,13 @@ export default function SignupForm({
       }
 
       // Log in the user
-      const loginResponse = await loginEmail(values.email, values.password);
-      
-      if (loginResponse.error) {
-        // User created but login failed - redirect to login page
-        onChangeView("login");
-        return;
+      const { data } = await loginEmail(values.email, values.password);
+  
+      if (data) {
+        document.cookie = `access_token=${data.access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
+        onChangeView("signedUp");
       }
-
-      // Redirect to dashboard on successful signup and login
-      router.push("/dashboard");
+      
     } catch (error: any) {
       setError(error.message || "An error occurred during signup. Please try again.");
       console.error("Signup error:", error);
@@ -83,6 +80,32 @@ export default function SignupForm({
     validationSchema: signUpSchema,
     onSubmit: handleSubmit,
   });
+
+    const autoLogin = async () => {
+      const { email, password } = formik.values;
+      const { data } = await loginEmail(email, password);
+  
+      if (data) {
+        document.cookie = `access_token=${data.access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
+        onChangeView("signedUp");
+      }
+    }
+  
+    const signUp = async (values: SignupFormValues) => {
+      try {
+        const { confirmPassword, ...payload } = values; // Remove confirmPassword value in payload
+        console.log("confirmPassword:", confirmPassword) //for linting purposes
+        const response = await createUser(payload);
+        if (response?.error) {
+          console.error("Error:", response.error);
+            } else {
+              await autoLogin();
+            }
+          }
+      catch (error) {
+        console.log("Signup Error:", error);
+      }
+    } 
 
   return (
     <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">

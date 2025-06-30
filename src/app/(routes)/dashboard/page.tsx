@@ -268,8 +268,8 @@ export default function DashboardPage() {
       const fetchedTaskTrendData = await getTaskCompletionTrend(user.user_id, range.start, range.end);
       const fetchedTaskDistributionData = await getTaskDistributionData(user.user_id, selectedMonth, selectedYear);
 
-      if (fetchedTasks) {
-        setTasks(fetchedTasks);
+      if (fetchedTasks?.status === "success") {
+        setTasks(fetchedTasks.data);
       } else {
         setTasks([]); // or keep previous state?
       }

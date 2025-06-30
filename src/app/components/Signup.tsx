@@ -76,10 +76,10 @@ export default function Signup({
 
   const autoLogin = async () => {
     const { email, password } = values;
-    const { access_token } = await loginEmail(email, password);
+    const { data } = await loginEmail(email, password);
 
-    if (access_token) {
-      document.cookie = `access_token=${access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
+    if (data) {
+      document.cookie = `access_token=${data.access_token}; path=/; secure; SameSite=Strict`; // Store in cookie
       onChangeView("signedUp");
     }
   }

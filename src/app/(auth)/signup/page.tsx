@@ -7,6 +7,7 @@ import { supabase } from "@/app/lib/supabase";
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSignedUp, setIsSignedUp] = useState(false);
 
   // Check if user is already logged in
   useEffect(() => {
@@ -27,8 +28,11 @@ export default function SignupPage() {
     if (view === "login") {
       router.push("/login");
     } else if (view === "signedUp") {
-      // This would be handled by the SignupForm component
-      router.push("/dashboard");
+      setIsSignedUp(true);
+      // Redirect to dashboard after showing success message for 3 seconds
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 3000);
     }
   };
 
@@ -36,6 +40,33 @@ export default function SignupPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-default"></div>
+      </div>
+    );
+  }
+
+  if (isSignedUp) {
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center p-4">
+        <div className="w-full max-w-md p-8 space-y-4 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-10 w-10 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight">Congratulations!</h2>
+          <p className="text-muted-foreground">You've successfully signed up. Redirecting to your dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -75,9 +106,7 @@ export default function SignupPage() {
           {/* Right side - Form */}
           <div className="lg:p-8">
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px]">
-              
               <SignupForm onChangeView={handleViewChange} />
-              
               <p className="px-8 text-center text-sm text-muted-foreground">
                 By clicking continue, you agree to our{" "}
                 <a
