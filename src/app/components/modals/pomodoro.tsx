@@ -18,28 +18,28 @@ interface TimerConfig {
 
 const TIMER_CONFIG: Record<TimerType, TimerConfig> = {
   pomodoro: {
-    label: 'Pomodoro',
+    label: 'Focus',
     time: 25 * 60, // 25 minutes in seconds
-    bgGradient: 'from-[#FFE09D] to-primary-default',
+    bgGradient: 'from-white to-gray-100 dark:from-gray-900 dark:to-gray-800',
     buttonColor: 'bg-primary-default',
-    borderColor: 'border-primary-default',
-    textColor: 'text-primary-default'
+    borderColor: 'border-primary-default/30',
+    textColor: 'text-primary-default dark:text-primary-400'
   },
   shortBreak: {
-    label: 'Short break',
+    label: 'Short Break',
     time: 5 * 60, // 5 minutes in seconds
-    bgGradient: 'from-darkBlue-100 to-darkBlue-default',
-    buttonColor: 'bg-darkBlue-default',
-    borderColor: 'border-darkBlue-default',
-    textColor: 'text-darkBlue-default'
+    bgGradient: 'from-white to-gray-100 dark:from-gray-900 dark:to-gray-800',
+    buttonColor: 'bg-blue-500',
+    borderColor: 'border-blue-500/30',
+    textColor: 'text-blue-500 dark:text-blue-400'
   },
   longBreak: {
-    label: 'Long break',
+    label: 'Long Break',
     time: 15 * 60, // 15 minutes in seconds
-    bgGradient: 'from-success-100 to-success-600',
-    buttonColor: 'bg-success-600',
-    borderColor: 'border-success-600',
-    textColor: 'text-success-600'
+    bgGradient: 'from-white to-gray-100 dark:from-gray-900 dark:to-gray-800',
+    buttonColor: 'bg-emerald-500',
+    borderColor: 'border-emerald-500/30',
+    textColor: 'text-emerald-500 dark:text-emerald-400'
   }
 } as const;
 
@@ -139,7 +139,6 @@ export default function PomodoroModal({
     };
   }, []);
 
-
   const renderConfirmationModal = useMemo(() => {
     if (!showConfirm || !pendingTimerType) return null;
     
@@ -158,83 +157,107 @@ export default function PomodoroModal({
     <div>
       {renderConfirmationModal}
       <div
-        className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 transition-opacity duration-300"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 transition-all duration-300"
         onClick={onClose}
       >
         <div
-          className={`modal-popup bg-white w-auto h-auto rounded-[10px] py-5 shadow-lg flex flex-col gap-5 bg-gradient-to-br ${currentTimer.bgGradient} items-center justify-center px-28 transition-all duration-500 ease-in-out`}
+          className={`relative bg-white dark:bg-gray-900 w-[500px] max-w-[95vw] rounded-2xl shadow-xl dark:shadow-2xl flex flex-col items-center justify-center p-8 transition-all duration-300 ease-out overflow-hidden border border-gray-200 dark:border-gray-700`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className={`relative flex flex-row justify-between items-center rounded-full border ${currentTimer.borderColor} gap-0.5 h-[44px] p-0.5 transition-colors duration-500 overflow-hidden`}>
-            {/* Background indicator that slides between buttons */}
-            <div 
-              className={`absolute left-0 top-0.5 h-[calc(100%-4px)] rounded-full transition-all duration-300 ease-out ${currentTimer.buttonColor}`}
-              style={{
-                width: `calc(${100 / Object.keys(TIMER_CONFIG).length}% - 2px)`,
-                transform: `translateX(calc(${Object.keys(TIMER_CONFIG).indexOf(activeTimer) * 100}% + 1px))`
-              }}
-            />
-            
-            {(Object.entries(TIMER_CONFIG) as Array<[TimerType, TimerConfig]>).map(([key, config]) => {
-              const isActive = safeTimerType === key;
-              return (
-                <button
-                  key={key}
-                  className={`relative z-10 flex-1 flex items-center w-20 justify-center text-[13px] font-lato rounded-full h-full transition-all duration-300 ${
-                    isActive 
-                      ? 'text-white' 
-                      : 'text-white/80 hover:text-white hover:bg-white/20'
-                  }`}
-                  onClick={handleTimerButtonClick(key)}
-                  disabled={isActive}
-                >
-                  {config.label}
-                </button>
-              );
-            })}
+          {/* Subtle gradient accent */}
+          <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${currentTimer.buttonColor} to-transparent`}></div>
+          
+          {/* Timer type selector */}
+          <div className='w-full max-w-xs mb-8 mx-auto'>
+            <div className={`relative flex flex-row justify-between items-center rounded-full border ${currentTimer.borderColor} h-12 p-1 transition-colors duration-300 overflow-hidden bg-gray-100 dark:bg-gray-800/50`}>
+              {/* Animated background */}
+              <div 
+                className={`absolute top-1 h-[calc(100%-8px)] rounded-full transition-all duration-300 ease-out ${currentTimer.buttonColor} ${
+                  activeTimer === 'longBreak' ? 'left-4' : 'left-1'
+                }`}
+                style={{
+                  width: `calc(${100 / Object.keys(TIMER_CONFIG).length}% - 8px)`,
+                  transform: `translateX(calc(${Object.keys(TIMER_CONFIG).indexOf(activeTimer) * 100}% + 4px))`,
+                }}
+              />
+              
+              {(Object.entries(TIMER_CONFIG) as Array<[TimerType, TimerConfig]>).map(([key, config]) => {
+                const isActive = safeTimerType === key;
+                return (
+                  <button
+                    key={key}
+                    className={`relative z-10 flex-1 flex items-center justify-center text-sm font-medium h-full transition-colors duration-300 ${
+                      isActive 
+                        ? 'text-white' 
+                        : `${config.textColor} hover:bg-black/5 dark:hover:bg-white/5`
+                    }`}
+                    onClick={handleTimerButtonClick(key)}
+                    disabled={isActive}
+                  >
+                    <span className='relative z-10'>{config.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className='relative'>
-            <h1 className='text-white text-[100px] font-bold font-lato text-center'>
+          
+          {/* Timer display */}
+          <div className='relative mb-10'>
+            <h1 className={`${currentTimer.textColor} text-7xl md:text-8xl font-bold font-mono tracking-tighter text-center mb-2`}>
               {displayTime}
             </h1>
             {isActive && (
-              <span className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 -translate-y-4 text-white/80 text-sm font-lato'>
-                {activeTimer === 'pomodoro' ? 'Time to focus!' : 'Take a break!'}
+              <span className='absolute -bottom-6 left-1/2 transform -translate-x-1/2 -translate-y-4 text-gray-600 dark:text-white/70 text-sm font-medium tracking-wide'>
+                {activeTimer === 'pomodoro' ? 'Time to focus! 💪' : 'Take a break! ☕'}
               </span>
             )}
           </div>
 
-          <div className="flex gap-4">
-            <div className="relative w-[106px] h-[44px]">
-              <div className={`absolute top-[4px] left-0 h-[40px] w-[106px] rounded-[5px] transition-colors duration-200 ${
-                isAtDefaultTime ? 'bg-[#DEDEDE]' : 'bg-[#DEDEDE]'
-              } shadow-[4px_4px_4px_rgba(0,0,0,0.2)]`} />
-              <button 
-                className={`absolute left-0 text-[23px] font-bold font-lato bg-white h-[40px] w-[106px] rounded-[5px] transition-all duration-200 ${
-                  isAtDefaultTime 
-                    ? 'translate-y-[4px] shadow-none text-gray-400' 
-                    : 'top-0 text-error-300 [text-shadow:0_0_8px_rgba(239,68,68,0.8)] hover:translate-y-[-2px] active:translate-y-[4px] '
-                }`}
-                onClick={handleReset}
-                disabled={isAtDefaultTime}
+          {/* Controls */}
+          <div className='flex items-center justify-center gap-4 w-full'>
+            <button
+              className={`py-3 px-8 rounded-xl font-medium text-white ${currentTimer.buttonColor} hover:opacity-90 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2`}
+              onClick={toggleTimer}
+            >
+              {isActive ? (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Pause
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Start
+                </>
+              )}
+            </button>
+            
+            <div className='flex gap-2'>
+              {!isAtDefaultTime && (
+                <button
+                  className={`p-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800/50 transition-colors duration-200 flex items-center justify-center`}
+                  onClick={handleReset}
+                  title="Reset timer"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
+              )}
+              
+              <button
+                className='p-3 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800/50 transition-colors duration-200 flex items-center justify-center'
+                onClick={onClose}
+                title="Close timer"
               >
-                Reset
-              </button>
-            </div>
-
-            <div className="relative w-[106px] h-[44px]">
-              <div className={`absolute top-[4px] left-0 h-[40px] w-[106px] rounded-[5px] transition-colors duration-200 ${
-                isActive ? 'bg-gray-300' : 'bg-[#DEDEDE]'
-              } shadow-[4px_4px_4px_rgba(0,0,0,0.2)]`} />
-              <button 
-                className={`absolute left-0 ${currentTimer.textColor} text-[23px] font-bold font-lato bg-white h-[40px] w-[106px] rounded-[5px] transition-all duration-200 ${
-                  isActive 
-                    ? 'translate-y-[4px] shadow-none' 
-                    : 'top-0 hover:translate-y-[-2px] active:translate-y-[4px]'
-                }`}
-                onClick={(e) => toggleTimer(e as React.MouseEvent)}
-              >
-                {isActive ? 'Pause' : 'Start'}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </div>
           </div>
