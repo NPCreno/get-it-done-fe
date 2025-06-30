@@ -55,11 +55,11 @@ export default function Login({
       let access_token: string | undefined;
 
       if (!usernameOrEmail.includes("@")) {
-        const response = await loginUsername(usernameOrEmail, password); // Login using username
-        access_token = response?.access_token;
+        const { data } = await loginUsername(usernameOrEmail, password); // Login using username
+        access_token = data?.access_token;
       } else {
-        const response = await loginEmail(usernameOrEmail, password); // Login using email
-        access_token = response?.access_token;
+        const { data } = await loginEmail(usernameOrEmail, password); // Login using email
+        access_token = data?.access_token;
       }
 
       if (access_token) {

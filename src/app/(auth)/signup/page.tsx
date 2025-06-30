@@ -65,7 +65,7 @@ export default function SignupPage() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold tracking-tight">Congratulations!</h2>
-          <p className="text-muted-foreground">You've successfully signed up. Redirecting to your dashboard...</p>
+          <p className="text-muted-foreground">You&apos;ve successfully signed up. Redirecting to your dashboard...</p>
         </div>
       </div>
     );
@@ -96,7 +96,7 @@ export default function SignupPage() {
             <div className="relative z-20 mt-auto">
               <blockquote className="space-y-2">
                 <p className="text-lg">
-                  "The secret of getting ahead is getting started."
+                  &ldquo;The secret of getting ahead is getting started.&rdquo;
                 </p>
                 <footer className="text-sm">Mark Twain</footer>
               </blockquote>

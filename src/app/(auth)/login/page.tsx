@@ -1,21 +1,9 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/app/components/auth/LoginForm";
-import { supabase } from "@/app/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Check if user is already logged in
-  const checkSession = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      router.push("/dashboard");
-    }
-  };
 
   // Handle view changes (e.g., switch to signup or forgot password)
   const handleViewChange = (view: string) => {
@@ -51,7 +39,7 @@ export default function LoginPage() {
             <div className="relative z-20 mt-auto">
               <blockquote className="space-y-2">
                 <p className="text-lg">
-                  "The best way to get something done is to begin."
+                  &ldquo;The best way to get something done is to begin.&rdquo;
                 </p>
                 <footer className="text-sm">Author Unknown</footer>
               </blockquote>

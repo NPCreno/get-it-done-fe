@@ -1,11 +1,9 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ForgotPasswordForm from "@/app/components/auth/ForgotPasswordForm";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   // Handle view changes (e.g., switch to login)
   const handleViewChange = (view: string) => {
@@ -39,7 +37,7 @@ export default function ForgotPasswordPage() {
             <div className="relative z-20 mt-auto">
               <blockquote className="space-y-2">
                 <p className="text-lg">
-                  "It's not that I'm so smart, it's just that I stay with problems longer."
+                &ldquo;It&apos;s not that I&apos;m so smart, it&apos;s just that I stay with problems longer.&rdquo;
                 </p>
                 <footer className="text-sm">Albert Einstein</footer>
               </blockquote>
