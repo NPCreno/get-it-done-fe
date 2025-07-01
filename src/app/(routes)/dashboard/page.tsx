@@ -410,16 +410,12 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    if (selectedTaskData) {
       setFieldValue("title", selectedTaskData?.title || "");
       setFieldValue("description", selectedTaskData?.description || "");
       setFieldValue("priority", selectedTaskData?.priority || "");
       setFieldValue("status", selectedTaskData?.status || "");
       setFieldValue("due_date", selectedTaskData?.due_date || null);
       setFieldValue("isRecurring", false);
-    } else {
-      return;
-    }
   }, [selectedTaskData, setFieldValue]);
 
   const handleTaskStatus = async (task: ITask) => {

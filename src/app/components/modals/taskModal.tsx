@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import InputBox from "../inputBox";
 import { IProject } from "@/app/interface/IProject";
+import { useFormState } from "@/app/context/FormProvider";
 
 interface taskModalProps {
   onClose: () => void;
@@ -83,6 +84,7 @@ export default function TaskModal({
   isUpdate,
   isLoading,
 }: taskModalProps) {
+  const { setSelectedTaskData } = useFormState();
   const [height, setHeight] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -119,6 +121,7 @@ export default function TaskModal({
   window.addEventListener("keydown", handleEscapeKey);
 
   const clearAllData = () => {
+    setSelectedTaskData(null);
     formik.setFieldValue("title", "");
     formik.setFieldValue("description", "");
     formik.setFieldValue("priority", "");
