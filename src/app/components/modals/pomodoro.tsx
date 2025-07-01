@@ -84,16 +84,16 @@ export default function PomodoroModal({
   const handleTimerChange = useCallback((timerType: TimerType) => {
     // Only change timer type if it's different from current and valid
     if (timerType !== activeTimer && timerType in TIMER_CONFIG) {
-      // If timer is active, show confirmation dialog
-      if (isActive) {
+      // Show confirmation dialog if timer is active or not at default value
+      if (isActive || !isAtDefaultTime) {
         setPendingTimerType(timerType);
         setShowConfirm(true);
       } else {
-        // If timer wasn't active, just switch the mode
+        // If timer is inactive and at default, just switch the mode
         setCurrentTimer(timerType);
       }
     }
-  }, [activeTimer, isActive, setCurrentTimer]);
+  }, [activeTimer, isActive, isAtDefaultTime, setCurrentTimer]);
   
   const handleTimerButtonClick = (timerType: TimerType) => (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
