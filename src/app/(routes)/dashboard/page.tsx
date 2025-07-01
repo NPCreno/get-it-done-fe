@@ -410,32 +410,13 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    if (selectedTaskData) {
       setFieldValue("title", selectedTaskData?.title || "");
       setFieldValue("description", selectedTaskData?.description || "");
       setFieldValue("priority", selectedTaskData?.priority || "");
       setFieldValue("status", selectedTaskData?.status || "");
       setFieldValue("due_date", selectedTaskData?.due_date || null);
       setFieldValue("isRecurring", false);
-    } else {
-      return;
-    }
   }, [selectedTaskData, setFieldValue]);
-
-  const handleTaskStatus = async (task: ITask) => {
-    await updateTask({
-      ...task,
-      user_id: user?.user_id || "",
-      project_color: "",
-      isRecurring: false,
-      repeat_every: "",
-      repeat_days: [],
-      start_date: null,
-      end_date: null,
-      project: task.project_id,
-      project_title: task.project_title || "",
-    });
-  };
 
   const clearAllData = () => {
     setFieldValue("title", "");
@@ -780,7 +761,22 @@ export default function DashboardPage() {
                     setIsTaskModalOpen(true);
                     setIsUpdateTask(true);
                   }}
-                  handleTaskStatus={(task: ITask) => handleTaskStatus(task)}
+                  taskUpdateStatus={(message: string, status: string) => {
+                    setUpdateTaskDashboard(!updateTaskDashboard)
+                    setToastMessage({
+                      title: `Task marked as ${status}`,
+                      description: message,
+                      className: status === 'Complete' ? 'text-success-default' : 'text-accent-default',
+                    });
+                    setShowToast(true);
+                    setIsExitingToast(false);
+                    setTimeout(() => {            // Auto-hide the toast after 5 seconds
+                      setIsExitingToast(true);
+                      setTimeout(() => {
+                        setShowToast(false);
+                      }, 400);
+                    }, 5000);
+                  }}
                 />
               ))}
             </div>

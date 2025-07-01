@@ -1,25 +1,29 @@
+import { updateTaskStatus } from "../api/taskRequests";
 import { useFormState } from "../context/FormProvider";
 import { ITask } from "../interface/ITask";
 import Image from "next/image";
+
 export function TaskItem({
     task,
     handleUpdateTask,
-    handleTaskStatus,
+    taskUpdateStatus,
   }: {
     task: ITask;
     handleUpdateTask: () => void;
-    handleTaskStatus: (task: ITask) => void;
+    taskUpdateStatus?: (message: string, status: string) => void;
   }) {
     const { setSelectedTaskData } = useFormState();
-  
-    const handleCheckToggle = () => {
+    const handleCheckToggle = async () => {
       const audio = new Audio('/soundfx/3.mp3'); // path to your mp3 file
       audio.play();
-      const updatedTask = {
-        ...task,
-        status: task.status === "Complete" ? "Pending" : "Complete",
-      };
-      handleTaskStatus(updatedTask);
+      try {
+        const response = await updateTaskStatus(task.task_id, task.status === "Complete" ? "Pending" : "Complete");
+        if (response.status === "success") {
+          taskUpdateStatus?.(response.message, task.status === "Complete" ? "Pending" : "Complete");
+        }
+      } catch (error) {
+        console.error("Error updating task status:", error);
+      }
     };
   
     return (
