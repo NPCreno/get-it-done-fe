@@ -55,7 +55,6 @@ export default function ChartCard({
 
   const heatmapData = generateHeatmapData();
 
-
   const renderNoDataState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
       <Database className="h-16 w-16 text-gray-400 mb-2" />
