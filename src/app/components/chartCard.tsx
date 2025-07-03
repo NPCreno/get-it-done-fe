@@ -11,13 +11,14 @@ import StreakCounter from "./streakCounter";
 import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
 import { ITaskDistribution } from "../interface/ITaskDistribution";
 import { Database } from 'lucide-react';
-
+import { IHeatmapData } from "../interface/IHeatmapData";
 interface ChartCardProps {
   header: string;
   delay: string;
   streakCount?: number;
   taskCompletionData?: ITaskCompletionTrendData[];
   taskDistributionData?: ITaskDistribution[];
+  calendarHeatmapData?: IHeatmapData[];
 }
 
 export default function ChartCard({
@@ -26,35 +27,35 @@ export default function ChartCard({
   streakCount = 0, // Default to 0 if not provided
   taskCompletionData = [],
   taskDistributionData = [],
+  calendarHeatmapData = [],
 }: ChartCardProps) {
-  // Generate more realistic heatmap data with weekly patterns
-  const generateHeatmapData = () => {
-    const data = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 30; i++) {
-      const date = subDays(today, i);
-      const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+
+    // Generate more realistic heatmap data with weekly patterns
+    const generateHeatmapData = () => {
+      const data = [];
+      const today = new Date();
       
-      // Generate more realistic data with weekly patterns
-      let count;
-      if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekends
-        count = Math.floor(Math.random() * 3); // 0-2 tasks on weekends
-      } else {
-        count = Math.floor(Math.random() * 8); // 0-7 tasks on weekdays
+      for (let i = 0; i < 30; i++) {
+        const date = subDays(today, i);
+        const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+        
+        // Generate more realistic data with weekly patterns
+        let count;
+        if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekends
+          count = Math.floor(Math.random() * 3); // 0-2 tasks on weekends
+        } else {
+          count = Math.floor(Math.random() * 8); // 0-7 tasks on weekdays
+        }
+        
+        data.unshift({ // Add to beginning to maintain chronological order
+          date: format(date, 'yyyy-MM-dd'),
+          count
+        });
       }
       
-      data.unshift({ // Add to beginning to maintain chronological order
-        date: format(date, 'yyyy-MM-dd'),
-        count
-      });
-    }
+      return data;
+    };
     
-    return data;
-  };
-
-  const heatmapData = generateHeatmapData();
-
   const renderNoDataState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">
       <Database className="h-16 w-16 text-gray-400 mb-2" />
@@ -63,7 +64,6 @@ export default function ChartCard({
   );
 
   const renderChart = () => {
-    
     switch (header) {
       case "Task Completion Trend":
         if (!taskCompletionData || taskCompletionData.length === 0) {
@@ -98,7 +98,10 @@ export default function ChartCard({
           <div className="w-full h-full p-4 bg-white rounded-[10px] shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] hover:shadow-[0px_2px_5.1px_-1px_rgba(0,0,0,0.25)] transition-all duration-300 fade-in-left">
             <CardTitle>{header}</CardTitle>
             <MonthlyHeatmap 
-              values={heatmapData}
+              values={calendarHeatmapData.map(item => ({
+                date: item.date,
+                count: item.value
+              }))}
               className="h-full"
             />
           </div>

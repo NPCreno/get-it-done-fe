@@ -14,6 +14,7 @@ import {
   getDashboardData,
   getTaskCompletionTrend,
   getTaskDistributionData,
+  getCalendarHeatmap,
 } from "@/app/api/taskRequests";
 import { getProjectsForUser } from "@/app/api/projectsRequests";
 import { getUser } from "@/app/api/userRequests";
@@ -37,10 +38,10 @@ import { TaskItem } from "@/app/components/taskItem";
 import { ITaskFormErrors } from "@/app/interface/forms/ITaskFormErrors";
 import { ITaskFormValues } from "@/app/interface/forms/ITaskFormValues";
 import { ITaskDistribution } from "@/app/interface/ITaskDistribution";
+import { IHeatmapData } from "@/app/interface/IHeatmapData";
 
 export default function DashboardPage() {
-  const { selectedTaskData, selectedMonth, selectedYear } = useFormState();
-  console.log("selectedMonth: ", selectedMonth);
+  const { selectedTaskData, selectedMonth, selectedYear, calendarMonthYear } = useFormState();
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
@@ -65,12 +66,9 @@ export default function DashboardPage() {
   const [pageLoading, setIsPageLoading] = useState(true);
   const [showLoader, setShowLoader] = useState(true);
   const [isPomodoroModalOpen, setIsPomodoroModalOpen] = useState(false);
-  const [taskCompletionData, setTaskCompletionData] = useState<
-    ITaskCompletionTrendData[]
-  >([]);
-  const [taskDistributionData, setTaskDistributionData] = useState<
-    ITaskDistribution[]
-  >([]);
+  const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
+  const [taskDistributionData, setTaskDistributionData] = useState<ITaskDistribution[]>([]);
+  const [calendarHeatmapData, setCalendarHeatmapData] = useState<IHeatmapData[]>([]);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -291,6 +289,12 @@ export default function DashboardPage() {
         selectedYear
       );
 
+      const fetchedCalendarHeatmapData = await getCalendarHeatmap(
+        user.user_id,
+        calendarMonthYear.month,
+        calendarMonthYear.year
+      );
+
       if (fetchedTasks?.status === "success") {
         setTasks(fetchedTasks.data);
       } else {
@@ -315,6 +319,12 @@ export default function DashboardPage() {
         setTaskDistributionData([]);
       }
 
+      if (fetchedCalendarHeatmapData.status === "success") {
+        setCalendarHeatmapData(fetchedCalendarHeatmapData.data);
+      } else {
+        setCalendarHeatmapData([]);
+      }
+
       if (isFirstLoad.current) {
         setIsPageLoading(false);
         isFirstLoad.current = false;
@@ -322,7 +332,7 @@ export default function DashboardPage() {
     };
 
     fetchTasks();
-  }, [user, updateTaskDashboard, showToast, selectedMonth, selectedYear]);
+  }, [user, updateTaskDashboard, showToast, selectedMonth, selectedYear, calendarMonthYear]);
 
   useEffect(() => {
     if (isTaskModalOpen && !isUpdateTask) {
@@ -736,7 +746,7 @@ export default function DashboardPage() {
                   <ChartCard
                     header="Calendar Heat map"
                     delay="fade-in-left-delay-4"
-                    streakCount={dashboardData?.streak_count || 0}
+                    calendarHeatmapData={calendarHeatmapData || []}
                   />
                 </div>
               </div>

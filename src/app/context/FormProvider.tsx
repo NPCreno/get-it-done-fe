@@ -29,6 +29,8 @@ type UniversalStateType = {
   setSelectedMonth: React.Dispatch<React.SetStateAction<string>>;
   selectedYear: string;
   setSelectedYear: React.Dispatch<React.SetStateAction<string>>;
+  calendarMonthYear: {month: string, year: string};
+  setCalendarMonthYear: React.Dispatch<React.SetStateAction<{month: string, year: string}>>;
 };
 
 // Create the context
@@ -51,7 +53,7 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
   // Initialize with current month (1-12) and year (e.g., 2025)
   const [selectedMonth, setSelectedMonth] = useState<string>((new Date().getMonth() + 1).toString());
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
-
+  const [calendarMonthYear, setCalendarMonthYear] = useState<{month: string, year: string}>({month: selectedMonth, year: selectedYear});
   // Mobile sidebar actions
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
@@ -82,6 +84,8 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
         setSelectedMonth,
         selectedYear,
         setSelectedYear,
+        calendarMonthYear,
+        setCalendarMonthYear,
       }}
     >
       {children}

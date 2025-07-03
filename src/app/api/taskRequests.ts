@@ -218,6 +218,34 @@ export const getTaskDistributionData= async (userId: string, month: string, year
   }
 };
 
+export const getCalendarHeatmap= async (userId: string, month: string, year: string) => {
+  try {
+    const token = getAccessToken();
+    let data;
+    const response = await fetch(`${apiUrl}/tasks/calendar-heatmap/${userId}?month=${month}&year=${year}`, 
+        { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+
+    });
+    if (response.ok) {
+      data = await response.json();
+    }
+    else {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching calendar heatmap data:', err);
+    throw err;
+  }
+};
+
 export const updateTaskStatus= async (taskId: string, status: string) => {
   try {
     const token = getAccessToken();

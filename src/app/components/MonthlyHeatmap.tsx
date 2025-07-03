@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   format, 
   addMonths, 
@@ -12,6 +12,7 @@ import {
   addDays
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useFormState } from '../context/FormProvider';
 
 interface HeatmapValue {
   date: string;
@@ -27,8 +28,15 @@ export default function MonthlyHeatmap({
   values = [], 
   className = '' 
 }: MonthlyHeatmapProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
+  const { calendarMonthYear, setCalendarMonthYear } = useFormState();
+  // Initialize currentMonth from calendarMonthYear if available, otherwise use current date
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    if (calendarMonthYear?.month && calendarMonthYear?.year) {
+      return new Date(parseInt(calendarMonthYear.year), parseInt(calendarMonthYear.month) - 1, 1);
+    }
+    return new Date();
+  });
+  
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
@@ -41,8 +49,38 @@ export default function MonthlyHeatmap({
     return acc;
   }, {});
 
-  const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  // Update local state when calendarMonthYear changes from outside
+  useEffect(() => {
+    if (calendarMonthYear?.month && calendarMonthYear?.year) {
+      const newMonth = new Date(
+        parseInt(calendarMonthYear.year),
+        parseInt(calendarMonthYear.month) - 1, // Convert to 0-indexed month
+        1
+      );
+      if (!isSameMonth(newMonth, currentMonth)) {
+        setCurrentMonth(newMonth);
+      }
+    }
+  }, [calendarMonthYear]);
+
+  const handlePrevMonth = () => {
+    const newMonth = subMonths(currentMonth, 1);
+    setCurrentMonth(newMonth);
+    setCalendarMonthYear({
+      month: (newMonth.getMonth() + 1).toString(),
+      year: newMonth.getFullYear().toString()
+    });
+  };
+
+  const handleNextMonth = () => {
+    const newMonth = addMonths(currentMonth, 1);
+    setCurrentMonth(newMonth);
+    setCalendarMonthYear({
+      month: (newMonth.getMonth() + 1).toString(),
+      year: newMonth.getFullYear().toString()
+    });
+  };
+  
   const getDayClass = (day: Date) => {
     const dayKey = format(day, 'yyyy-MM-dd');
     const count = valueMap[dayKey] || 0;
