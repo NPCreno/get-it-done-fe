@@ -5,7 +5,6 @@ import { ChartAreaGradient } from "./shadcn/areaChart";
 import Image from "next/image";
 import { ChartPieInteractive } from "./shadcn/pieChart";
 import MonthlyHeatmap from "./MonthlyHeatmap";
-import { subDays, format } from 'date-fns';
 import { CardTitle } from "./shadcn/card";
 import StreakCounter from "./streakCounter";
 import { ITaskCompletionTrendData } from "../interface/ITaskCompletionTrendData";
@@ -29,32 +28,6 @@ export default function ChartCard({
   taskDistributionData = [],
   calendarHeatmapData = [],
 }: ChartCardProps) {
-
-    // Generate more realistic heatmap data with weekly patterns
-    const generateHeatmapData = () => {
-      const data = [];
-      const today = new Date();
-      
-      for (let i = 0; i < 30; i++) {
-        const date = subDays(today, i);
-        const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-        
-        // Generate more realistic data with weekly patterns
-        let count;
-        if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekends
-          count = Math.floor(Math.random() * 3); // 0-2 tasks on weekends
-        } else {
-          count = Math.floor(Math.random() * 8); // 0-7 tasks on weekdays
-        }
-        
-        data.unshift({ // Add to beginning to maintain chronological order
-          date: format(date, 'yyyy-MM-dd'),
-          count
-        });
-      }
-      
-      return data;
-    };
     
   const renderNoDataState = () => (
     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-white">

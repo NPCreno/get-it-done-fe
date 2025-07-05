@@ -61,7 +61,7 @@ export default function MonthlyHeatmap({
         setCurrentMonth(newMonth);
       }
     }
-  }, [calendarMonthYear]);
+  }, [calendarMonthYear, currentMonth]);
 
   const handlePrevMonth = () => {
     const newMonth = subMonths(currentMonth, 1);
