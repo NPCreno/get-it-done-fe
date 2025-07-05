@@ -246,6 +246,34 @@ export const getCalendarHeatmap= async (userId: string, month: string, year: str
   }
 };
 
+export const getStreakCount= async (userId: string) => {
+  try {
+    const token = getAccessToken();
+    let data;
+    const response = await fetch(`${apiUrl}/tasks/streak/${userId}`, 
+        { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+
+    });
+    if (response.ok) {
+      data = await response.json();
+    }
+    else {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+    }
+
+    return data;
+  } catch (err) {
+    console.error('Error fetching streak count:', err);
+    throw err;
+  }
+};
+
 export const updateTaskStatus= async (taskId: string, status: string) => {
   try {
     const token = getAccessToken();

@@ -15,6 +15,7 @@ import {
   getTaskCompletionTrend,
   getTaskDistributionData,
   getCalendarHeatmap,
+  getStreakCount,
 } from "@/app/api/taskRequests";
 import { getProjectsForUser } from "@/app/api/projectsRequests";
 import { getUser } from "@/app/api/userRequests";
@@ -69,6 +70,7 @@ export default function DashboardPage() {
   const [taskCompletionData, setTaskCompletionData] = useState<ITaskCompletionTrendData[]>([]);
   const [taskDistributionData, setTaskDistributionData] = useState<ITaskDistribution[]>([]);
   const [calendarHeatmapData, setCalendarHeatmapData] = useState<IHeatmapData[]>([]);
+  const [streakCount, setStreakCount] = useState(0);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -295,6 +297,8 @@ export default function DashboardPage() {
         calendarMonthYear.year
       );
 
+      const fetchedStreakCount = await getStreakCount(user.user_id);
+
       if (fetchedTasks?.status === "success") {
         setTasks(fetchedTasks.data);
       } else {
@@ -323,6 +327,12 @@ export default function DashboardPage() {
         setCalendarHeatmapData(fetchedCalendarHeatmapData.data);
       } else {
         setCalendarHeatmapData([]);
+      }
+
+      if (fetchedStreakCount.status === "success") {
+        setStreakCount(fetchedStreakCount.data.count);
+      } else {
+        setStreakCount(0);
       }
 
       if (isFirstLoad.current) {
@@ -739,7 +749,7 @@ export default function DashboardPage() {
                   <ChartCard
                     header="Productivity Streak"
                     delay="fade-in-left-delay-3"
-                    streakCount={dashboardData?.streak_count || 10}
+                    streakCount={streakCount}
                   />
                 </div>
                 <div className="transform transition-all duration-500 hover:scale-[1.01] hover:shadow-lg hover:shadow-green-100/20">
