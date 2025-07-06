@@ -42,7 +42,7 @@ import { ITaskDistribution } from "@/app/interface/ITaskDistribution";
 import { IHeatmapData } from "@/app/interface/IHeatmapData";
 
 export default function DashboardPage() {
-  const { selectedTaskData, selectedMonth, selectedYear, calendarMonthYear } = useFormState();
+  const { selectedTaskData, setSelectedTaskData, selectedMonth, selectedYear, calendarMonthYear } = useFormState();
   const [user, setUser] = useState<IUser | null>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [projectOptions, setProjectOptions] = useState<IProject[]>([]);
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const [taskDistributionData, setTaskDistributionData] = useState<ITaskDistribution[]>([]);
   const [calendarHeatmapData, setCalendarHeatmapData] = useState<IHeatmapData[]>([]);
   const [streakCount, setStreakCount] = useState(0);
+  const [showCompletedTasks, setShowCompletedTasks] = useState(false);
   const isFirstLoad = useRef(true);
   const handleToastClose = () => {
     setIsExitingToast(true);
@@ -822,37 +823,103 @@ export default function DashboardPage() {
 
                 {/* Scrollable Task List */}
                 <div className="flex flex-col gap-[10px] mt-5 lg:overflow-y-auto flex-grow basis-0">
-                  {/* Task Item */}
-                  {tasks.map((task, index) => (
-                    <TaskItem
-                      key={index}
-                      task={task}
-                      handleUpdateTask={() => {
-                        setIsTaskModalOpen(true);
-                        setIsUpdateTask(true);
-                      }}
-                      taskUpdateStatus={(message: string, status: string) => {
-                        setUpdateTaskDashboard(!updateTaskDashboard);
-                        setToastMessage({
-                          title: `Task marked as ${status}`,
-                          description: message,
-                          className:
-                            status === "Complete"
-                              ? "text-success-default"
-                              : "text-accent-default",
-                        });
-                        setShowToast(true);
-                        setIsExitingToast(false);
-                        setTimeout(() => {
-                          // Auto-hide the toast after 5 seconds
-                          setIsExitingToast(true);
+                  {/* Active Tasks */}
+                  {tasks.filter(task => task.status !== 'Complete').length > 0 ? (
+                    tasks
+                      .filter(task => task.status !== 'Complete')
+                      .map((task, index) => (
+                      <TaskItem
+                        key={`active-${index}`}
+                        task={task}
+                        handleUpdateTask={() => {
+                          setSelectedTaskData(task);
+                          setIsTaskModalOpen(true);
+                          setIsUpdateTask(true);
+                        }}
+                        taskUpdateStatus={(message: string, status: string) => {
+                          setUpdateTaskDashboard(!updateTaskDashboard);
+                          setToastMessage({
+                            title: `Task marked as ${status}`,
+                            description: message,
+                            className:
+                              status === "Complete"
+                                ? "text-success-default"
+                                : "text-accent-default",
+                          });
+                          setShowToast(true);
+                          setIsExitingToast(false);
                           setTimeout(() => {
-                            setShowToast(false);
-                          }, 400);
-                        }, 5000);
-                      }}
-                    />
-                  ))}
+                            setIsExitingToast(true);
+                            setTimeout(() => {
+                              setShowToast(false);
+                            }, 400);
+                          }, 5000);
+                        }}
+                      />
+                    )))
+                    : (
+                      <div className="flex flex-col items-center justify-center px-4 text-center">
+                        <div className="w-24 h-24 mb-6 text-primary-default">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">All caught up!</h3>
+                        <p className="text-gray-500 mb-6 max-w-md">You&apos;ve completed all your tasks. Time to celebrate or add a new challenge!</p>
+                      </div>
+                    )}
+
+                  {/* Completed Tasks Section */}
+                  {tasks.some(task => task.status === 'Complete') && (
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setShowCompletedTasks(!showCompletedTasks)}
+                        className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors mb-2"
+                      >
+                        <span>Completed ({tasks.filter(task => task.status === 'Complete').length})</span>
+                        <svg
+                          className={`w-4 h-4 transition-transform duration-200 ${showCompletedTasks ? 'rotate-180' : ''}`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showCompletedTasks && (
+                        <div className="space-y-2 pl-4 border-l-2 border-gray-200">
+                          {tasks
+                            .filter(task => task.status === 'Complete')
+                            .map((task, index) => (
+                              <TaskItem
+                                key={`completed-${index}`}
+                                task={task}
+                                handleUpdateTask={() => {
+                                  setSelectedTaskData(task);
+                                  setIsTaskModalOpen(true);
+                                  setIsUpdateTask(true);
+                                }}
+                                taskUpdateStatus={(message: string, status: string) => {
+                                  setUpdateTaskDashboard(!updateTaskDashboard);
+                                  setToastMessage({
+                                    title: `Task marked as ${status}`,
+                                    description: message,
+                                    className: status === "Complete" ? "text-success-default" : "text-accent-default",
+                                  });
+                                  setShowToast(true);
+                                  setIsExitingToast(false);
+                                  setTimeout(() => {
+                                    setIsExitingToast(true);
+                                    setTimeout(() => setShowToast(false), 400);
+                                  }, 5000);
+                                }}
+                              />
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </>
