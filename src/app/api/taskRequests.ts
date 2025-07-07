@@ -218,6 +218,68 @@ export const getTaskDistributionData= async (userId: string, month: string, year
   }
 };
 
+export const getCalendarHeatmap = async (userId: string, month: string, year: string) => {
+  try {
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}/tasks/calendar-heatmap/${userId}?month=${month}&year=${year}`, 
+    { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 404) {
+      // For new users without any tasks, return an empty array
+      return { data: [] };
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching calendar heatmap data:', err);
+    // Return empty data structure instead of throwing error
+    return { data: [] };
+  }
+};
+
+export const getStreakCount = async (userId: string) => {
+  try {
+    const token = getAccessToken();
+    const response = await fetch(`${apiUrl}/tasks/streak/${userId}`, 
+    { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 404) {
+      // For new users without any tasks, return 0 streak
+      return { data: { count: 0 } };
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText || 'Unknown error'}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error('Error fetching streak count:', err);
+    // Return 0 streak in case of any error
+    return { data: { count: 0 } };
+  }
+};
+
 export const updateTaskStatus= async (taskId: string, status: string) => {
   try {
     const token = getAccessToken();
