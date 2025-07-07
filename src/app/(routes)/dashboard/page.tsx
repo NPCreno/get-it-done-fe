@@ -260,85 +260,96 @@ export default function DashboardPage() {
     const fetchTasks = async () => {
       if (!user) return;
 
-      // Only show loading spinner for first load
+      // Set loading state
       if (isFirstLoad.current) {
         setIsPageLoading(true);
       }
 
       const startDate = new Date().toISOString();
-      const endDate = new Date(
-        new Date().setDate(new Date().getDate() + 1)
-      ).toISOString();
-
+      const endDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString();
       const range = getWeekRange(new Date().toISOString());
-      const fetchedTasks = await getTasksByUser(
-        user.user_id,
-        startDate,
-        endDate
-      );
-      const fetchedDashboardData = await getDashboardData(
-        user.user_id,
-        startDate,
-        endDate
-      );
-      const fetchedTaskTrendData = await getTaskCompletionTrend(
-        user.user_id,
-        range.start,
-        range.end
-      );
-      const fetchedTaskDistributionData = await getTaskDistributionData(
-        user.user_id,
-        selectedMonth,
-        selectedYear
-      );
 
-      const fetchedCalendarHeatmapData = await getCalendarHeatmap(
-        user.user_id,
-        calendarMonthYear.month,
-        calendarMonthYear.year
-      );
+      try {
+        // Run all API calls in parallel
+        const [
+          tasksResponse,
+          dashboardResponse,
+          trendResponse,
+          distributionResponse,
+          heatmapResponse,
+          streakResponse
+        ] = await Promise.allSettled([
+          getTasksByUser(user.user_id, startDate, endDate),
+          getDashboardData(user.user_id, startDate, endDate),
+          getTaskCompletionTrend(user.user_id, range.start, range.end),
+          getTaskDistributionData(user.user_id, selectedMonth, selectedYear),
+          getCalendarHeatmap(user.user_id, calendarMonthYear.month, calendarMonthYear.year),
+          getStreakCount(user.user_id)
+        ]);
 
-      const fetchedStreakCount = await getStreakCount(user.user_id);
+        // Process each response with error handling
+        type ApiResponse<T> = {
+          status: 'success' | 'error';
+          data: T;
+          error?: string;
+        };
 
-      if (fetchedTasks?.status === "success") {
-        setTasks(fetchedTasks.data);
-      } else {
-        setTasks([]); // or keep previous state?
-      }
+        const processResponse = <T,>(
+          response: PromiseSettledResult<ApiResponse<T>>,
+          successHandler: (data: T) => void,
+          errorValue: T
+        ) => {
+          if (response.status === 'fulfilled' && response.value?.status === 'success' && response.value.data !== undefined) {
+            successHandler(response.value.data);
+          } else {
+            const error = response.status === 'rejected' 
+              ? response.reason 
+              : response.status === 'fulfilled' 
+                ? response.value?.error 
+                : 'Unknown error';
+            console.error('API Error:', error);
+            successHandler(errorValue);
+          }
+        };
 
-      if (fetchedDashboardData.status === "success") {
-        setDashboardData(fetchedDashboardData.data);
-      } else {
-        setDashboardData(undefined);
-      }
+        // Update states with responses
+        processResponse<ITask[]>(tasksResponse, setTasks, []);
+        processResponse<IDashboardData>(
+          dashboardResponse, 
+          setDashboardData, 
+          { 
+            all_tasks: 0,
+            pending_tasks: 0,
+            complete_tasks: 0,
+            all_projects: 0,
+            streak_count: 0
+          }
+        );
+        processResponse<ITaskCompletionTrendData[]>(trendResponse, setTaskCompletionData, []);
+        processResponse<ITaskDistribution[]>(distributionResponse, setTaskDistributionData, []);
+        processResponse<IHeatmapData[]>(heatmapResponse, setCalendarHeatmapData, []);
+        
+        // Handle streak count separately since it has a different structure
+        if (streakResponse.status === 'fulfilled' && streakResponse.value?.status === 'success') {
+          setStreakCount(streakResponse.value.data?.count || 0);
+        } else {
+          setStreakCount(0);
+        }
 
-      if (fetchedTaskTrendData.status === "success") {
-        setTaskCompletionData(fetchedTaskTrendData.data);
-      } else {
-        setTaskCompletionData([]);
-      }
-
-      if (fetchedTaskDistributionData.status === "success") {
-        setTaskDistributionData(fetchedTaskDistributionData.data);
-      } else {
-        setTaskDistributionData([]);
-      }
-
-      if (fetchedCalendarHeatmapData.status === "success") {
-        setCalendarHeatmapData(fetchedCalendarHeatmapData.data);
-      } else {
-        setCalendarHeatmapData([]);
-      }
-
-      if (fetchedStreakCount.status === "success") {
-        setStreakCount(fetchedStreakCount.data.count);
-      } else {
-        setStreakCount(0);
-      }
-
-      if (isFirstLoad.current) {
-        setIsPageLoading(false);
-        isFirstLoad.current = false;
+      } catch (error) {
+        console.error('Error in fetchTasks:', error);
+        // Optionally show a toast notification for the user
+        setToastMessage({
+          title: 'Error',
+          description: 'Failed to load dashboard data. Please try again later.',
+          className: 'bg-red-500',
+        });
+        setShowToast(true);
+      } finally {
+        if (isFirstLoad.current) {
+          setIsPageLoading(false);
+          isFirstLoad.current = false;
+        }
       }
     };
 
