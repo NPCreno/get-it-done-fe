@@ -59,12 +59,6 @@ export default function ProjectCard({
   const daysUntilDue = dueDate ? Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null;
   const isOverdue = dueDate && daysUntilDue !== null && daysUntilDue < 0;
   const priority = project.priority || 'none';
-  
-  // Mock team members - replace with actual data
-  const teamMembers = [
-    { id: 1, name: 'User 1', avatar: 'U1' },
-    { id: 2, name: 'User 2', avatar: 'U2' },
-  ];
 
   return (
     <motion.div
@@ -216,33 +210,6 @@ export default function ProjectCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        {/* Team avatars */}
-        <div className="flex -space-x-2">
-          {teamMembers.map((member) => (
-            <div 
-              key={member.id}
-              className="w-7 h-7 rounded-full bg-white/80 flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white"
-              title={member.name}
-            >
-              {member.avatar}
-            </div>
-          ))}
-          <motion.button 
-            className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-xs text-gray-700 border-2 border-white hover:bg-white transition-all duration-300 shadow-sm hover:shadow-md"
-            whileHover={{ scale: 1.1, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAddTaskClick();
-            }}
-            title="Add new task"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-current">
-              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.button>
-        </div>
-
         {/* Quick actions */}
         <motion.div 
           className="flex items-center gap-2"
@@ -324,18 +291,6 @@ export default function ProjectCard({
           )}
         </motion.div>
       </motion.div>
-
-      {/* Decorative elements */}
-      <motion.div 
-        className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-white/20"
-        whileHover={{ scale: 1.1 }}
-        transition={{ duration: 0.3 }}
-      />
-      <motion.div 
-        className="absolute -right-3 -bottom-3 w-12 h-12 rounded-full bg-white/30"
-        whileHover={{ scale: 1.2 }}
-        transition={{ duration: 0.3 }}
-      />
     </motion.div>
   );
 }

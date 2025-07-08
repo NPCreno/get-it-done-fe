@@ -73,7 +73,7 @@ export function TaskItem({
             <div className="flex flex-row gap-2 items-center">
               <div
                 className={`flex ${
-                  task.project_title != null ? "bg-[#D4D4D4]" : "bg-[#ffffff]"
+                  task.project_title != null ? "bg-[#D4D4D4] block" : "hidden"
                 } font-lato text-[13px] text-text font-bold rounded-[10px] px-2 h-[25px] items-center justify-center`}
               >
                 {task.project_title}
