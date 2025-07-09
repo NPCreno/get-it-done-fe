@@ -4,7 +4,6 @@ import { useFormik } from "formik";
 import { loginSchema } from "@/app/schemas/loginSchema";
 import { useRouter } from "next/navigation";
 import { loginEmail, loginUsername } from "@/app/api/userRequests";
-import { Button } from "@/app/components/shadcn/button";
 import { Loader2 } from "lucide-react";
 import InputBox from "@/app/components/inputBox";
 import Cookies from 'js-cookie';

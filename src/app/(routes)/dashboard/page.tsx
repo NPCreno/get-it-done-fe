@@ -805,7 +805,7 @@ export default function DashboardPage() {
                   {/* Scrollable Task List */}
                   <div className="flex flex-col h-full">
                     {/* Active Tasks - Centered */}
-                    <div className="flex-grow flex flex-col justify-center">
+                    <div className={`flex-grow flex flex-col ${tasks.filter(task => task.status !== 'Complete').length > 0 ? 'justify-start mt-5' : 'justify-center'}`}>
                     {tasks.filter(task => task.status !== 'Complete').length > 0 ? (
                       tasks
                         .filter(task => task.status !== 'Complete')
