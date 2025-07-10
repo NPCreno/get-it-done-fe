@@ -809,33 +809,65 @@ export default function DashboardPage() {
                     {tasks.filter(task => task.status !== 'Complete').length > 0 ? (
                       tasks
                         .filter(task => task.status !== 'Complete')
-                        .map((task, index) => (
+                        .map((task) => (
                         <TaskItem
-                          key={`active-${index}`}
+                          key={`active-${task.task_id}-${task.status}`}
                           task={task}
                           handleUpdateTask={() => {
                             setSelectedTaskData(task);
                             setIsTaskModalOpen(true);
                             setIsUpdateTask(true);
                           }}
-                          taskUpdateStatus={(message: string, status: string) => {
-                            setUpdateTaskDashboard(!updateTaskDashboard);
+                          taskUpdateStatus={(message: string, newStatus: string) => {
+                            // Optimistically update the task status in the local state
+                            setTasks(currentTasks => 
+                              currentTasks.map(t => 
+                                t.task_id === task.task_id 
+                                  ? { ...t, status: newStatus } 
+                                  : t
+                              )
+                            );
+                            
+                            // Update dashboard data optimistically
+                            if (dashboardData) {
+                              setDashboardData(prev => {
+                                if (!prev) return prev;
+                                const newData = { ...prev };
+                                
+                                // Decrease the count of the old status
+                                if (task.status === 'Complete') {
+                                  newData.complete_tasks = Math.max(0, newData.complete_tasks - 1);
+                                } else {
+                                  newData.pending_tasks = Math.max(0, newData.pending_tasks - 1);
+                                }
+                                
+                                // Increase the count of the new status
+                                if (newStatus === 'Complete') {
+                                  newData.complete_tasks += 1;
+                                } else {
+                                  newData.pending_tasks += 1;
+                                }
+                                
+                                return newData;
+                              });
+                            }
+
+                            // Show toast notification
                             setToastMessage({
-                              title: `Task marked as ${status}`,
+                              title: `Task marked as ${newStatus}`,
                               description: message,
-                              className:
-                                status === "Complete"
-                                  ? "text-success-default"
-                                  : "text-accent-default",
+                              className: newStatus === "Complete" 
+                                ? "text-success-default" 
+                                : "text-accent-default",
                             });
                             setShowToast(true);
                             setIsExitingToast(false);
+                            
+                            // Auto-hide toast after delay
                             setTimeout(() => {
                               setIsExitingToast(true);
-                              setTimeout(() => {
-                                setShowToast(false);
-                              }, 400);
-                            }, 5000);
+                              setTimeout(() => setShowToast(false), 400);
+                            }, 3000);
                           }}
                         />
                       )))
@@ -875,28 +907,65 @@ export default function DashboardPage() {
                           <div className="space-y-2 pl-4 border-l-2 border-gray-200">
                             {tasks
                               .filter(task => task.status === 'Complete')
-                              .map((task, index) => (
+                              .map((task) => (
                                 <TaskItem
-                                  key={`completed-${index}`}
+                                  key={`completed-${task.task_id}-${task.status}`}
                                   task={task}
                                   handleUpdateTask={() => {
                                     setSelectedTaskData(task);
                                     setIsTaskModalOpen(true);
                                     setIsUpdateTask(true);
                                   }}
-                                  taskUpdateStatus={(message: string, status: string) => {
-                                    setUpdateTaskDashboard(!updateTaskDashboard);
+                                  taskUpdateStatus={(message: string, newStatus: string) => {
+                                    // Optimistically update the task status in the local state
+                                    setTasks(currentTasks => 
+                                      currentTasks.map(t => 
+                                        t.task_id === task.task_id 
+                                          ? { ...t, status: newStatus } 
+                                          : t
+                                      )
+                                    );
+                                    
+                                    // Update dashboard data optimistically
+                                    if (dashboardData) {
+                                      setDashboardData(prev => {
+                                        if (!prev) return prev;
+                                        const newData = { ...prev };
+                                        
+                                        // Decrease the count of the old status
+                                        if (task.status === 'Complete') {
+                                          newData.complete_tasks = Math.max(0, newData.complete_tasks - 1);
+                                        } else {
+                                          newData.pending_tasks = Math.max(0, newData.pending_tasks - 1);
+                                        }
+                                        
+                                        // Increase the count of the new status
+                                        if (newStatus === 'Complete') {
+                                          newData.complete_tasks += 1;
+                                        } else {
+                                          newData.pending_tasks += 1;
+                                        }
+                                        
+                                        return newData;
+                                      });
+                                    }
+
+                                    // Show toast notification
                                     setToastMessage({
-                                      title: `Task marked as ${status}`,
+                                      title: `Task marked as ${newStatus}`,
                                       description: message,
-                                      className: status === "Complete" ? "text-success-default" : "text-accent-default",
+                                      className: newStatus === "Complete" 
+                                        ? "text-success-default" 
+                                        : "text-accent-default",
                                     });
                                     setShowToast(true);
                                     setIsExitingToast(false);
+                                    
+                                    // Auto-hide toast after delay
                                     setTimeout(() => {
                                       setIsExitingToast(true);
                                       setTimeout(() => setShowToast(false), 400);
-                                    }, 5000);
+                                    }, 3000);
                                   }}
                                 />
                               ))}
