@@ -1,13 +1,13 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { updateTaskStatus } from "../api/taskRequests";
 import { useFormState } from "../context/FormProvider";
 import { ITask } from "../interface/ITask";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 
 interface TaskItemProps {
   task: ITask;
   handleUpdateTask: () => void;
-  taskUpdateStatus?: (message: string, status: string) => void;
+  taskUpdateStatus?: (message: string, type?: 'info' | 'success' | 'error' | 'warning') => void;
 }
 
 export function TaskItem({ 
@@ -17,63 +17,83 @@ export function TaskItem({
 }: TaskItemProps) {
   const { setSelectedTaskData } = useFormState();
   const [optimisticStatus, setOptimisticStatus] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const isUpdatingRef = useRef(false);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const updateInProgress = useRef<boolean>(false);
   
-  const handleCheckToggle = async (e: React.MouseEvent) => {
+  const currentStatus = optimisticStatus || task.status;
+  const isComplete = currentStatus === "Complete";
+  const isCurrentlyUpdating = isUpdating || updateInProgress.current;
+
+  const handleCheckToggle = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     
-    // Prevent multiple clicks while updating
-    if (isUpdatingRef.current) {
-      console.log("Update in progress, ignoring click");
+    if (isCurrentlyUpdating) {
+      console.log('Update already in progress, ignoring click');
       return;
     }
-    
+
     try {
-      // Set updating state immediately
-      isUpdatingRef.current = true;
+      // Set updating state optimistically
+      updateInProgress.current = true;
       setIsUpdating(true);
-      console.log("Starting task update...");
-      
-      const audio = new Audio('/soundfx/3.mp3');
-      audio.play();
       
       const newStatus = task.status === "Complete" ? "Pending" : "Complete";
+      const statusText = newStatus === "Complete" ? "completed" : "marked as pending";
       
-      // Update UI optimistically
+      // Play sound effect
+      const audio = new Audio('/soundfx/3.mp3');
+      audio.play().catch(error => console.warn('Audio playback failed:', error));
+      
+      // Show updating message
+      taskUpdateStatus?.("Updating task status...", 'info');
+      
+      // Optimistic UI update
       setOptimisticStatus(newStatus);
-      taskUpdateStatus?.(`Updating task status to ${newStatus}...`, newStatus);
       
-      // Make the API call
-      const response = await updateTaskStatus(task.task_id, newStatus);
+      // Make API call with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
-      if (response.status !== "success") {
-        throw new Error(response.message || 'Failed to update task status');
+      try {
+        const response = await Promise.race([
+          updateTaskStatus(task.task_id, newStatus),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timed out. Please try again.')), 10000)
+          )
+        ]) as { status: string; message?: string };
+        
+        if (response.status !== "success") {
+          throw new Error(response.message || 'Failed to update task status');
+        }
+        
+        // Show success message
+        taskUpdateStatus?.(`Task ${statusText} successfully!`, 'success');
+        
+      } catch (error) {
+        // Revert optimistic update on error
+        setOptimisticStatus(null);
+        throw error;
+      } finally {
+        clearTimeout(timeoutId);
       }
-      
-      console.log("Task update successful");
-      // Parent component will handle the success state
       
     } catch (error) {
       console.error("Error updating task status:", error);
-      // Revert optimistic update on error
-      setOptimisticStatus(null);
-      taskUpdateStatus?.(error instanceof Error ? error.message : 'Failed to update task status', task.status);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update task status';
+      taskUpdateStatus?.(errorMessage, 'error');
     } finally {
-      // Always set updating to false when done
-      isUpdatingRef.current = false;
+      // Always clean up the updating state
+      updateInProgress.current = false;
       setIsUpdating(false);
-      console.log("Update completed, isUpdating set to false");
     }
-  };
+  }, [task.status, task.task_id, taskUpdateStatus, isCurrentlyUpdating]);
 
-  const currentStatus = optimisticStatus || task.status;
-  const isComplete = currentStatus === "Complete";
-
-  // Debug effect for tracking isUpdating state changes
+  // Clean up on unmount
   useEffect(() => {
-    console.log("isUpdating state changed to:", isUpdating);
-  }, [isUpdating]);
+    return () => {
+      updateInProgress.current = false;
+    };
+  }, []);
 
   return (
     <div 
@@ -91,10 +111,11 @@ export function TaskItem({
           <input
             id={`checkTask-${task.task_id}`}
             type="checkbox"
-            onClick={handleCheckToggle}
+            onChange={handleCheckToggle}
+            onClick={e => e.stopPropagation()}
             checked={isComplete}
-            disabled={isUpdating}
-            readOnly
+            disabled={isCurrentlyUpdating}
+            aria-label={isComplete ? 'Mark task as pending' : 'Mark task as complete'}
             className="peer appearance-none w-full h-full cursor-pointer"
           />
           <div className="absolute inset-0 rounded-full border-[2px] border-solid border-gray-300 peer-checked:border-0 group-hover:border-0 pointer-events-none" />
